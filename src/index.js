@@ -1,8 +1,22 @@
 #!/usr/bin/env node
 
-const args = process.argv.slice(2);
+import { 
+  deployEKSCluster, 
+  destroyEKSCluster
+} from "./commands/deploy.js"
 
-args.forEach(arg => {
-  console.log(arg);
-});
+const args = process.argv.slice(2);
+const firstArg = args[0];
+
+switch(firstArg) {
+  case "deploy":
+    deployEKSCluster();
+    break;
+  case "teardown":
+    destroyEKSCluster();
+    break;
+  default:
+    // placeholder
+}
+
 
