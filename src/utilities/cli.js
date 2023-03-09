@@ -1,8 +1,10 @@
-const cli = (spinner, message, successFlag=true) => {
-  if (message) {
-    spinner.text = message;
+const cli = (spinner, message, stop) => {
+  spinner.text = message;
+  if (stop==="success") {
+    spinner.succeed();
+  } else if (stop==="fail") {
+    spinner.fail();
   }
-  successFlag ? spinner.succeed() : spinner.fail();
 };
 
 export default cli;

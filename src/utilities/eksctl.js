@@ -1,5 +1,5 @@
 import child_process from "child_process";
-import { CLUSTER_NAME } from "./constants.js";
+import { CLUSTER_NAME, LOAD_GEN_NODE_GRP } from "./constants.js";
 import iam from "./iam.js";
 import ora from "ora";
 import fs from "fs";
@@ -11,24 +11,34 @@ const exec = promisify(child_process.exec);
 const k6OperatorPath = fullPath('../k6-operator/deployment');
 
 const eksctl = {
-  makeCluster() {
-    const spinner = ora("Creating Edamame Cluster...").start();
-    return exec(`eksctl create cluster --name ${CLUSTER_NAME}`)
-      .then(() => cli(spinner, "Created Edamame Cluster"))
-      .catch(error => {
-        cli(
-          spinner, 
-          `Error creating cluster: ${error}`, 
-          false
-        );
-      });
+  makeCluster(spinner) {
+    return (
+      exec(`eksctl create cluster --name ${CLUSTER_NAME}`)
+        .then(() => cli(spinner, "Created Edamame cluster"))
+        .then(() => this.createLoadGenGrp())
+        .then(() => cli(spinner, "Configured load generation node group on cluster"))
+    );
   },
 
-  configureEBSCreds() {
-    const spinner = ora("Configuring EBS Credentials...").start();
+  createLoadGenGrp() {
+    return exec(
+      `eksctl create nodegroup --cluster=${CLUSTER_NAME} `+ 
+      `--name=${LOAD_GEN_NODE_GRP} --node-type=t3.small ` +
+      `--nodes=0 --nodes-min=0 --nodes-max=100 `
+    );
+  },
+
+  scaleLoadGenNodes(numNodes) {
+    return exec(
+      `eksctl scale nodegroup --cluster=${CLUSTER_NAME} ` +
+      `--nodes=${numNodes} ${LOAD_GEN_NODE_GRP}`
+    );
+  },
+
+  configureEBSCreds(spinner) {
+    spinner.text = "Configuring EBS Credentials...";
     return exec(`${iam.OIDC} && ${iam.listOIDCs}`)
       .then(stdoObj => {
-        console.log(stdoObj.stdout);
         const exists = iam.OIDCexists(stdoObj.stdout);
         if (!exists) { 
           return exec(iam.createOIDC);
@@ -43,19 +53,18 @@ const eksctl = {
           exec(iam.addCsiDriver(role));
         }
       })
-      .then(() => cli(spinner, "Configured EBS Credentials"))
-      .catch(error => cli(spinner, `Error configuring EBS credentials ${error}`, false));
+      .then(() => cli(spinner, "Configured EBS Credentials"));
   },
 
   destroyCluster() {
     const spinner = ora("Tearing Down Edamame Cluster...").start();
     exec(`eksctl delete cluster --name ${CLUSTER_NAME}`)
-      .then(() => cli(spinner, "Deleted Edamame Cluster"))
+      .then(() => cli(spinner, "Deleted Edamame Cluster", "success"))
       .catch(error => {
         cli(
           spinner, 
           `Error deleting cluster: ${error}`, 
-          false
+          "fail"
         );
       })
   }
