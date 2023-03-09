@@ -6,20 +6,36 @@ import fs from "fs";
 import yaml from "js-yaml";
 import fullPath from "./path.js";
 import { promisify } from "util";
+import cli from "./cli.js";
 const exec = promisify(child_process.exec);
 const k6OperatorPath = fullPath('../k6-operator/deployment');
 
 const eksctl = {
   makeCluster() {
-    const spinner = ora("Creating Edemame Cluster...").start();
-    exec(`eksctl create cluster --name ${CLUSTER_NAME}`)
-      .then(stdoObj => exec(`${iam.OIDC} && ${iam.listOIDCs}`))
+    const spinner = ora("Creating Edamame Cluster...").start();
+    return exec(`eksctl create cluster --name ${CLUSTER_NAME}`)
+      .then(() => cli(spinner, "Created Edamame Cluster"))
+      .catch(error => {
+        cli(
+          spinner, 
+          `Error creating cluster: ${error}`, 
+          false
+        );
+      });
+  },
+
+  configureEBSCreds() {
+    const spinner = ora("Configuring EBS Credentials...").start();
+    return exec(`${iam.OIDC} && ${iam.listOIDCs}`)
       .then(stdoObj => {
-        const exists = iam.OIDCexists(stdoObj.stdout)
-        if (!exists) { exec(iam.createOIDC) }
+        console.log(stdoObj.stdout);
+        const exists = iam.OIDCexists(stdoObj.stdout);
+        if (!exists) { 
+          return exec(iam.createOIDC);
+        }
       })
-      .then(stdoObj => exec(iam.addIAMDriverRole))
-      .then(stdoObj => exec(iam.fetchRoles))
+      .then(() => exec(iam.addIAMDriverRole))
+      .then(() => exec(iam.fetchRoles))
       .then(stdoObj => {
         const nameRole = stdoObj.stdout.match(iam.ebsCsiDriverRegex);
         if (nameRole) {
@@ -27,20 +43,20 @@ const eksctl = {
           exec(iam.addCsiDriver(role));
         }
       })
-      .then(stdoObj => spinner.succeed())
-      .catch(error => {
-        console.log(`Error creating Edemame cluster: ${error}`);
-        spinner.fail();
-      });
+      .then(() => cli(spinner, "Configured EBS Credentials"))
+      .catch(error => cli(spinner, `Error configuring EBS credentials ${error}`, false));
   },
 
   destroyCluster() {
-    const spinner = ora("Tearing Down Edemame Cluster...").start();
+    const spinner = ora("Tearing Down Edamame Cluster...").start();
     exec(`eksctl delete cluster --name ${CLUSTER_NAME}`)
-      .then(stdoObj => spinner.succeed())
+      .then(() => cli(spinner, "Deleted Edamame Cluster"))
       .catch(error => {
-        console.log(`error: ${error}`)
-        spinner.fail();
+        cli(
+          spinner, 
+          `Error deleting cluster: ${error}`, 
+          false
+        );
       })
   }
 };
