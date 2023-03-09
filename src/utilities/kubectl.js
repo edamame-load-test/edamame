@@ -1,31 +1,48 @@
 import fs from "fs";
 import yaml from "js-yaml";
-import { NUM_VUS_PER_JOB, K6_CR_TEMPLATE, K6_CR_FINAL } from "./constants.js";
+import { NUM_VUS_PER_POD, K6_CR_TEMPLATE, K6_CR_FINAL } from "./constants.js";
 import { promisify } from "util";
 import child_process from "child_process";
 import fullPath from "./path.js";
 import ora from "ora";
+import cli from "./cli.js";
+import eksctl from "./eksctl.js";
 
 const exec = promisify(child_process.exec);
 const k6OpDeployPath = fullPath('../k6-operator/deployment');
 
 const kubectl = {
-  launchK6Test(testPath, numVus, configMapName) {
-    this.createK6CustomResource(testPath, numVus, configMapName);
-    const spinner = ora("Distributing K6 load test...").start();
-
-    // may move some of these exec commands elsewhere to chain them during cluster creation
+  // I think make deploy is a feature of kustomize, which is an extension of kubectl
+  //  which is why this deployk6Op function is here
+  deployK6Op() {
+    const spinner = ora("Deploying K6 operator...").start();
     exec(`cd ${k6OpDeployPath} && cd .. && make deploy`)
-      .then((stdoObj) => exec(`kubectl apply -f ${k6OpDeployPath}/statsite.yaml`))
-      .then((stdoObj) => exec(`kubectl create configmap ${configMapName} --from-file ${testPath}`))
-      .then((stdoObj) => exec(`kubectl apply -f ${k6OpDeployPath}/${K6_CR_FINAL}`))
-      .then((stdoObj) => {
-        spinner.text = "Starting k6 load test";
-        spinner.succeed()
-      })
-      .catch((error) => {
-        console.log(`Error during distributed k6 test deployment: ${error}`);
-        spinner.fail();
+      .then(() => cli(spinner, 'Deployed k6 operator to cluster'))
+      .catch(error => {
+        cli(
+          spinner, 
+          `Error deploying k6 operator to cluster: ${error}`, 
+          false
+        );
+      });
+  },
+
+  launchK6Test(testPath, numVus, configMapName) {
+    const spinner = ora("Distributing K6 load test...").start();
+    this.createK6CustomResource(testPath, numVus, configMapName);
+    const numNodes = this.parallelism(numVus);
+
+    exec(`kubectl apply -f ${k6OpDeployPath}/statsite.yaml`)
+      .then(() => exec(`kubectl create configmap ${configMapName} --from-file ${testPath}`))
+      //.then(() => eksctl.scaleLoadGenNodes(numNodes))
+      .then(() => exec(`kubectl apply -f ${k6OpDeployPath}/${K6_CR_FINAL}`))
+      .then(() => cli(spinner, "Starting k6 load test..."))
+      .catch(error => {
+        cli(
+          spinner,
+          `Error while distributing k6 load test: ${error}`,
+          false
+        );
       });
   },
 
@@ -43,7 +60,7 @@ const kubectl = {
   },
 
   parallelism(numVus) {
-    return numVus / NUM_VUS_PER_JOB;
+    return numVus / NUM_VUS_PER_POD;
   }
 };
 

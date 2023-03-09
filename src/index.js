@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { deployEKSCluster } from "./commands/deploy.js"
+import { init } from "./commands/init.js"
 import { destroyEKSCluster } from "./commands/destroy.js"
 import { runTest } from "./commands/runTest.js"
 
@@ -12,8 +12,8 @@ function flagValue(flag) {
 }
 
 switch(firstArg) {
-  case "deploy":
-    deployEKSCluster();
+  case "init":
+    init();
     break;
   case "run-test":
     // assumes test is run like so, with the relative filepath being passed in after --file:
