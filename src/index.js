@@ -17,7 +17,7 @@ switch(firstArg) {
     break;
   case "run-test":
     // assumes test is run like so, with the relative filepath being passed in after --file:
-    //  edemame run-test --file ./deployment/test.js --vus 40000 --name medium-test
+    //  edamame run-test --file ./deployment/test.js --vus 40000 --name medium-test
     const filePath = flagValue("--file");
     const numVus = flagValue("--vus");
     const configMapName = flagValue("--name");
