@@ -3,7 +3,7 @@ kind: K6
 metadata:
   name: k6-xk6
 spec:
-  parallelism: 4
+  parallelism: 1
   script:
     configMap:
       name: "crocodile-stress-test"

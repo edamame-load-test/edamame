@@ -7,14 +7,14 @@ import fullPath from "./path.js";
 import ora from "ora";
 
 const exec = promisify(child_process.exec);
-const k6OpDeployPath = fullPath(import.meta.url, '../k6-operator/deployment');
+const k6OpDeployPath = fullPath('../k6-operator/deployment');
 
 const kubectl = {
   launchK6Test(testPath, numVus, configMapName) {
     this.createK6CustomResource(testPath, numVus, configMapName);
     const spinner = ora("Distributing K6 load test...").start();
 
-    // plan to move some of these exec commands elsewhere to chain them during cluster creation
+    // may move some of these exec commands elsewhere to chain them during cluster creation
     exec(`cd ${k6OpDeployPath} && cd .. && make deploy`)
       .then((stdoObj) => exec(`kubectl apply -f ${k6OpDeployPath}/statsite.yaml`))
       .then((stdoObj) => exec(`kubectl create configmap ${configMapName} --from-file ${testPath}`))
@@ -44,16 +44,6 @@ const kubectl = {
 
   parallelism(numVus) {
     return numVus / NUM_VUS_PER_JOB;
-  },
-
-  shellCommands(testPath, numVus, configMapName) {
-    // if switch to cdk app need to add command to configure kubectl with cluster just created
-    const deployK6Op = `cd ${k6OpDeployPath} && cd .. && make deploy && `; //
-    const statsite = `kubectl apply -f ${k6OpDeployPath}/statsite.yaml`; //
-    // the following assumes testPath is the full file path to the test file 
-    const makeConfigMap = `kubectl create configmap ${configMapName} --from-file ${testPath} && `;
-    const deployK6CR = `kubectl apply -f ${k6OpDeployPath}/${K6_CR_FINAL}`;
-    return deployK6Op + makeConfigMap + deployK6CR;
   }
 };
 
