@@ -1,0 +1,22 @@
+apiVersion: k6.io/v1alpha1
+kind: K6
+metadata:
+  name: k6-xk6
+spec:
+  parallelism: 4
+  script:
+    configMap:
+      name: "crocodile-stress-test"
+      file: "test.js"
+  arguments: --out distributed-statsd
+  runner:
+    image: lukeoguro/xk6-statsd:latest
+    env:
+      - name: K6_STATSD_ADDR
+        value: "statsd-service:8125"
+      - name: POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+      - name: K6_STATSD_GAUGE_NAMESPACE
+        value: "$(POD_NAME)."
