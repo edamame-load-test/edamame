@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: statsd-service
+spec:
+  selector:
+    app: statsd
+  ports:
+    - protocol: "UDP"
+      port: 8125
+      targetPort: 8125
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statsd
+  labels:
+    statsd_server: statsite
+spec:
+  selector:
+    matchLabels:
+      app: statsd
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: statsd
+    spec:
+      containers:
+        - name: statsd
+          image: public.ecr.aws/l7g9j7r7/edamame-statsite-amd64:latest
+          ports:
+            - name: statsd
+              containerPort: 8125
