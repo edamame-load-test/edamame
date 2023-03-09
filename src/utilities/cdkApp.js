@@ -13,7 +13,7 @@ const k6OperatorPath = fullPath('../k6-operator/deployment');
 
 const cdkApp = {
   deploy() {
-    const spinner = ora("Creating Edemame Cluster...").start();
+    const spinner = ora("Creating Edamame Cluster...").start();
     exec(`cd ${cdkPath} && cdk synth && cdk bootstrap && cdk deploy --require-approval never`).then(stdoObj => {
       // stdout info includes cluster name/other cluster info if it's successfully created
       // this ensures we have the info to connect kubectl to the right cluster

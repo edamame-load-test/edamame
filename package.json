@@ -1,11 +1,11 @@
 {
-  "name": "edemame",
+  "name": "edamame",
   "version": "1.0.0",
   "description": "",
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "edemame": "src/index.js"
+    "edamame": "src/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
