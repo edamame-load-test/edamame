@@ -8,8 +8,8 @@ import { promisify } from "util";
 import fullPath from "./path.js";
 const exec = promisify(child_process.exec);
 
-const cdkPath = fullPath(import.meta.url, '../cdk');
-const k6OperatorPath = fullPath(import.meta.url, '../k6-operator/deployment');
+const cdkPath = fullPath('../cdk');
+const k6OperatorPath = fullPath('../k6-operator/deployment');
 
 const cdkApp = {
   deploy() {
