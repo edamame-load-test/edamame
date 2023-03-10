@@ -1,4 +1,6 @@
 import kubectl from "../utilities/kubectl.js";
+import loadGenerators from "../utilities/loadGenerators.js";
+import cli from "../utilities/cli.js";
 import fs from "fs";
 import ora from "ora";
 
@@ -15,13 +17,12 @@ const runTest = (testPath, numVus, configMapName) => {
     const spinner = ora("Distributing k6 load test...").start();
 
     kubectl.launchK6Test(testPath, numVus, configMapName, spinner)
-      //.then(() => poll to figure out when test finished & update spinner);
+      .then(() => loadGenerators.pollUntilAllComplete(numVus))
+      .then(() => cli(spinner, "All tests completed; removing load generators"))
+      .then(() => kubectl.phaseOutK6(configMapName))
+      .then(() => cli(spinner, "Removed load generating components from cluster", "success"))
       .catch(error => {
-        cli(
-          spinner, 
-          `Error during load test distribution: ${error}`,
-          "fail"
-        );
+        cli(spinner, `Load test Error: ${error}`, "fail");
       })
   } else {
     askUserForNewPath(testPath);
