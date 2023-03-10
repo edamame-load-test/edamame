@@ -20,6 +20,15 @@ const kubectl = {
     );
   },
 
+  phaseOutK6(configMapName) {
+    return (
+      exec(`kubectl delete -f ${k6OpDeployPath}/statsite.yaml`)
+        .then(() => exec(`kubectl delete configmap ${configMapName} -n default`))
+        .then(() => eksctl.scaleLoadGenNodes(0))
+        .then(() => exec(`kubectl delete -f ${k6OpDeployPath}/${K6_CR_FINAL}`))
+    );
+  },
+
   launchK6Test(testPath, numVus, configMapName, spinner) {
     this.createK6CustomResource(testPath, numVus, configMapName);
     const numNodes = this.parallelism(numVus);
@@ -31,6 +40,10 @@ const kubectl = {
         .then(() => exec(`kubectl apply -f ${k6OpDeployPath}/${K6_CR_FINAL}`))
         .then(() => cli(spinner, "Starting k6 load test..."))
     );
+  },
+
+  getPods() {
+    return exec(`kubectl get pods`);
   },
 
   createK6CustomResource(path, numVus, configMapName) {
