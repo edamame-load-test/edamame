@@ -1,23 +1,15 @@
-import child_process from "child_process";
-import { CLUSTER_NAME, LOAD_GEN_NODE_GRP } from "./constants.js";
-import iam from "./iam.js";
-import ora from "ora";
-import fs from "fs";
-import yaml from "js-yaml";
-import fullPath from "./path.js";
-import { promisify } from "util";
 import cli from "./cli.js";
+import { promisify } from "util";
+import child_process from "child_process";
+import { 
+  CLUSTER_NAME, 
+  LOAD_GEN_NODE_GRP 
+} from "./constants.js";
 const exec = promisify(child_process.exec);
-const k6OperatorPath = fullPath('../k6-operator/deployment');
 
 const eksctl = {
-  makeCluster(spinner) {
-    return (
-      exec(`eksctl create cluster --name ${CLUSTER_NAME}`)
-        .then(() => cli(spinner, "Created Edamame cluster"))
-        .then(() => this.createLoadGenGrp())
-        .then(() => cli(spinner, "Configured load generation node group on cluster"))
-    );
+  createCluster() {
+    return exec(`eksctl create cluster --name ${CLUSTER_NAME}`);
   },
 
   createLoadGenGrp() {
@@ -28,6 +20,49 @@ const eksctl = {
     );
   },
 
+  fetchIamRoles() {
+    return exec(`eksctl get iamserviceaccount --cluster ${CLUSTER_NAME}`);
+  },
+
+  createOIDC() {
+    return exec(
+      'eksctl utils associate-iam-oidc-provider ' +
+      `--cluster ${CLUSTER_NAME} --approve`
+    );
+  },
+
+  addIAMDriverRole() {
+    return exec('eksctl create iamserviceaccount ' + 
+      '--name ebs-csi-controller-sa ' +
+      '--namespace kube-system ' +
+      `--cluster ${CLUSTER_NAME} ` +
+      '--attach-policy-arn ' +
+      'arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy ' +
+      '--approve --role-only ' +
+      '--role-name AmazonEKS_EBS_CSI_DriverRole'
+    );
+  },
+
+  fetchOIDCs() {
+    const OIDC = `aws eks describe-cluster ` +
+    `--name ${CLUSTER_NAME} ` +
+    '--query "cluster.identity.oidc.issuer" ' +
+    "--output text | cut -d '/' -f 5"
+    
+    const listOIDCs = "aws iam list-open-id-connect-providers";
+
+    return exec(`${OIDC} && ${listOIDCs}`);
+  },
+
+  addCsiDriver(roleArn) {
+    return exec(
+      'eksctl create addon ' +
+      '--name aws-ebs-csi-driver ' +
+      `--cluster ${CLUSTER_NAME} ` +
+      `--service-account-role-arn ${roleArn} --force`
+    );
+  },
+
   scaleLoadGenNodes(numNodes) {
     return exec(
       `eksctl scale nodegroup --cluster=${CLUSTER_NAME} ` +
@@ -35,38 +70,8 @@ const eksctl = {
     );
   },
 
-  configureEBSCreds(spinner) {
-    spinner.text = "Configuring EBS Credentials...";
-    return exec(`${iam.OIDC} && ${iam.listOIDCs}`)
-      .then(stdoObj => {
-        const exists = iam.OIDCexists(stdoObj.stdout);
-        if (!exists) { 
-          return exec(iam.createOIDC);
-        }
-      })
-      .then(() => exec(iam.addIAMDriverRole))
-      .then(() => exec(iam.fetchRoles))
-      .then(stdoObj => {
-        const nameRole = stdoObj.stdout.match(iam.ebsCsiDriverRegex);
-        if (nameRole) {
-          const role = nameRole[0].split("\t")[1];
-          exec(iam.addCsiDriver(role));
-        }
-      })
-      .then(() => cli(spinner, "Configured EBS Credentials"));
-  },
-
   destroyCluster() {
-    const spinner = ora("Tearing Down Edamame Cluster...").start();
-    exec(`eksctl delete cluster --name ${CLUSTER_NAME}`)
-      .then(() => cli(spinner, "Deleted Edamame Cluster", "success"))
-      .catch(error => {
-        cli(
-          spinner, 
-          `Error deleting cluster: ${error}`, 
-          "fail"
-        );
-      })
+    return exec(`eksctl delete cluster --name ${CLUSTER_NAME}`);
   }
 };
 

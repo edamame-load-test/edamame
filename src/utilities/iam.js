@@ -1,33 +1,13 @@
-import { CLUSTER_NAME } from "./constants.js";
+import { EBS_CSI_DRIVER_REGEX } from "./constants.js";
+import child_process from "child_process";
+import { promisify } from "util";
+const exec = promisify(child_process.exec);
 
 const iam = {
-  OIDC: (
-    `aws eks describe-cluster --name ${CLUSTER_NAME} ` +
-    '--query "cluster.identity.oidc.issuer" ' +
-    "--output text | cut -d '/' -f 5"
-  ),
-
-  listOIDCs: "aws iam list-open-id-connect-providers",
-
-  createOIDC: (
-    'eksctl utils associate-iam-oidc-provider ' +
-    `--cluster ${CLUSTER_NAME} --approve`
-  ),
-
-  fetchRoles: `eksctl get iamserviceaccount --cluster ${CLUSTER_NAME}`,
-
-  ebsCsiDriverRegex: "ebs-csi-controller-sa.*AmazonEKS_EBS_CSI_DriverRole",
-
-  addIAMDriverRole: (
-    'eksctl create iamserviceaccount ' + 
-    '--name ebs-csi-controller-sa ' +
-    '--namespace kube-system ' +
-    `--cluster ${CLUSTER_NAME} ` +
-    '--attach-policy-arn ' +
-    'arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy ' +
-    '--approve --role-only ' +
-    '--role-name AmazonEKS_EBS_CSI_DriverRole'
-  ),
+  ebsRole(stdout) {
+    const nameRole = stdout.match(EBS_CSI_DRIVER_REGEX);
+    return nameRole ? nameRole[0].split("\t")[1] : undefined;
+  },
 
   OIDCexists(stdout) {
     const oidcAndList = stdout.split("OpenIDConnectProviderList");
@@ -36,14 +16,6 @@ const iam = {
     return list.match(oidc) === null ? false : true;
   },
 
-  addCsiDriver(roleArn) {
-    return (
-      'eksctl create addon ' +
-      '--name aws-ebs-csi-driver ' +
-      `--cluster ${CLUSTER_NAME} ` +
-      `--service-account-role-arn ${roleArn} --force`
-    );
-  }
 };
 
 export default iam;

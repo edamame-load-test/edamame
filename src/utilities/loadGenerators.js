@@ -2,6 +2,7 @@ import child_process from "child_process";
 import { promisify } from "util";
 import kubectl from "./kubectl.js";
 import { K6_TEST_POD_REGEX } from "./constants.js";
+import cr from "./customResource.js";
 const exec = promisify(child_process.exec);
 
 const loadGenerators = {
@@ -33,7 +34,7 @@ const loadGenerators = {
   },
 
   pollUntilAllComplete(numVus) {
-    const numLoadGenerators = kubectl.parallelism(numVus);
+    const numLoadGenerators = cr.parallelism(numVus);
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
         console.log("Starting new poll async function iteration");
