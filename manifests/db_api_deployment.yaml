@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-api
+  labels:
+    app: db-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-api
+  template:
+    metadata:
+      labels:
+        app: db-api
+    spec:
+      containers:
+      - name: db-api
+        image: gcpinckert/edamame-db-api:latest
+        ports:
+        - containerPort: 4444
+        env:
+          - name: PORT
+            value: "4444"
+          - name: PGHOST
+            valueFrom:
+              configMapKeyRef:
+                name: psql-configmap
+                key: psql-host
+          - name: PGPORT
+            valueFrom:
+              configMapKeyRef:
+                name: psql-configmap
+                key: psql-port
+          - name: PGUSER
+            valueFrom:
+              secretKeyRef:
+                name: psql-secret
+                key: psql-username
+          - name: PGDATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: psql-configmap
+                key: psql-db
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: psql-secret
+                key: psql-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-api-service
+spec:
+  selector:
+    app: db-api
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 4444
+      targetPort: 4444
+      nodePort: 30000

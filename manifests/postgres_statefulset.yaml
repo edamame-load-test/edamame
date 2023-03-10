@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: psql
-        image: "public.ecr.aws/docker/library/postgres:latest"
+        image: "postgres:latest"
         env:
           - name: POSTGRES_USER
             valueFrom:
@@ -37,6 +37,12 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/postgresql/data
+        - name: postgres-initdb
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: postgres-initdb
+        configMap:
+          name: postgres-initdb-config
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -47,6 +53,26 @@ spec:
       resources:
         requests:
           storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-initdb-config
+data:
+  initdb.sh: |
+    set -e
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+      CREATE TABLE tests (id SERIAL PRIMARY KEY);
+      CREATE TABLE samples (
+        id SERIAL PRIMARY KEY,
+        ts TIMESTAMP,
+        metric VARCHAR(255),
+        value REAL,
+        test_id INT REFERENCES tests(id)
+      );
+      CREATE USER edamame_reader WITH PASSWORD '$POSTGRES_PASSWORD';
+      GRANT SELECT ON ALL TABLES IN SCHEMA public TO edamame_reader;
+    EOSQL
 ---
 apiVersion: v1
 kind: Service
