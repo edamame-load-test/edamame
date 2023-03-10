@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: psql
+  labels:
+    app: psql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psql
+  serviceName: psql
+  template:
+    metadata:
+      labels:
+        app: psql
+    spec:
+      containers:
+      - name: psql
+        image: "public.ecr.aws/docker/library/postgres:latest"
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: psql-secret
+                key: psql-username
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: psql-secret
+                key: psql-password
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: gp2
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: psql-service
+spec:
+  selector:
+    app: psql
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+  clusterIP: None
