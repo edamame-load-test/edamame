@@ -20,6 +20,8 @@ spec:
         ports:
         - containerPort: 4444
         env:
+          - name: PORT
+            value: "4444"
           - name: PGHOST
             valueFrom:
               configMapKeyRef:
