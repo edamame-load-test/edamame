@@ -17,11 +17,10 @@ switch(firstArg) {
     break;
   case "run-test":
     // assumes test is run like so, with the relative filepath being passed in after --file:
-    //  edamame run-test --file ./deployment/test.js --vus 40000 --name medium-test
+    //  edamame run-test --file ./deployment/test.js --vus 40000
     const filePath = flagValue("--file");
     const numVus = flagValue("--vus");
-    const configMapName = flagValue("--name");
-    runTest(filePath, numVus, configMapName);
+    runTest(filePath, numVus);
     break;
   case "teardown":
     destroyEKSCluster();

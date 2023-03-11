@@ -1,11 +1,11 @@
 import cluster from "../utilities/cluster.js";
-import ora from "ora";
+import Spinner from "../utilities/spinner.js";
 
 const destroyEKSCluster = () => {
-  const spinner = ora("Tearing Down Edamame Cluster...").start();
+  const spinner = new Spinner("Tearing Down Edamame Cluster...");
   cluster.destroy()
-    .then(() => cli(spinner, "Deleted Edamame Cluster", "success"))
-    .catch(err => cli(spinner, `Error deleting cluster: ${err}`, "fail"));
+    .then(() => spinner.succeed("Deleted Edamame Cluster"))
+    .catch(err => spinner.fail(`Error deleting cluster: ${err}`));
 };
 
 export {

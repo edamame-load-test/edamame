@@ -1,21 +1,20 @@
 import fs from "fs";
-import ora from "ora";
 import kubectl from "../utilities/kubectl.js";
 import loadGenerators from "../utilities/loadGenerators.js";
-import cli from "../utilities/cli.js";
+import Spinner from "../utilities/spinner.js";
 import cluster from "../utilities/cluster.js";
 
 
-const runTest = (testPath, numVus, configMapName) => {
+const runTest = (testPath, numVus) => {
   if (fs.existsSync(testPath)) {
-    const spinner = ora("Distributing k6 load test...").start();
-    cluster.launchK6Test(testPath, numVus, configMapName, spinner)
-      .then(() => cli(spinner, "Starting k6 load test..."))
+    const spinner = new Spinner("Distributing k6 load test...");
+    cluster.launchK6Test(testPath, numVus)
+      .then(() => spinner.update("Starting k6 load test..."))
       .then(() => loadGenerators.pollUntilAllComplete(numVus))
-      .then(() => cli(spinner, "All tests completed; Removing load generators."))
-      .then(() => cluster.phaseOutK6(configMapName))
-      .then(() => cli(spinner, "Removed load generating components from cluster.", "success"))
-      .catch(err => cli(spinner, `Error running test: ${err}`, "fail"));
+      .then(() => spinner.update("All tests completed; Removing load generators."))
+      .then(() => cluster.phaseOutK6())
+      .then(() => spinner.succeed("Removed load generating components from cluster."))
+      .catch(err => spinner.fail(`Error running test: ${err}`));
   } else {
     console.log(
       `Couldn't find k6 test script at: ${testPath} ` +

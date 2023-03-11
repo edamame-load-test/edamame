@@ -1,15 +1,15 @@
 import child_process from "child_process";
 import { promisify } from "util";
 import kubectl from "./kubectl.js";
-import { K6_TEST_POD_REGEX } from "./constants.js";
-import cr from "./customResource.js";
+import { K6_TEST_POD_REGEX } from "../constants/constants.js";
+import manifest from "./manifest.js";
 const exec = promisify(child_process.exec);
 
 const loadGenerators = {
   numTestsCompleted(stdout) {
     let testsCompleted = 0;
     const pods = stdout.split("\n");
-    console.log("iterating through k6 load gen pods and counting the number of completed");
+    console.log("Assessing load generators; counting the number completed");
     pods.forEach(pod => {
       if (pod.match(K6_TEST_POD_REGEX)) {
         if (pod.match('Completed')) {
@@ -17,15 +17,15 @@ const loadGenerators = {
         }
       }
     });
-    console.log(`number of tests completed: ${testsCompleted}`);
+    console.log(`Number of load generators completed: ${testsCompleted}`);
     return testsCompleted;
   },
 
   checkAllCompleted(totalTests) {
     return (
       kubectl.getPods()
-        .then(stdoObj => {
-          const currComplete = this.numTestsCompleted(stdoObj.stdout);
+        .then(({stdout}) => {
+          const currComplete = this.numTestsCompleted(stdout);
           if (currComplete === totalTests) {
             return true;
           }
@@ -34,10 +34,10 @@ const loadGenerators = {
   },
 
   pollUntilAllComplete(numVus) {
-    const numLoadGenerators = cr.parallelism(numVus);
+    const numLoadGenerators = manifest.parallelism(numVus);
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
-        console.log("Starting new poll async function iteration");
+        console.log("Polling load generators...");
         const finished = await this.checkAllCompleted(numLoadGenerators);
         if (!finished) {
           return;
@@ -45,7 +45,9 @@ const loadGenerators = {
 
         clearInterval(interval);
         resolve();
-      }, 30000); // 30 seconds is arbitrary
+      // do we want to poll more/less frequently than 30 seconds?
+      //  or try to switch to an event-driven approach...
+      }, 30000);
     });
   }
 };
