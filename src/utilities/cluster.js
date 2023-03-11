@@ -1,9 +1,11 @@
 import iam from "./iam.js";
+import dbApi from "./dbApi.js";
 import files from "./files.js";
 import eksctl from "./eksctl.js";
 import kubectl from "./kubectl.js";
 import manifest from "./manifest.js";
 import { 
+  CLUSTER_NAME,
   K6_CR_FILE,
   STATSITE_FILE,
   PG_SECRET_FILE,
@@ -15,7 +17,12 @@ import {
 const cluster = {
   create() { 
     return (
-      eksctl.createCluster()
+      eksctl.clusterDesc()
+        .then(({stdout}) => {
+          if (!stdout.match(CLUSTER_NAME)) {
+            return eksctl.createCluster();
+          }
+        })
         .then(() => eksctl.createLoadGenGrp())
     );
   },
@@ -54,8 +61,7 @@ const cluster = {
    },
 
   phaseOutK6() { 
-    // need to get testId here; could read it from configMap file..
-    const testId = "4"; // harcoding for now
+    const testId = manifest.latestK6TestId();
     return (
       kubectl.deleteManifest(files.path(STATSITE_FILE))
         .then(() => kubectl.deleteConfigMap(testId))
@@ -65,24 +71,25 @@ const cluster = {
   },
 
   launchK6Test(testPath, numVus) {
-    const testId = "4"; // hardcoding for now
-    manifest.createK6Cr(testPath, numVus, testId); // will move this to below 
-    const numNodes = manifest.parallelism(numVus);
-
     return (
-      // get test id from node api request then call
-      // manifest.createK6CR(testPath, numVus, string(testId));
-
-      kubectl.applyManifest(files.path(STATSITE_FILE))
-        .then(() => kubectl.createConfigMapWithName(testId, testPath))
-        .then(() => eksctl.scaleLoadGenNodes(numNodes))
+      dbApi.newTestId()
+        .then((testId) => {
+          manifest.createK6Cr(testPath, numVus, testId);
+          return kubectl.createConfigMapWithName(testId, testPath);
+        })
+        .then(() => kubectl.applyManifest(files.path(STATSITE_FILE)))
+        .then(() => eksctl.scaleLoadGenNodes(manifest.parallelism(numVus)))
         .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
     );
   },
 
   destroy() {
-    eksctl.destroyCluster()
-    // add logic for tearing down persistent volume store
+    return eksctl.destroyCluster();
+    /*return (
+      //kubectl.deletePv('pv', need_to_get_and_parse_name_first) 
+        //.then(() => eksctl.destroyCluster())
+        // any additional logic needed for deleting EBS?
+    );*/
   }
 };
 

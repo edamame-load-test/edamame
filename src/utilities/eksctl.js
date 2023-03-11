@@ -11,6 +11,10 @@ const eksctl = {
     return exec(`eksctl create cluster --name ${CLUSTER_NAME}`);
   },
 
+  clusterDesc() {
+    return exec(`eksctl get cluster`);
+  },
+
   createLoadGenGrp() {
     return exec(
       `eksctl create nodegroup --cluster=${CLUSTER_NAME} `+ 
