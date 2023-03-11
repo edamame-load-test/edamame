@@ -1,5 +1,4 @@
 import fs from "fs";
-import kubectl from "../utilities/kubectl.js";
 import loadGenerators from "../utilities/loadGenerators.js";
 import Spinner from "../utilities/spinner.js";
 import cluster from "../utilities/cluster.js";

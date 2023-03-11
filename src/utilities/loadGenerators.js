@@ -1,7 +1,10 @@
 import child_process from "child_process";
 import { promisify } from "util";
 import kubectl from "./kubectl.js";
-import { K6_TEST_POD_REGEX } from "../constants/constants.js";
+import { 
+  K6_TEST_POD_REGEX,
+  POLL_FREQUENCY
+} from "../constants/constants.js";
 import manifest from "./manifest.js";
 const exec = promisify(child_process.exec);
 
@@ -47,7 +50,7 @@ const loadGenerators = {
         resolve();
       // do we want to poll more/less frequently than 30 seconds?
       //  or try to switch to an event-driven approach...
-      }, 30000);
+      }, POLL_FREQUENCY);
     });
   }
 };

@@ -23,6 +23,11 @@ const manifest = {
     files.write(K6_CR_FILE, k6CrData);
   },
 
+  latestK6TestId() {
+    const data = files.read(K6_CR_FILE);
+    return data.spec.script.configMap.name;
+  },
+
   setPgPw(pw) {
     const pgSecret = files.read(PG_SECRET_FILE);
     pgSecret.data["psql-username"] = this.base64(CLUSTER_NAME);
@@ -41,3 +46,4 @@ const manifest = {
 };
 
 export default manifest;
+

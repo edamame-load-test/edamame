@@ -21,11 +21,23 @@ const kubectl = {
     return exec(`kubectl delete -f ${path}`);
   },
 
+  getIps() {
+    return exec(`kubectl get svc`);
+  },
+
   createConfigMap(path) {
     // added this b/c psql-host key wasn't being properly registered by db api
     // deployment even though could see psql-host in psql-configmap when used
     // createConfigMapWithName to create psql configmap
     return exec(`kubectl create -f ${path}`);
+  },
+
+  deletePv(type, name) {
+    return exec(`kubectl delete ${type} ${name}`);
+  },
+
+  getPv(type, name) {
+    return exec(`kubectl get ${type} ${name}`);
   },
 
   applyManifest(path) {
@@ -35,7 +47,7 @@ const kubectl = {
   getPods() {
     return exec(`kubectl get pods`);
   }
-
 };
 
 export default kubectl;
+
