@@ -1,18 +1,17 @@
-import ora from "ora";
 import cluster from "../utilities/cluster.js";
-import cli from "../utilities/cli.js";
+import Spinner from "../utilities/spinner.js";
 import userInput from "../utilities/userInput.js";
 
 const init = () => {
-  const spinner = ora("Creating Edamame Cluster...").start();
+  const spinner = new Spinner("Creating Edamame Cluster...");
   cluster.create()
-    .then(() => cli(spinner, "Configuring EBS Credentials..."))
+    .then(() => spinner.update("Configuring EBS Credentials..."))
     .then(() => cluster.configureEBSCreds())
     .then(() => userInput.processPassword())
-    .then(() => cli(spinner, "Deploying Grafana, Postgres, & K6 Operator..."))
+    .then(() => spinner.update("Deploying Grafana, Postgres, & K6 Operator..."))
     .then(() => cluster.deployServersK6Op())
-    .then(() => cli(spinner, "Cluster Configured. You can load test now!", "success"))
-    .catch(error => cli(spinner, `Error creating cluster: ${error}`, "fail"));
+    .then(() => spinner.succeed("Cluster Configured. You can load test now!"))
+    .catch(err => spinner.fail(`Error creating cluster: ${err}`));
 };
 
 export {

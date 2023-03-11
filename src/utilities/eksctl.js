@@ -1,10 +1,9 @@
-import cli from "./cli.js";
 import { promisify } from "util";
 import child_process from "child_process";
 import { 
   CLUSTER_NAME, 
   LOAD_GEN_NODE_GRP 
-} from "./constants.js";
+} from "../constants/constants.js";
 const exec = promisify(child_process.exec);
 
 const eksctl = {
