@@ -12,7 +12,7 @@ In order to run `edamame`, you will need the following:
 ## Installation
 
 - Clone the repository
-- In the root directory, run the command `npm install` followed by the command `npm init`.
+- In the root directory, run the command `npm install` followed by the command `npm link`.
 
 ## Commands
 
@@ -85,6 +85,8 @@ Outputs:
 ```
 
 - Retrieves all the ids for tests that have been run in JSON format.
+
+**Note**: In the future, the availability of this command may change. We'd like to have tests identifiable by some user-specified custom name.
 
 ### edamame teardown
 
