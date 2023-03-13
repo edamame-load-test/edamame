@@ -1,5 +1,5 @@
 import kubectl from "./kubectl.js";
-import { 
+import {
   K6_TEST_POD_REGEX,
   POLL_FREQUENCY
 } from "../constants/constants.js";
@@ -9,7 +9,7 @@ const loadGenerators = {
   numTestsCompleted(stdout) {
     let testsCompleted = 0;
     const pods = stdout.split("\n");
-    console.log("Assessing load generators; counting the number completed");
+    // console.log("Assessing load generators; counting the number completed");
     pods.forEach(pod => {
       if (pod.match(K6_TEST_POD_REGEX)) {
         if (pod.match('Completed')) {
@@ -17,14 +17,14 @@ const loadGenerators = {
         }
       }
     });
-    console.log(`Number of load generators completed: ${testsCompleted}`);
+    // console.log(`Number of load generators completed: ${testsCompleted}`);
     return testsCompleted;
   },
 
   checkAllCompleted(totalTests) {
     return (
       kubectl.getPods()
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           const currComplete = this.numTestsCompleted(stdout);
           if (currComplete === totalTests) {
             return true;
@@ -37,7 +37,7 @@ const loadGenerators = {
     const numLoadGenerators = manifest.parallelism(numVus);
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
-        console.log("Polling load generators...");
+        // console.log("Polling load generators...");
         const finished = await this.checkAllCompleted(numLoadGenerators);
         if (!finished) {
           return;
