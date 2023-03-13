@@ -75,6 +75,15 @@ const eksctl = {
 
   destroyCluster() {
     return exec(`eksctl delete cluster --name ${CLUSTER_NAME}`);
+  },
+
+  async deleteEBSVolumes() {
+    let volumes = await exec(`aws ec2 describe-volumes --filter "Name=tag:kubernetes.io/created-for/pvc/name,Values=data-psql-0,grafana-pvc" --query 'Volumes[].VolumeId' --output json`)
+    volumes = JSON.parse(volumes.stdout)
+    console.log(volumes)
+    return Promise.allSettled(volumes.map(volume => {
+      exec(`aws ec2 delete-volume --volume-id ${volume}`)
+    }))
   }
 };
 
