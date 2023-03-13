@@ -14,3 +14,4 @@ export default function () {
     'http response status code is 200': result.status === 200,
   });
 }
+
