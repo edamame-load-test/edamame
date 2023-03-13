@@ -16,9 +16,7 @@ const userInput = {
 
   processPassword() {
     const password = this.getPassword();
-    manifest.setPgPw(password);
-    // do we want users ability to confirm the password they entered?
-    // <> have them re-enter to confirm?
+    manifest.setPgGrafCredentials(password);
   }
 };
 

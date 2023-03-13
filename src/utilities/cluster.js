@@ -6,12 +6,19 @@ import kubectl from "./kubectl.js";
 import manifest from "./manifest.js";
 import { 
   CLUSTER_NAME,
+  PG_CM,
+  GRAF,
+  GRAF_DS,
+  GRAF_DBS,
+  GRAF_PORT,
   K6_CR_FILE,
   STATSITE_FILE,
   PG_SECRET_FILE,
   PG_CM_FILE,
   PG_SS_FILE,
-  DB_API_FILE
+  DB_API_FILE,
+  GRAF_DS_FILE,
+  GRAF_DB_FILE
 } from "../constants/constants.js";
 
 const cluster = {
@@ -46,17 +53,42 @@ const cluster = {
     );
   },
 
+  applyPgManifests() {
+    return (
+      kubectl.applyManifest(files.path(PG_SECRET_FILE))
+        .then(() => kubectl.configMapExists(PG_CM))
+        .then((exists) => {
+          if (!exists) {
+            return kubectl.createConfigMap(files.path(PG_CM_FILE));
+          }
+        })
+        .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)))
+    );
+  },
+
+  applyGrafanaManifests() { 
+    return (
+      kubectl.configMapExists(GRAF_DS)
+        .then((exists) => {
+          if (!exists) {
+            return (
+              kubectl.createConfigMapWithName(GRAF_DS, files.path(GRAF_DS_FILE))
+                .then(() => manifest.forEachGrafJsonDB(kubectl.createConfigMapWithName))
+                .then(() => kubectl.createConfigMapWithName(GRAF_DBS, files.path(GRAF_DB_FILE)))
+                .then(() => kubectl.applyManifest(files.path(GRAF)))
+                //.then(() => kubectl.portForward("service/grafana", GRAF_PORT, GRAF_PORT))
+            );
+          }
+        })
+    );
+  },
+
   deployServersK6Op() { 
     return (
       kubectl.deployK6Operator()
-        .then(() => kubectl.applyManifest(files.path(PG_SECRET_FILE)))
-        .then(() => kubectl.createConfigMap(files.path(PG_CM_FILE)))
-        .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)))
-        // when put in error handling, if need to reapply db api after its deleted
-        //   will need to update hardcoded nodePort value in yaml file otherwise
-        //   get error that nodePort is already in use even though dp api service was taken down
+        .then(() => this.applyPgManifests())
+        .then(() => this.applyGrafanaManifests())
         .then(() => kubectl.applyManifest(files.path(DB_API_FILE)))
-        //.then(() => kubectl.applyManifest(files.path(grafana_path)) 
     );
    },
 

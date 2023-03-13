@@ -2,7 +2,9 @@ import {
   NUM_VUS_PER_POD, 
   K6_CR_FILE,
   PG_SECRET_FILE,
-  CLUSTER_NAME
+  GRAF_DS_FILE,
+  CLUSTER_NAME,
+  GRAF_JSON_DBS
 } from "../constants/constants.js";
 import files from "./files.js";
 
@@ -28,12 +30,29 @@ const manifest = {
     return data.spec.script.configMap.name;
   },
 
-  setPgPw(pw) {
+  setPgGrafCredentials(pw) {
     const pgSecret = files.read(PG_SECRET_FILE);
+    const grafCreds = files.read(GRAF_DS_FILE);
+    
+    grafCreds.datasources[0].user = CLUSTER_NAME;
+    grafCreds.datasources[0].secureJsonData.password = pw;
+
     pgSecret.data["psql-username"] = this.base64(CLUSTER_NAME);
     pgSecret.data["psql-password"] = this.base64(pw);
-    // add/update grafana secret to use same creds
+
     files.write(PG_SECRET_FILE, pgSecret);
+    files.write(GRAF_DS_FILE, grafCreds);
+  },
+
+  forEachGrafJsonDB(callback) {
+    const dirPath = files.path(`/${GRAF_JSON_DBS}`);
+    const names = files.fileNames(dirPath);
+    names.forEach(name => {
+      if (name.match(".json")) {
+        const nameNoExt = name.replace("\.json", "").replace("_", "-");
+        callback(nameNoExt, `${dirPath}/${name}`);
+      }
+    });
   },
 
   base64(value) {

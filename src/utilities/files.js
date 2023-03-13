@@ -14,6 +14,10 @@ const files = {
     return yaml.load(fs.readFileSync(file), 'utf-8');
   },
 
+  fileNames(path) {
+    return fs.readdirSync(path);
+  },
+
   write(fileName, data) {
     const filePath = this.path(fileName);
     fs.writeFileSync(filePath, yaml.dump(data));

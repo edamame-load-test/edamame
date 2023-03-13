@@ -31,12 +31,13 @@ const dbApi = {
 
     for (let colIdx = 0; colIdx < services.length; colIdx++) {
       const serviceCols = services[colIdx];
+
       if (serviceCols.match(DB_API_NAME)) {
         const propRows = serviceCols.split(" ");
 
         for (let rowIdx = 0; rowIdx < propRows.length; rowIdx++) {
           const prop = propRows[rowIdx];
-          if (prop.match(DB_API_REGEX)) {
+          if (prop && prop.match(DB_API_REGEX)) {
             return  prop + ":" + DB_API_PORT;
           }
         }

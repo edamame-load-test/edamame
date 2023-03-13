@@ -8,7 +8,7 @@ const runTest = (testPath, numVus) => {
   if (fs.existsSync(testPath)) {
     const spinner = new Spinner("Distributing k6 load test...");
     cluster.launchK6Test(testPath, numVus)
-      .then(() => spinner.update("Starting k6 load test..."))
+      .then(() => spinner.update("Running k6 load test..."))
       .then(() => loadGenerators.pollUntilAllComplete(numVus))
       .then(() => spinner.update("All tests completed; Removing load generators."))
       .then(() => cluster.phaseOutK6())
