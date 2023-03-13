@@ -1,12 +1,9 @@
-import child_process from "child_process";
-import { promisify } from "util";
 import kubectl from "./kubectl.js";
 import { 
   K6_TEST_POD_REGEX,
   POLL_FREQUENCY
 } from "../constants/constants.js";
 import manifest from "./manifest.js";
-const exec = promisify(child_process.exec);
 
 const loadGenerators = {
   numTestsCompleted(stdout) {

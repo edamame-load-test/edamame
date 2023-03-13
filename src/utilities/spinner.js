@@ -24,3 +24,5 @@ Spinner.prototype.fail = function(msg) {
 
 export default Spinner;
 
+
+

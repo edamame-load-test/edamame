@@ -20,10 +20,9 @@ switch(firstArg) {
     // assumes test is run like so, with the relative filepath being passed in after --file:
     //  edamame run test --file ./deployment/test.js --vus 40000
     const filePath = flagValue("--file");
-    const numVus = flagValue("--vus");
     // later: add back (--name) flag to let users associate testId with name of their choice
     //   then when want to view a test 
-    runTest(filePath, numVus);
+    runTest(filePath);
     break;
   case "get":
     getTestIds();

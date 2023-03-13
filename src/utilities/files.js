@@ -4,14 +4,22 @@ import yaml from "js-yaml";
 import { fileURLToPath } from 'url';
 
 const files = {
+  exists(path) {
+    return fs.existsSync(path);
+  },
+
   parseNameFromPath(path) {
     const pathItems = path.split('/');
     return pathItems[pathItems.length -1];
   },
 
-  read(fileName) {
+  read(path) {
+    return fs.readFileSync(path, 'utf-8');
+  },
+
+  readYAML(fileName) {
     const file = this.path(fileName);
-    return yaml.load(fs.readFileSync(file), 'utf-8');
+    return yaml.load(this.read(file));
   },
 
   fileNames(path) {

@@ -4,6 +4,7 @@ import files from "./files.js";
 import eksctl from "./eksctl.js";
 import kubectl from "./kubectl.js";
 import manifest from "./manifest.js";
+import grafana from "./grafana.js";
 import { 
   CLUSTER_NAME,
   PG_CM,
@@ -76,7 +77,6 @@ const cluster = {
                 .then(() => manifest.forEachGrafJsonDB(kubectl.createConfigMapWithName))
                 .then(() => kubectl.createConfigMapWithName(GRAF_DBS, files.path(GRAF_DB_FILE)))
                 .then(() => kubectl.applyManifest(files.path(GRAF)))
-                //.then(() => kubectl.portForward("service/grafana", GRAF_PORT, GRAF_PORT))
             );
           }
         })
@@ -89,6 +89,7 @@ const cluster = {
         .then(() => this.applyPgManifests())
         .then(() => this.applyGrafanaManifests())
         .then(() => kubectl.applyManifest(files.path(DB_API_FILE)))
+        .then(() => grafana.getExternalIp())
     );
    },
 
