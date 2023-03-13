@@ -1,5 +1,5 @@
 import {
-  NUM_VUS_PER_POD, 
+  NUM_VUS_PER_POD,
   K6_CR_FILE,
   PG_SECRET_FILE,
   GRAF_DS_FILE,
@@ -18,7 +18,7 @@ const manifest = {
     k6CrData.spec.script.configMap.file = files.parseNameFromPath(path);
     envObjs.forEach(obj => {
       if (obj.name === "K6_STATSD_NAMESPACE") {
-        obj.value = testId;
+        obj.value = `${testId}.`;
       }
     });
 
@@ -33,7 +33,7 @@ const manifest = {
   setPgGrafCredentials(pw) {
     const pgSecret = files.read(PG_SECRET_FILE);
     const grafCreds = files.read(GRAF_DS_FILE);
-    
+
     grafCreds.datasources[0].user = CLUSTER_NAME;
     grafCreds.datasources[0].secureJsonData.password = pw;
 
