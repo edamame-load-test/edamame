@@ -10,12 +10,11 @@ const init = () => {
     .then(() => userInput.processPassword())
     .then(() => spinner.update("Deploying Grafana, Postgres, & K6 Operator..."))
     .then(() => cluster.deployServersK6Op())
-    .then(() => {
-      spinner.succeed("Cluster configured. You can load test now!");
-      /*spinner.succeed(
-        `Cluster Configured. You can load test now! ` +
-        `Access the grafana dashboard at localhost:3000`
-      );*/
+    .then(grafanaUrl => {
+      spinner.succeed(
+        `Cluster configured. ` +
+        `Please load the grafana dashboard at: ${grafanaUrl} ` + 
+        `and then run a load test.`)
     })
     .catch(err => spinner.fail(`Error creating cluster: ${err}`));
 };

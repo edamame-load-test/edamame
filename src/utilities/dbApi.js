@@ -1,7 +1,7 @@
 import { 
   DB_API_NAME,
   DB_API_PORT,
-  DB_API_REGEX
+  EXTERNAL_IP_REGEX
  } from "../constants/constants.js";
 import kubectl from "./kubectl.js";
 import { promisify } from "util";
@@ -37,7 +37,7 @@ const dbApi = {
 
         for (let rowIdx = 0; rowIdx < propRows.length; rowIdx++) {
           const prop = propRows[rowIdx];
-          if (prop && prop.match(DB_API_REGEX)) {
+          if (prop && prop.match(EXTERNAL_IP_REGEX)) {
             return  prop + ":" + DB_API_PORT;
           }
         }
