@@ -25,6 +25,19 @@ const kubectl = {
     return exec(`kubectl get svc`);
   },
 
+  configMapExists(name) {
+    return (
+      exec(`kubectl get configmaps`)
+        .then(({stdout}) => {
+          return !!stdout.match(name);
+        })
+    );
+  },
+
+  portForward(service, port1, port2) {
+    return exec(`kubectl port-forward ${service} ${port1}:${port2} & `);
+  }, 
+
   createConfigMap(path) {
     // added this b/c psql-host key wasn't being properly registered by db api
     // deployment even though could see psql-host in psql-configmap when used
@@ -50,4 +63,3 @@ const kubectl = {
 };
 
 export default kubectl;
-

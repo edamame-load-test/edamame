@@ -3,11 +3,11 @@ kind: K6
 metadata:
   name: k6-edamame-test
 spec:
-  parallelism: 1
+  parallelism: 4
   script:
     configMap:
-      name: "test_id"
-      file: sample_test.js
+      name: "testId"
+      file: test.js
   arguments: "--out distributed-statsd"
   runner:
     image: lukeoguro/xk6-statsd:latest
@@ -21,4 +21,4 @@ spec:
       - name: K6_STATSD_GAUGE_NAMESPACE
         value: $(POD_NAME).
       - name: K6_STATSD_NAMESPACE
-        value: "test_id"
+        value: "testId"

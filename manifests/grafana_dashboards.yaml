@@ -1,0 +1,13 @@
+apiVersion: 1
+providers:
+  - name: "http"
+    orgId: 1
+    folder: ""
+    folderUid: ""
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: false #We can probably change this to true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true

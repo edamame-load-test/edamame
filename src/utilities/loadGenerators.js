@@ -48,8 +48,6 @@ const loadGenerators = {
 
         clearInterval(interval);
         resolve();
-      // do we want to poll more/less frequently than 30 seconds?
-      //  or try to switch to an event-driven approach...
       }, POLL_FREQUENCY);
     });
   }
