@@ -2,7 +2,7 @@ apiVersion: 1
 datasources:
   - name: Postgres
     type: postgres
-    url: postgres-service:5432
+    url: psql-service:5432
     database: edamame
     user:
     secureJsonData:
