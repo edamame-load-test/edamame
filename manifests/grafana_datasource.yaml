@@ -1,3 +1,4 @@
+# Add a secret for the username and password
 apiVersion: 1
 datasources:
   - name: Postgres

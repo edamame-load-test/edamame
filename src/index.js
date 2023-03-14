@@ -1,37 +1,43 @@
 #!/usr/bin/env node
 
-import { init } from "./commands/init.js"
-import { destroyEKSCluster } from "./commands/destroy.js"
-import { runTest } from "./commands/runTest.js"
+import { init } from "./commands/init.js";
+import { destroyEKSCluster } from "./commands/destroy.js";
+import { runTest } from "./commands/runTest.js";
 import { getTestIds } from "./commands/getTestIds.js";
+import { Command } from "commander";
+const program = new Command();
 
-const args = process.argv.slice(2);
-const firstArg = args[0];
-
-function flagValue(flag) {
-  return args[args.indexOf(flag) + 1];
-}
-
-switch(firstArg) {
-  case "init":
+program
+  .command("init")
+  .description(
+    "Create an EKS cluster and deploy Grafana, Postgres, & K6 Operator"
+  )
+  .action(() => {
     init();
-    break;
-  case "run":
-    // assumes test is run like so, with the relative filepath being passed in after --file:
-    //  edamame run test --file ./deployment/test.js --vus 40000
-    const filePath = flagValue("--file");
-    // later: add back (--name) flag to let users associate testId with name of their choice
-    //   then when want to view a test 
+  });
+
+program
+  .command("run")
+  .description("run the load test")
+  .requiredOption("-f, --file <file>", "path to the test file")
+  // .option("-n, --name <name>", "name to associate with the test")
+  .action((options) => {
+    const filePath = options.file;
     runTest(filePath);
-    break;
-  case "get":
+  });
+
+program
+  .command("get")
+  .description("get a list of all available test IDs")
+  .action(() => {
     getTestIds();
-    break;
-  case "teardown":
+  });
+
+program
+  .command("teardown")
+  .description("Delete the entire EKS cluster")
+  .action(() => {
     destroyEKSCluster();
-    break;
-  default:
-    // placeholder
-}
+  });
 
-
+program.parse(process.argv);
