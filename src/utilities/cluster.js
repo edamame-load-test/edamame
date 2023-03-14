@@ -116,8 +116,9 @@ const cluster = {
     );
   },
 
-  destroy() {
-    return eksctl.destroyCluster();
+  async destroy() {
+    await eksctl.destroyCluster();
+    return eksctl.deleteEBSVolumes();
     /*return (
       //kubectl.deletePv('pv', need_to_get_and_parse_name_first) 
         //.then(() => eksctl.destroyCluster())
