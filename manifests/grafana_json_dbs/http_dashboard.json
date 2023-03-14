@@ -162,7 +162,7 @@
           "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
         }
       ],
-      "title": "Panel Title",
+      "title": "Request Duration (99th percentile)",
       "type": "stat"
     },
     {
@@ -174,6 +174,7 @@
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
+            "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
@@ -229,7 +230,7 @@
           "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
         }
       ],
-      "title": "# of Requests",
+      "title": "Requests & VUs",
       "type": "timeseries"
     }
   ],
@@ -240,7 +241,7 @@
   "templating": {
     "list": [
       {
-        "current": { "selected": true, "text": "1", "value": "1" },
+        "current": { "selected": false, "text": "1", "value": "1" },
         "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
         "definition": "SELECT DISTINCT test_id from samples;",
         "hide": 0,
@@ -265,6 +266,6 @@
   "timezone": "",
   "title": "http-data",
   "uid": "IWSghv-4k",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
