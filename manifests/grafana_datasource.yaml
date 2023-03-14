@@ -4,7 +4,7 @@ datasources:
     type: postgres
     url: psql-service:5432
     database: edamame
-    user:
+    user: edamame_reader
     secureJsonData:
       password:
     jsonData:
