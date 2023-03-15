@@ -21,4 +21,4 @@ spec:
       - name: K6_STATSD_GAUGE_NAMESPACE
         value: $(POD_NAME).
       - name: K6_STATSD_NAMESPACE
-        value: '10.'
+        value: '1.'

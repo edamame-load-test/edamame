@@ -59,6 +59,17 @@ spec:
             requests:
               cpu: 250m
               memory: 750Mi
+          env:
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: psql-secret
+                  key: psql-username
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: psql-secret
+                  key: psql-password
           volumeMounts:
             - name: grafana-pv
               mountPath: /var/lib/grafana
