@@ -6,7 +6,7 @@ datasources:
     database: edamame
     user: edamame_reader
     secureJsonData:
-      password: password
+      password:
     jsonData:
       sslmode: disable
       maxOpenConns: 0
