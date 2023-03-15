@@ -61,7 +61,7 @@ const manifest = {
     return data.spec.script.configMap.name;
   },
 
-  setPgCredentials(pw) {
+  setPgGrafCredentials(pw) {
     const pgSecret = files.readYAML(PG_SECRET_FILE);
     pgSecret.data["psql-username"] = this.base64(CLUSTER_NAME);
     pgSecret.data["psql-password"] = this.base64(pw);
