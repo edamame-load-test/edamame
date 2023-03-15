@@ -4,9 +4,9 @@ datasources:
     type: postgres
     url: psql-service:5432
     database: edamame
-    user: edamame_reader
+    user: $USERNAME
     secureJsonData:
-      password:
+      password: $PASSWORD
     jsonData:
       sslmode: disable
       maxOpenConns: 0
