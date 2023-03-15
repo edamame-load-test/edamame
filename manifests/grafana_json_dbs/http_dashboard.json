@@ -155,7 +155,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT ts as \"time\", MAX(value) AS max_value \nFROM samples \nWHERE metric IN ('counts.http_reqs', 'timers.http_req_duration.p99') \nGROUP BY ts \nHAVING COUNT(DISTINCT metric) = 2 \nORDER BY max_value DESC ",
+          "rawSql": "SELECT ts as \"time\", MAX(value) AS max_value \nFROM samples \nWHERE metric IN ('counts.http_reqs', 'timers.http_req_duration.p99') AND $__timeFilter(ts)\nGROUP BY ts \nHAVING COUNT(DISTINCT metric) = 2 \nORDER BY max_value DESC ",
           "refId": "A",
           "select": [[{ "params": ["value"], "type": "column" }]],
           "timeColumn": "time",
@@ -186,7 +186,7 @@
             "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": { "type": "linear" },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": { "group": "A", "mode": "none" },
             "thresholdsStyle": { "mode": "off" }
@@ -223,29 +223,115 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT ts AS time,\nmetric,\nvalue\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric IN ('vus', 'counts.http_reqs')",
+          "rawSql": "SELECT ts AS time,\nmetric,\nvalue\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric IN ('vus', 'counts.http_reqs')\nORDER BY ts",
           "refId": "Requsts",
           "select": [[{ "params": ["value"], "type": "column" }]],
           "timeColumn": "time",
           "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
         }
       ],
-      "title": "Requests & VUs",
+      "title": "# of Requests & VUs",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "timers.http_req_duration.count"
+            },
+            "properties": [{ "id": "custom.axisPlacement", "value": "right" }]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "timers.http_req_duration.p99"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": { "fixedColor": "red", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 12, "w": 23, "x": 0, "y": 18 },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "timezones": [""],
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  ts AS time,\n  metric,\n  value\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric IN ('timers.http_req_duration.p99', 'timers.http_req_duration.count')\nORDER BY ts",
+          "refId": "A",
+          "select": [[{ "params": ["value"], "type": "column" }]],
+          "timeColumn": "time",
+          "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
+        }
+      ],
+      "title": "Request Duration",
       "type": "timeseries"
     }
   ],
-  "refresh": "5s",
+  "refresh": false,
   "schemaVersion": 37,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "current": { "selected": false, "text": "1", "value": "1" },
+        "current": { "selected": false, "text": "5", "value": "5" },
         "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
         "definition": "SELECT DISTINCT test_id from samples;",
         "hide": 0,
         "includeAll": false,
+        "label": "Your Test",
         "multi": false,
         "name": "testid",
         "options": [],
@@ -259,13 +345,13 @@
     ]
   },
   "time": {
-    "from": "2023-03-14T00:51:34.767Z",
-    "to": "2023-03-14T00:55:35.787Z"
+    "from": "2023-03-15T15:16:05.504Z",
+    "to": "2023-03-15T15:18:54.819Z"
   },
   "timepicker": {},
   "timezone": "",
   "title": "http-data",
   "uid": "IWSghv-4k",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }
