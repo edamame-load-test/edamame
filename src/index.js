@@ -17,13 +17,10 @@ program
   });
 
 program
-  .command("run")
+  .command("run <file>")
   .description("run the load test")
-  .requiredOption("-f, --file <file>", "path to the test file")
-  // .option("-n, --name <name>", "name to associate with the test")
-  .action((options) => {
-    const filePath = options.file;
-    runTest(filePath);
+  .action((file) => {
+    runTest(file);
   });
 
 program
