@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { init } from "./commands/init.js"
-import { destroyEKSCluster } from "./commands/destroy.js"
-import { runTest } from "./commands/runTest.js"
+import { init } from "./commands/init.js";
+import { destroyEKSCluster } from "./commands/destroy.js";
+import { runTest } from "./commands/runTest.js";
 import { getTestIds } from "./commands/getTestIds.js";
 
 const args = process.argv.slice(2);
@@ -12,7 +12,7 @@ function flagValue(flag) {
   return args[args.indexOf(flag) + 1];
 }
 
-switch(firstArg) {
+switch (firstArg) {
   case "init":
     init();
     break;
@@ -21,7 +21,7 @@ switch(firstArg) {
     //  edamame run test --file ./deployment/test.js --vus 40000
     const filePath = flagValue("--file");
     // later: add back (--name) flag to let users associate testId with name of their choice
-    //   then when want to view a test 
+    //   then when want to view a test
     runTest(filePath);
     break;
   case "get":
@@ -31,7 +31,5 @@ switch(firstArg) {
     destroyEKSCluster();
     break;
   default:
-    // placeholder
+  // placeholder
 }
-
-
