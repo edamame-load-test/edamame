@@ -6,7 +6,7 @@ generatorOptions:
 secretGenerator:
 - name: psql-secret
   envs:
-  - properties/psql.env
+  - psql.env
   type: Opaque
   options:
     disableNameSuffixHash: true
