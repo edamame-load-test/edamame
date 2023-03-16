@@ -4,7 +4,7 @@ metadata:
   name: statsd-service
 spec:
   selector:
-    app: statsd
+    app: statsite-server
   ports:
     - protocol: "UDP"
       port: 8125
@@ -14,16 +14,16 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: statsd
+  name: statsite-server
 spec:
   selector:
     matchLabels:
-      app: statsd
+      app: statsite-server
   replicas: 1
   template:
     metadata:
       labels:
-        app: statsd
+        app: statsite-server
     spec:
       containers:
         - name: statsd
