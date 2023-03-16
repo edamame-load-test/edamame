@@ -53,9 +53,6 @@ const cluster = {
   },
 
   applyPgManifests() {
-    // return kubectl
-      //.applyManifest(files.path(PG_SECRET_FILE))
-      //.then(() => 
     return kubectl.configMapExists(PG_CM)
       .then((exists) => {
         if (!exists) {
@@ -116,11 +113,6 @@ const cluster = {
   async destroy() {
     await eksctl.destroyCluster();
     return eksctl.deleteEBSVolumes();
-    /*return (
-      //kubectl.deletePv('pv', need_to_get_and_parse_name_first) 
-        //.then(() => eksctl.destroyCluster())
-        // any additional logic needed for deleting EBS?
-    );*/
   },
 };
 
