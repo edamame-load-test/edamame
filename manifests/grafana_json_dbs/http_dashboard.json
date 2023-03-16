@@ -94,7 +94,7 @@
       "id": 4,
       "options": {
         "colorMode": "background",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
@@ -109,7 +109,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT ts AS \"time\",\nMAX(value)\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric = 'counts.counts.http_req_failed'\nGROUP BY 1\nORDER BY 1 ASC",
+          "rawSql": "SELECT ts AS \"time\",\nMAX(value)\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric = 'counts.http_req_failed'\nGROUP BY 1\nORDER BY 1 ASC",
           "refId": "A",
           "select": [[{ "params": ["value"], "type": "column" }]],
           "timeColumn": "time",
@@ -319,14 +319,14 @@
       "type": "timeseries"
     }
   ],
-  "refresh": false,
+  "refresh": "5s",
   "schemaVersion": 37,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "current": { "selected": false, "text": "5", "value": "5" },
+        "current": { "selected": true, "text": "23", "value": "23" },
         "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
         "definition": "SELECT DISTINCT test_id from samples;",
         "hide": 0,
@@ -344,14 +344,11 @@
       }
     ]
   },
-  "time": {
-    "from": "2023-03-15T15:16:05.504Z",
-    "to": "2023-03-15T15:18:54.819Z"
-  },
+  "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "",
   "title": "http-data",
   "uid": "IWSghv-4k",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
