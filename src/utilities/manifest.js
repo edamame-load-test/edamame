@@ -60,7 +60,6 @@ const manifest = {
   },
 
   setPgGrafCredentials(pw) {
-    console.log(pw);
     const secretData = `psql-username=${CLUSTER_NAME}\npsql-password=${pw}`;
     files.write("psql.env", secretData); // creates or overwrites file
     return kubectl.createSecret();
