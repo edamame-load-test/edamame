@@ -6,8 +6,8 @@ spec:
   parallelism: 1
   script:
     configMap:
-      name: '26'
-      file: test7.js
+      name: '2'
+      file: test1.js
   separate: true
   arguments: '--out distributed-statsd'
   runner:
@@ -22,7 +22,7 @@ spec:
       - name: K6_STATSD_GAUGE_NAMESPACE
         value: $(POD_NAME).
       - name: K6_STATSD_NAMESPACE
-        value: '26.'
+        value: '2.'
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
