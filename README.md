@@ -4,10 +4,12 @@
 
 In order to run `edamame`, you will need the following:
 
-- An [AWS Account](https://docs.aws.amazon.com/SetUp/latest/UserGuide/setup-prereqs-instructions.html)
+- An [AWS Account](https://docs.aws.amazon.com/SetUp/latest/UserGuide/setup-prereqs-instructions.html).
 - The [AWS CLI tool](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) should be installed and configured.
-- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl), a command line tool for working with Kubernetes clusters, should be installed.
+- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl), a command line tool for working with Kubernetes clusters, should be installed (ensure you have v. 1.14 or greater which supports Kustomization files).
 - [`eksctl`](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html), a command line tool for working with EKS clusters, should be installed.
+- [`Make`](https://www.gnu.org/software/make/), a build automation tool used to build executable programs and libraries from source code
+- [`Go`](https://go.dev/doc/install),the programming language used by K6.
 
 ## Installation
 
@@ -44,7 +46,7 @@ Password for PG & Grafana has been set as:
 
 **Notes**:
 
-- It can as long as *20 minutes* to create the cluster and apply the necessary permissions.
+- It can as long as _20 minutes_ to create the cluster and apply the necessary permissions.
 - To access the Grafana dashboards, use the provided link. For now, the default Grafana username and password are used (`admin` and `admin`). In Grafana, navigate to the Dashboards, and select the `testid` for the data you wish to view. If no tests have been run, you may see an error, until there are test ids in the database to display.
 
 ### edamame run
@@ -105,6 +107,6 @@ Outputs:
 
 **Notes**:
 
-- Because this command will delete the entire cluster, it will also *delete all data*. In order to maintain historical data, the cluster must remain up. In the future, we will be providing an additional command to export data, so that it is not lost when the cluster is deleted.
+- Because this command will delete the entire cluster, it will also _delete all data_. In order to maintain historical data, the cluster must remain up. In the future, we will be providing an additional command to export data, so that it is not lost when the cluster is deleted.
 - The process of deleting a cluster can take 10-15 mins.
 - If you try to create a new cluster directly after deleting a cluster, you may run into errors. This is because AWS continues to remove resources associated with the EKS cluster for up to 10 minutes after the command completes. Try waiting for a little while, and seeing if that fixes the problem.
