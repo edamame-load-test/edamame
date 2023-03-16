@@ -17,6 +17,10 @@ const kubectl = {
     return exec(`kubectl create configmap ${name} --from-file ${path}`);
   },
 
+  createSecret() {
+    return exec(`kubectl apply -k ${files.path("")}`);
+  },
+
   deleteManifest(path) {
     return exec(`kubectl delete -f ${path}`);
   },
@@ -63,3 +67,4 @@ const kubectl = {
 };
 
 export default kubectl;
+

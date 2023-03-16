@@ -53,15 +53,15 @@ const cluster = {
   },
 
   applyPgManifests() {
-    return kubectl
-      .applyManifest(files.path(PG_SECRET_FILE))
-      .then(() => kubectl.configMapExists(PG_CM))
+    return kubectl.configMapExists(PG_CM)
       .then((exists) => {
         if (!exists) {
           return kubectl.createConfigMap(files.path(PG_CM_FILE));
         }
       })
-      .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)));
+      .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)))
+      .then(() => new Promise(res => setTimeout(res, 10000)))
+      // setting a 10s delay on return above to see if it fixes issue with timing
   },
 
   applyGrafanaManifests() {
@@ -83,7 +83,7 @@ const cluster = {
   deployServersK6Op() {
     return kubectl
       .deployK6Operator()
-      .then(() => this.applyPgManifests())
+      .then(() => this.applyPgManifests()) // added 10 s delay here
       .then(() => this.applyGrafanaManifests())
       .then(() => kubectl.applyManifest(files.path(DB_API_FILE)))
       .then(() => grafana.getExternalIp());
@@ -113,11 +113,6 @@ const cluster = {
   async destroy() {
     await eksctl.destroyCluster();
     return eksctl.deleteEBSVolumes();
-    /*return (
-      //kubectl.deletePv('pv', need_to_get_and_parse_name_first) 
-        //.then(() => eksctl.destroyCluster())
-        // any additional logic needed for deleting EBS?
-    );*/
   },
 };
 
