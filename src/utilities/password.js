@@ -1,8 +1,8 @@
 import readlineSync from "readline-sync";
 import manifest from "./manifest.js";
 
-const userInput = {
-  getPassword() {
+const password = {
+  get() {
     console.log(
       `Please enter a password to associate ` +
       `with your Edamame Grafana dashboard & ` +
@@ -14,10 +14,19 @@ const userInput = {
     return password;
   },
 
-  processPassword() {
-    const password = this.getPassword();
+  create(len) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < len; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  },
+
+  assign() {
+    const password = this.create(35);
     manifest.setPgGrafCredentials(password);
   }
 };
 
-export default userInput;
+export default password;

@@ -8,6 +8,10 @@ const files = {
     return fs.existsSync(path);
   },
 
+  create() {
+
+  },
+
   parseNameFromPath(path) {
     const pathItems = path.split('/');
     return pathItems[pathItems.length -1];
@@ -26,9 +30,14 @@ const files = {
     return fs.readdirSync(path);
   },
 
-  write(fileName, data) {
+  writeYAML(fileName, data) {
     const filePath = this.path(fileName);
     fs.writeFileSync(filePath, yaml.dump(data));
+  },
+
+  write(fileName, data) {
+    const filePath = this.path(fileName)
+    fs.writeFileSync(filePath, data)
   },
 
   path(fileName, directory="../../manifests/") {

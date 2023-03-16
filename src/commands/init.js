@@ -1,6 +1,6 @@
 import cluster from "../utilities/cluster.js";
 import Spinner from "../utilities/spinner.js";
-import userInput from "../utilities/userInput.js";
+import password from "../utilities/password.js";
 
 const init = async () => {
   const spinner = new Spinner("Creating Edamame cluster... (this may take up to 20 minutes)");
@@ -14,7 +14,7 @@ const init = async () => {
     await cluster.configureEBSCreds();
     spinner.succeed("Successfully configured EBS credentials.");
 
-    await userInput.processPassword()
+    await password.assign();
 
     spinner.info("Deploying Grafana, Postgres, & K6 Operator...");
     spinner.start();

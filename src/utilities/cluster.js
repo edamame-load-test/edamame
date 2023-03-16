@@ -53,9 +53,10 @@ const cluster = {
   },
 
   applyPgManifests() {
-    return kubectl
-      .applyManifest(files.path(PG_SECRET_FILE))
-      .then(() => kubectl.configMapExists(PG_CM))
+    // return kubectl
+      //.applyManifest(files.path(PG_SECRET_FILE))
+      //.then(() => 
+    return kubectl.configMapExists(PG_CM)
       .then((exists) => {
         if (!exists) {
           return kubectl.createConfigMap(files.path(PG_CM_FILE));

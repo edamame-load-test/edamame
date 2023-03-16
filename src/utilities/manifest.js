@@ -1,16 +1,14 @@
 import {
   NUM_VUS_PER_POD,
   K6_CR_FILE,
-  PG_SECRET_FILE,
-  GRAF_DS_FILE,
   CLUSTER_NAME,
   GRAF_JSON_DBS,
 } from "../constants/constants.js";
 import files from "./files.js";
-import fs from "fs";
+import kubectl from "./kubectl.js";
 
 const manifest = {
-  createK6Cr(path, numVus, testId) {
+  createK6Cr(path, numVus, testId) { // change to kustomize overlay chain
     const k6CrData = files.readYAML(K6_CR_FILE);
     const envObjs = k6CrData.spec.runner.env;
 
@@ -23,7 +21,7 @@ const manifest = {
       }
     });
 
-    files.write(K6_CR_FILE, k6CrData);
+    files.writeYAML(K6_CR_FILE, k6CrData);
   },
 
   numVus(path) {
@@ -62,10 +60,10 @@ const manifest = {
   },
 
   setPgGrafCredentials(pw) {
-    const pgSecret = files.readYAML(PG_SECRET_FILE);
-    pgSecret.data["psql-username"] = this.base64(CLUSTER_NAME);
-    pgSecret.data["psql-password"] = this.base64(pw);
-    files.write(PG_SECRET_FILE, pgSecret);
+    console.log(pw);
+    const secretData = `psql-username=${CLUSTER_NAME}\npsql-password=password`;
+    files.write("properties/psql.env", secretData); // creates or overwrites file
+    return kubectl.createSecret();
   },
 
   forEachGrafJsonDB(callback) {
@@ -89,3 +87,5 @@ const manifest = {
 };
 
 export default manifest;
+
+
