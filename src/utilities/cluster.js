@@ -62,7 +62,9 @@ const cluster = {
           return kubectl.createConfigMap(files.path(PG_CM_FILE));
         }
       })
-      .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)));
+      .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)))
+      .then(() => new Promise(res => setTimeout(res, 10000)))
+      // setting a 10s delay on return above to see if it fixes issue with timing
   },
 
   applyGrafanaManifests() {
@@ -84,7 +86,7 @@ const cluster = {
   deployServersK6Op() {
     return kubectl
       .deployK6Operator()
-      .then(() => this.applyPgManifests())
+      .then(() => this.applyPgManifests()) // added 10 s delay here
       .then(() => this.applyGrafanaManifests())
       .then(() => kubectl.applyManifest(files.path(DB_API_FILE)))
       .then(() => grafana.getExternalIp());
