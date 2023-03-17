@@ -15,11 +15,11 @@ const init = async () => {
     spinner.succeed("Successfully configured EBS credentials.");
 
     await password.assign();
-
+    
     spinner.info("Deploying Grafana, Postgres, & K6 Operator...");
     spinner.start();
+    
     const grafanaUrl = await cluster.deployServersK6Op();
-    spinner.info(`Please find your Grafana dashboard at: ${grafanaUrl}`);
     spinner.succeed("Cluster configured. Welcome to Edamame!");
   } catch (err) {
     spinner.fail(`Error creating cluster: ${err}`);

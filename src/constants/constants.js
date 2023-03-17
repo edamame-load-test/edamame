@@ -2,8 +2,8 @@ const NUM_VUS_PER_POD = 1000;
 const POLL_FREQUENCY = 30000;
 const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
-const DB_API_NAME = "db-api-service";
-const EXTERNAL_IP_REGEX = "amazonaws.com";
+const PORT_FORWARD_DELAY = 5000;
+const DB_API_SERVICE = "service/db-api-service";
 const GRAF = "grafana.yaml";
 const GRAF_DS_FILE = "grafana_datasource.yaml";
 const GRAF_DB_FILE = "grafana_dashboards.yaml";
@@ -26,7 +26,7 @@ const EBS_CSI_DRIVER_REGEX =
 export {
   NUM_VUS_PER_POD,
   POLL_FREQUENCY,
-  EXTERNAL_IP_REGEX,
+  PORT_FORWARD_DELAY,
   PG_CM,
   GRAF,
   GRAF_DS,
@@ -36,7 +36,7 @@ export {
   GRAF_DB_FILE,
   GRAF_JSON_DBS,
   DB_API_PORT,
-  DB_API_NAME,
+  DB_API_SERVICE,
   K6_CR_FILE,
   PG_SECRET_FILE,
   PG_CM_FILE,

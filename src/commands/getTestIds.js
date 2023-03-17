@@ -5,9 +5,9 @@ const getTestIds = (testPath, numVus) => {
   const spinner = new Spinner("Retrieving all test ids...");
   dbApi
     .getTestIds()
-    .then(({ stdout }) => {
+    .then(ids => {
       spinner.succeed();
-      console.log(stdout);
+      console.log(ids);
     })
     .catch((err) => {
       spinner.fail(`Error running test: ${err}`);

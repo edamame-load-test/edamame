@@ -44,7 +44,7 @@ Password for PG & Grafana has been set as:
 
 **Notes**:
 
-- It can as long as *20 minutes* to create the cluster and apply the necessary permissions.
+- It can as long as _20 minutes_ to create the cluster and apply the necessary permissions.
 - To access the Grafana dashboards, use the provided link. For now, the default Grafana username and password are used (`admin` and `admin`). In Grafana, navigate to the Dashboards, and select the `testid` for the data you wish to view. If no tests have been run, you may see an error, until there are test ids in the database to display.
 
 ### edamame run
@@ -89,6 +89,21 @@ Outputs:
 
 **Note**: In the future, the availability of this command and the format of the return value may change. We'd like to have tests identifiable by some user-specified custom name.
 
+### edamame grafana
+
+Usage: `edamame grafana`
+Outputs:
+
+```
+[02:33:01:842] ℹ Configuring local access to grafana dashboard...
+[07:31:34:711] ✔ Please find your Grafana dashboard at: http://localhost:3000
+
+```
+
+- Provides local access to the grafana dashboard.
+
+**Note**: If you enter `CTRL+C` in the terminal after running edamame grafana, that will end your local access to the dashboard. To run a test while maintaining access to the grafana dashboard, please open a new terminal and execute `edamame run --file {/path/to/test.js}`
+
 ### edamame teardown
 
 Usage: `edamame teardown`
@@ -105,6 +120,6 @@ Outputs:
 
 **Notes**:
 
-- Because this command will delete the entire cluster, it will also *delete all data*. In order to maintain historical data, the cluster must remain up. In the future, we will be providing an additional command to export data, so that it is not lost when the cluster is deleted.
+- Because this command will delete the entire cluster, it will also _delete all data_. In order to maintain historical data, the cluster must remain up. In the future, we will be providing an additional command to export data, so that it is not lost when the cluster is deleted.
 - The process of deleting a cluster can take 10-15 mins.
 - If you try to create a new cluster directly after deleting a cluster, you may run into errors. This is because AWS continues to remove resources associated with the EKS cluster for up to 10 minutes after the command completes. Try waiting for a little while, and seeing if that fixes the problem.

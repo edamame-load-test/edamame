@@ -1,4 +1,3 @@
-import files from "../utilities/files.js";
 import loadGenerators from "../utilities/loadGenerators.js";
 import Spinner from "../utilities/spinner.js";
 import cluster from "../utilities/cluster.js";
@@ -14,8 +13,8 @@ const runTest = async (testPath) => {
     }
     spinner.succeed(`Successfully read test script.`);
 
-
-    spinner.info(`Initializing load test with ${numVus}...`);
+    const nodeCount = manifest.parallelism(numVus);
+    spinner.info(`Initializing load test with ${nodeCount} ${nodeCount === 1 ? "node" : "nodes"}...`);
     spinner.start();
     await cluster.launchK6Test(testPath, numVus);
     spinner.succeed("Successfully initialized load test.");
