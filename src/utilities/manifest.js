@@ -1,5 +1,7 @@
+import { exists } from "fs";
 import {
   NUM_VUS_PER_POD,
+  K6_CR_TEMPLATE,
   K6_CR_FILE,
   CLUSTER_NAME,
   GRAF_JSON_DBS,
@@ -9,7 +11,7 @@ import kubectl from "./kubectl.js";
 
 const manifest = {
   createK6Cr(path, numVus, testId) { // change to kustomize overlay chain
-    const k6CrData = files.readYAML(K6_CR_FILE);
+    const k6CrData = files.readYAML(K6_CR_TEMPLATE);
     const envObjs = k6CrData.spec.runner.env;
 
     k6CrData.spec.parallelism = this.parallelism(numVus);
@@ -20,6 +22,10 @@ const manifest = {
         obj.value = `${testId}.`;
       }
     });
+
+    if (!files.exists(files.path('/load_test_crds'))) {
+      files.makeDir('/load_test_crds')
+    }
 
     files.writeYAML(K6_CR_FILE, k6CrData);
   },
@@ -86,5 +92,3 @@ const manifest = {
 };
 
 export default manifest;
-
-

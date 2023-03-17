@@ -95,6 +95,7 @@ const cluster = {
       .then(() => kubectl.deleteManifest(files.path(STATSITE_FILE)))
       .then(() => kubectl.deleteConfigMap(testId))
       .then(() => eksctl.scaleLoadGenNodes(0))
+      .then(() => files.delete(K6_CR_FILE));
   },
 
   launchK6Test(testPath, numVus) {

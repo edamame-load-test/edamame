@@ -3,11 +3,11 @@ kind: K6
 metadata:
   name: k6-edamame-test
 spec:
-  parallelism: 1
+  parallelism: 1             # default value
   script:
     configMap:
-      name: '2'
-      file: test1.js
+      name: '1'              # default value
+      file: test.js          # default value
   separate: true
   arguments: '--out distributed-statsd'
   runner:
@@ -22,7 +22,7 @@ spec:
       - name: K6_STATSD_GAUGE_NAMESPACE
         value: $(POD_NAME).
       - name: K6_STATSD_NAMESPACE
-        value: '2.'
+        value: '1.'          # default value
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

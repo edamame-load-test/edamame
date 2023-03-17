@@ -10,7 +10,8 @@ const GRAF_DB_FILE = "grafana_dashboards.yaml";
 const GRAF_DS = "grafana-datasources";
 const GRAF_DBS = "grafana-dashboards";
 const GRAF_JSON_DBS = "grafana_json_dbs";
-const K6_CR_FILE = "k6_custom_resource.yaml";
+const K6_CR_TEMPLATE = "k6_custom_resource_template.yaml"
+const K6_CR_FILE = 'load_test_crds/k6_crd.yaml';
 const PG_SECRET_FILE = "postgres_secret.yaml";
 const PG_CM = "psql-configmap";
 const PG_CM_FILE = "postgres_configmap.yaml";
@@ -37,6 +38,7 @@ export {
   GRAF_JSON_DBS,
   DB_API_PORT,
   DB_API_NAME,
+  K6_CR_TEMPLATE,
   K6_CR_FILE,
   PG_SECRET_FILE,
   PG_CM_FILE,

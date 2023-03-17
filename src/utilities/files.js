@@ -8,8 +8,8 @@ const files = {
     return fs.existsSync(path);
   },
 
-  create() {
-
+  makeDir(dirName) {
+    return fs.mkdir(this.path(dirName), (err) => err)
   },
 
   parseNameFromPath(path) {
@@ -47,6 +47,10 @@ const files = {
     let fullpath = path.join(dirname, desiredPathEnd);
     return fullpath.replace(/ /g, '\\ ');
   },
+
+  delete(fileName) {
+    return fs.rm(this.path(fileName), (err) => err)
+  }
 
 };
 
