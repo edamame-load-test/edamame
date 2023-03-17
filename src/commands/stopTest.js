@@ -3,13 +3,12 @@ import cluster from "../utilities/cluster.js";
 
 import { KubeConfig, CustomObjectsApi } from '@kubernetes/client-node';
 
-const kc = new KubeConfig();
-kc.loadFromDefault();
-
-const k8sApi = kc.makeApiClient(CustomObjectsApi);
-
-
 const stopTest = async () => {
+  const kc = new KubeConfig();
+  kc.loadFromDefault();
+
+  const k8sApi = kc.makeApiClient(CustomObjectsApi);
+
   const spinner = new Spinner("Stopping current test...");
   const res = await k8sApi.listClusterCustomObject("k6.io", "v1alpha1", "k6s");
   const tests = res.body.items;
