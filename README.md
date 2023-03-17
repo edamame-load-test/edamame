@@ -1,6 +1,6 @@
 # Edamame
 
-## Pre-requisites
+## Prerequisites
 
 In order to run `edamame`, you will need the following:
 
