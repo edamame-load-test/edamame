@@ -1,10 +1,15 @@
 import cluster from "../utilities/cluster.js";
 import Spinner from "../utilities/spinner.js";
 import password from "../utilities/password.js";
+import frontend from "../utilities/frontend.js";
+import { launchGui } from "./gui.js";
 
 const init = async () => {
-  const spinner = new Spinner("Creating Edamame cluster... (this may take up to 20 minutes)");
+  const spinner = new Spinner(
+    "Creating Edamame cluster... (this may take up to 20 minutes)"
+  );
 
+  // Initiate Cluster
   try {
     await cluster.checkForAllInstallations();
     await cluster.create();
@@ -28,9 +33,10 @@ const init = async () => {
     spinner.succeed("Cluster configured. Welcome to Edamame!");
   } catch (err) {
     spinner.fail(`Error creating cluster: ${err}`);
+    return;
   }
-}
 
-export {
-  init
+  launchGui();
 };
+
+export { init };

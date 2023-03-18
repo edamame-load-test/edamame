@@ -23,16 +23,20 @@ program
 
 program
   .command("run")
-  .requiredOption('-f, --file <file>', 'File path of k6 load test script')
-  .option('-n, --name <name>', 'Name to associate with test')
-  .option('-v, --vus-per-pod <vus>', 'Specify the maximum number of VUs per pod', NUM_VUS_PER_POD)
+  .requiredOption("-f, --file <file>", "File path of k6 load test script")
+  .option("-n, --name <name>", "Name to associate with test")
+  .option(
+    "-v, --vus-per-pod <vus>",
+    "Specify the maximum number of VUs per pod",
+    NUM_VUS_PER_POD
+  )
   .description("run the load test")
   .action(runTest);
 
 program
   .command("get")
-  .option('--all', 'Get all information')
-  .option('-n, --name <name>', 'Name of specific test')
+  .option("--all", "Get all information")
+  .option("-n, --name <name>", "Name of specific test")
   .description("get information about all or one historical test(s)")
   .action(get);
 
@@ -43,14 +47,16 @@ program
 
 program
   .command("update")
-  .requiredOption('-c, --current <current>', 'Current test name')
-  .requiredOption('-n, --new <new>', 'New test name')
+  .requiredOption("-c, --current <current>", "Current test name")
+  .requiredOption("-n, --new <new>", "New test name")
   .description("Update the name associated with a test")
   .action(updateTestName);
 
 program
   .command("grafana")
-  .description("configure local access to grafana dashboard to analyze test metrics")
+  .description(
+    "configure local access to grafana dashboard to analyze test metrics"
+  )
   .action(() => {
     portForwardGrafana();
   });
@@ -70,4 +76,3 @@ program
   });
 
 program.parse(process.argv);
-
