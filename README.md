@@ -110,7 +110,7 @@ Usage: `edamame grafana`
 Outputs:
 
 ```
-[02:33:01:842] ℹ Configuring local access to grafana dashboard...
+[07:31:01:842] ℹ Configuring local access to grafana dashboard...
 [07:31:34:711] ✔ Please find your Grafana dashboard at: http://localhost:3000
 
 ```
