@@ -95,8 +95,8 @@ Usage: `edamame get`
 Outputs:
 
 ```
-[07:31:33:028] ℹ Retrieving all test ids...
-[07:31:34:711] ✔
+[08:44:25:886] ℹ Retrieving all test ids...
+[08:44:31:016] ✔ successfully retrieved all test ids!
 [{"id":1},{"id":2},{"id":3}]
 ```
 
@@ -110,14 +110,14 @@ Usage: `edamame grafana`
 Outputs:
 
 ```
-[02:33:01:842] ℹ Configuring local access to grafana dashboard...
+[07:31:01:842] ℹ Configuring local access to grafana dashboard...
 [07:31:34:711] ✔ Please find your Grafana dashboard at: http://localhost:3000
 
 ```
 
 - Provides local access to the grafana dashboard.
 
-**Note**: If you enter `CTRL+C` in the terminal after running edamame grafana, that will end your local access to the dashboard. To run a test while maintaining access to the grafana dashboard, please open a new terminal and execute `edamame run --file {/path/to/test.js}`
+**Note**: If you enter `CTRL+C` in the terminal after running edamame grafana, that will end your local access to the dashboard. To run a test while maintaining access to the grafana dashboard, please open a new terminal and execute `edamame run {/path/to/test.js}`
 
 ### edamame teardown
 
