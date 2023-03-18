@@ -1,13 +1,15 @@
 # Edamame
 
-## Pre-requisites
+## Prerequisites
 
 In order to run `edamame`, you will need the following:
 
-- An [AWS Account](https://docs.aws.amazon.com/SetUp/latest/UserGuide/setup-prereqs-instructions.html)
+- An [AWS Account](https://docs.aws.amazon.com/SetUp/latest/UserGuide/setup-prereqs-instructions.html).
 - The [AWS CLI tool](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) should be installed and configured.
-- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl), a command line tool for working with Kubernetes clusters, should be installed.
+- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl), a command line tool for working with Kubernetes clusters, should be installed (ensure you have v. 1.14 or greater which supports Kustomization files).
 - [`eksctl`](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html), a command line tool for working with EKS clusters, should be installed.
+- [`Make`](https://www.gnu.org/software/make/), a build automation tool used to build executable programs and libraries from source code
+- [`Go`](https://go.dev/doc/install),the programming language used by K6.
 
 ## Installation
 
@@ -49,13 +51,13 @@ Password for PG & Grafana has been set as:
 
 ### edamame run
 
-Usage: `edamame run --file {/path/to/test.js}`
+Usage: `edamame run {/path/to/test.js}`
 Outputs:
 
 ```
 [07:24:33:021] ℹ Reading test script...
 [07:24:33:027] ✔ Successfully read test script.
-[07:24:33:027] ℹ Initializing load test with 200...
+[07:24:33:027] ℹ Initializing load test with 3 nodes...
 [07:25:11:079] ✔ Successfully initialized load test.
 [07:25:11:080] ℹ Running load test...
 [07:28:12:527] ✔ Load test completed.
@@ -69,10 +71,23 @@ Outputs:
 
 **Notes**:
 
-- The `--file` flag takes the relative path of the test script you want to run. This should be written in JavaScript, and follow conventions of k6 testing scripts. See [here](https://k6.io/docs/examples/) for examples and tutorials on how to write a k6 test script.
+- The command takes the relative path of the test script you want to run. This should be written in JavaScript, and follow conventions of k6 testing scripts. See [here](https://k6.io/docs/examples/) for examples and tutorials on how to write a k6 test script.
 - `edamame` will read the max number of VUs directly from the provided test script, there is no need to provide this as additional argument to `edamame run`. To see how to specify number of VUs in the test script, see the [k6 documentation](https://k6.io/docs/get-started/running-k6/#using-options).
 - To run a sample test, use one of the sample test files provided in the `k6_tests` directory. For example, `./k6_tests/test1.js` (relative path specified from the root project directory).
 - To see data displayed in real time, select an "auto-refresh" rate of `5s` in the Grafana dashboard, and select the `testid` for the currently running test.
+
+### edamame stop
+
+Usage: `edamame stop`
+Outputs:
+
+```
+[03:34:20:399] ℹ Stopping current test...
+[03:34:53:785] ✔ Stopped current test.
+```
+
+- Immediately stops the currently running test
+- Removes load generating nodes
 
 ### edamame get
 

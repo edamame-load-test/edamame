@@ -61,7 +61,7 @@ const cluster = {
       })
       .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)))
       .then(() => new Promise(res => setTimeout(res, 10000)))
-      // setting a 10s delay on return above to see if it fixes issue with timing
+    // setting a 10s delay on return above to see if it fixes issue with timing
   },
 
   applyGrafanaManifests() {
@@ -90,11 +90,11 @@ const cluster = {
 
   phaseOutK6() {
     const testId = manifest.latestK6TestId();
-    return kubectl
-      .deleteManifest(files.path(STATSITE_FILE))
+    return kubectl.deleteManifest(files.path(K6_CR_FILE))
+      .then(() => kubectl.deleteManifest(files.path(STATSITE_FILE)))
       .then(() => kubectl.deleteConfigMap(testId))
       .then(() => eksctl.scaleLoadGenNodes(0))
-      .then(() => kubectl.deleteManifest(files.path(K6_CR_FILE)));
+      .then(() => files.delete(K6_CR_FILE));
   },
 
   launchK6Test(testPath, numVus) {

@@ -5,6 +5,7 @@ import { destroyEKSCluster } from "./commands/destroy.js";
 import { runTest } from "./commands/runTest.js";
 import { getTestIds } from "./commands/getTestIds.js";
 import { portForwardGrafana } from "./commands/portForwardGrafana.js";
+import { stopTest } from "./commands/stopTest.js"
 import { Command } from "commander";
 const program = new Command();
 
@@ -36,6 +37,13 @@ program
   .description("configure local access to grafana dashboard to analyze test metrics")
   .action(() => {
     portForwardGrafana();
+  });
+
+program
+  .command("stop")
+  .description("get a list of all available test IDs")
+  .action(() => {
+    stopTest();
   });
 
 program
