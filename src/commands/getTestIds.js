@@ -6,7 +6,7 @@ const getTestIds = (testPath, numVus) => {
   dbApi
     .getTestIds()
     .then(ids => {
-      spinner.succeed();
+      spinner.succeed("successfully retrieved all test ids!");
       console.log(ids);
     })
     .catch((err) => {
