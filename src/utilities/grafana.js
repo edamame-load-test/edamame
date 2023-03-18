@@ -14,13 +14,21 @@ const grafana = {
         }
         clearInterval(interval);
 
-        kubectl
-          .exactPodName("grafana")
-          .then(podName => {
-            kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT)
-          });
-        
-        resolve(`http://localhost:${GRAF_PORT}`);
+        kubectl.localPortAlreadyBound(GRAF_PORT)
+          .then(({stdout}) => {
+            if (stdout) {
+              resolve(`Couldn't establish local grafana connection, because port ${GRAF_PORT} is already taken.`);
+            }
+          })
+          .catch(error => {
+            // localPortAlreadyBound within child_process fails if no process running at the port
+            kubectl
+              .exactPodName("grafana")
+              .then(podName => {
+                kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT)
+              });
+            resolve(`http://localhost:${GRAF_PORT}`);
+          })
       }, POLL_FREQUENCY);
     });
   },

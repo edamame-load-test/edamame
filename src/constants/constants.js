@@ -3,7 +3,6 @@ const POLL_FREQUENCY = 30000;
 const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
 const PORT_FORWARD_DELAY = 5000;
-const DB_API_SERVICE = "service/db-api-service";
 const GRAF = "grafana.yaml";
 const GRAF_DS_FILE = "grafana_datasource.yaml";
 const GRAF_DB_FILE = "grafana_dashboards.yaml";
@@ -36,7 +35,6 @@ export {
   GRAF_DB_FILE,
   GRAF_JSON_DBS,
   DB_API_PORT,
-  DB_API_SERVICE,
   K6_CR_FILE,
   PG_SECRET_FILE,
   PG_CM_FILE,

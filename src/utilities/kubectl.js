@@ -55,13 +55,17 @@ const kubectl = {
     );
   },
 
+  localPortAlreadyBound(port) {
+    return exec(`lsof -iTCP:${port} -sTCP:LISTEN`);
+  },
+
   tempPortForward(podName, localAccessPort, podPort) {
     this.pidPortForward(podName)
       .then(pid => {
         if (!pid) {
           return exec(`kubectl port-forward ${podName} ${localAccessPort}:${podPort} &`);
         }
-      })
+      });
   }, 
 
   checkPodAvailable(podNameRegex) {
