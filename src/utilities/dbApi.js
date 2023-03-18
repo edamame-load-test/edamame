@@ -1,7 +1,6 @@
 import { 
-  DB_API_NAME,
   DB_API_PORT,
-  EXTERNAL_IP_REGEX
+  PORT_FORWARD_DELAY
  } from "../constants/constants.js";
 import kubectl from "./kubectl.js";
 import { promisify } from "util";
@@ -10,52 +9,49 @@ const exec = promisify(child_process.exec);
 
 const dbApi = {
   newTestId() {
-    return (
-      kubectl.getIps()
-        .then(({stdout}) => {
-          const url = this.findUrl(stdout);
-          return exec(`curl -X POST ${url}/tests`);
-        })
-        .then(({stdout}) => {
-          const testId = stdout.match('[0-9]{1,}');
-          if (testId) {
-            return testId[0];
-          }
-        })
-    );
+    kubectl
+      .exactPodName("db-api")
+      .then(podName => {
+        kubectl.tempPortForward(podName, DB_API_PORT, DB_API_PORT);
+      });
+      
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.curlRequest("-X POST")
+          .then(({stdout}) => {
+            kubectl.endPortForward("db-api");
+            const testId = stdout.match('[0-9]{1,}');
+            if (testId) {
+              resolve(testId[0]);
+            }
+          })
+      }, PORT_FORWARD_DELAY)
+    });
   },
 
-  findUrl(stdout) {
-    let url;
-    const services = stdout.split("\n");
-
-    for (let colIdx = 0; colIdx < services.length; colIdx++) {
-      const serviceCols = services[colIdx];
-
-      if (serviceCols.match(DB_API_NAME)) {
-        const propRows = serviceCols.split(" ");
-
-        for (let rowIdx = 0; rowIdx < propRows.length; rowIdx++) {
-          const prop = propRows[rowIdx];
-          if (prop && prop.match(EXTERNAL_IP_REGEX)) {
-            return  prop + ":" + DB_API_PORT;
-          }
-        }
-      }
-    }
+  curlRequest(http_method="", path="tests") {
+    return exec(`curl ${http_method} http://localhost:${DB_API_PORT}/${path}`);
   },
 
   getTestIds() {
-    return (
-      kubectl.getIps()
-        .then(({stdout}) => {
-          const url = this.findUrl(stdout);
-          return exec(`curl -X GET ${url}/tests`);
-        })
-    );
+    kubectl
+      .exactPodName("db-api")
+      .then(podName => {
+        kubectl.tempPortForward(podName, DB_API_PORT, DB_API_PORT);
+      });
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        return (
+          this.curlRequest("")
+            .then(({stdout}) => {
+              kubectl.endPortForward("db-api");
+              resolve(stdout);
+            })
+        );
+      }, PORT_FORWARD_DELAY)
+    });
   }
 };
 
 export default dbApi;
-
-

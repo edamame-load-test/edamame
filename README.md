@@ -104,6 +104,21 @@ Outputs:
 
 **Note**: In the future, the availability of this command and the format of the return value may change. We'd like to have tests identifiable by some user-specified custom name.
 
+### edamame grafana
+
+Usage: `edamame grafana`
+Outputs:
+
+```
+[02:33:01:842] ℹ Configuring local access to grafana dashboard...
+[07:31:34:711] ✔ Please find your Grafana dashboard at: http://localhost:3000
+
+```
+
+- Provides local access to the grafana dashboard.
+
+**Note**: If you enter `CTRL+C` in the terminal after running edamame grafana, that will end your local access to the dashboard. To run a test while maintaining access to the grafana dashboard, please open a new terminal and execute `edamame run --file {/path/to/test.js}`
+
 ### edamame teardown
 
 Usage: `edamame teardown`

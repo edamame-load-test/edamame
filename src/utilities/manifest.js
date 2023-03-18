@@ -40,11 +40,14 @@ const manifest = {
       test.forEach((line) => {
         let vus = line.match("vus: [0-9]{1,}");
         let target = line.match("target: [0-9]{1,}");
+        let max = line.match("maxVUs: [0-9]{1,}");
 
         if (vus) {
           numVus = this.maxNumVus(numVus, vus[0]);
         } else if (target) {
           numVus = this.maxNumVus(numVus, target[0]);
+        } else if (max) {
+          numVus = this.maxNumVus(numVus, max[0]);
         }
       });
     }

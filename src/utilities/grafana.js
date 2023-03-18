@@ -1,47 +1,50 @@
 import kubectl from "./kubectl.js";
 import { 
   POLL_FREQUENCY,
-  EXTERNAL_IP_REGEX,
   GRAF_PORT
 } from "../constants/constants.js";
 
 const grafana = {
-  checkIpAvailable() {
-    return (
-      kubectl.getIps()
-        .then(({stdout}) => {
-          const services = stdout.split("\n");
-
-          for (let colIdx = 0; colIdx < services.length; colIdx++) {
-            const serviceCols = services[colIdx];
-      
-            if (serviceCols.match("grafana")) {
-              const propRows = serviceCols.split(" ");
-      
-              for (let rowIdx = 0; rowIdx < propRows.length; rowIdx++) {
-                const prop = propRows[rowIdx];
-                if (prop && prop.match(EXTERNAL_IP_REGEX)) {
-                  return `${prop}:${GRAF_PORT}`;
-                }
-              }
-            }
-          }
-        })
-    );
-  },
-
-  getExternalIp() {
+  getLocalAddressWhenReady() {
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
-        const url = await this.checkIpAvailable();
-        if (!url) {
+        const available = await kubectl.checkPodAvailable("grafana");
+        if (!available) {
           return;
         }
-
         clearInterval(interval);
-        resolve(url);
+
+        kubectl.localPortAlreadyBound(GRAF_PORT)
+          .then(({stdout}) => {
+            if (stdout) {
+              resolve(`Couldn't establish local grafana connection, because port ${GRAF_PORT} is already taken.`);
+            }
+          })
+          .catch(error => {
+            // localPortAlreadyBound within child_process fails if no process running at the port
+            kubectl
+              .exactPodName("grafana")
+              .then(podName => {
+                kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT)
+              });
+            resolve(`http://localhost:${GRAF_PORT}`);
+          })
       }, POLL_FREQUENCY);
     });
+  },
+
+  detailedUrl(testId) {
+    kubectl
+      .exactPodName("grafana")
+      .then(podName => {
+        kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT);
+      });
+  
+    return (
+      `http://localhost:${GRAF_PORT}/d/IWSghv-4k/` +
+      `http-data?orgId=1&var-testid=${testId}` +
+      `&refresh=5s&from=now-15m&to=now`
+    );
   }
 };
 

@@ -86,7 +86,6 @@ const cluster = {
       .then(() => this.applyPgManifests()) // added 10 s delay here
       .then(() => this.applyGrafanaManifests())
       .then(() => kubectl.applyManifest(files.path(DB_API_FILE)))
-      .then(() => grafana.getExternalIp());
   },
 
   phaseOutK6() {
@@ -109,7 +108,7 @@ const cluster = {
       .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
       .then(() => eksctl.scaleLoadGenNodes(manifest.parallelism(numVus)))
   },
-
+  
   async destroy() {
     await eksctl.destroyCluster();
     return eksctl.deleteEBSVolumes();

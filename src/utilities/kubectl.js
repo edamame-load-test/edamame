@@ -29,6 +29,77 @@ const kubectl = {
     return exec(`kubectl get svc`);
   },
 
+  pidPortForward(name) {
+    return (
+      exec(`ps aux | grep -i ${name} | grep -v grep | awk {'print $2'}`)
+        .then(({stdout}) => {
+          return stdout;
+        })
+    );
+  },
+
+  exactPodName(abbreviatedName) {
+    return (
+      this.getPods()
+        .then(({stdout}) => {
+          const pods = stdout.split("\n");
+
+          for (let i = 0; i < pods.length; i++) {
+            const pod = pods[i];
+            if (pod.match(abbreviatedName)) {
+              const podDetails = pod.split(" ");
+              return podDetails[0];
+            }
+          }
+        })
+    );
+  },
+
+  localPortAlreadyBound(port) {
+    return exec(`lsof -iTCP:${port} -sTCP:LISTEN`);
+  },
+
+  tempPortForward(podName, localAccessPort, podPort) {
+    this.pidPortForward(podName)
+      .then(pid => {
+        if (!pid) {
+          return exec(`kubectl port-forward ${podName} ${localAccessPort}:${podPort} &`);
+        }
+      });
+  }, 
+
+  checkPodAvailable(podNameRegex) {
+    return (
+      this.getPods()
+        .then(({stdout}) => {
+          const pods = stdout.split("\n");
+
+          for (let rowIdx = 0; rowIdx < pods.length; rowIdx++) {
+            const pod = pods[rowIdx];
+
+            if (pod.match(podNameRegex)) {
+              const podDetails = pod.split(" ");
+      
+              for (let colIdx = 0; colIdx < podDetails.length; colIdx++) {
+                const detail = podDetails[colIdx];
+                if (detail && detail.match('Running')) {
+                  return true;
+                }
+              }
+            }
+          }
+        })
+    );
+  },
+
+  endPortForward(name) {
+    return (
+      this.pidPortForward(name)
+      .then(pid => exec(`kill ${pid}`))
+    );
+  },
+
+
   configMapExists(name) {
     return (
       exec(`kubectl get configmaps`)
@@ -37,10 +108,6 @@ const kubectl = {
         })
     );
   },
-
-  portForward(service, port1, port2) {
-    return exec(`kubectl port-forward ${service} ${port1}:${port2} & `);
-  }, 
 
   createConfigMap(path) {
     // added this b/c psql-host key wasn't being properly registered by db api
