@@ -97,9 +97,9 @@ const cluster = {
       .then(() => files.delete(K6_CR_FILE));
   },
 
-  launchK6Test(testPath, numVus) {
+  launchK6Test(testPath, name, numVus) {
     return dbApi
-      .newTestId()
+      .newTestId(testPath, name)
       .then((testId) => {
         manifest.createK6Cr(testPath, numVus, testId);
         return kubectl.createConfigMapWithName(testId, testPath);

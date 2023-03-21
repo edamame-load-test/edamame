@@ -15,7 +15,7 @@ const manifest = {
     const envObjs = k6CrData.spec.runner.env;
 
     k6CrData.spec.parallelism = this.parallelism(numVus);
-    k6CrData.spec.script.configMap.name = testId;
+    k6CrData.spec.script.configMap.name = String(testId);
     k6CrData.spec.script.configMap.file = files.parseNameFromPath(path);
     envObjs.forEach((obj) => {
       if (obj.name === "K6_STATSD_NAMESPACE") {
@@ -70,7 +70,7 @@ const manifest = {
 
   setPgGrafCredentials(pw) {
     const secretData = `psql-username=${CLUSTER_NAME}\npsql-password=${pw}`;
-    files.write("psql.env", secretData); // creates or overwrites file
+    files.write("psql.env", secretData);
     return kubectl.createSecret();
   },
 

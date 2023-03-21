@@ -51,7 +51,8 @@ Password for PG & Grafana has been set as:
 
 ### edamame run
 
-Usage: `edamame run {/path/to/test.js}`
+Usage: `edamame run --path {/path/to/test.js} --name "<desired name>"`
+Alternative usage:`edamame run -p {/path/to/test.js} -n "<desired name>"`
 Outputs:
 
 ```
@@ -71,6 +72,8 @@ Outputs:
 
 **Notes**:
 
+- The name flag is optional. If you do not specify a name, a unique identifier will be generated for you and assigned to the test.
+- If your test name is one word, then you do not need to include quotes when executing this command. For example, if the test's name is `example`, then the command could be executed as: `edamame run --path {/relativepath/to/test.js} --name example`. If the test's name is `example test`, then the command would need to be executed as: `edamame run --path {/relativepath/to/test.js} --name "example test"`.
 - The command takes the relative path of the test script you want to run. This should be written in JavaScript, and follow conventions of k6 testing scripts. See [here](https://k6.io/docs/examples/) for examples and tutorials on how to write a k6 test script.
 - `edamame` will read the max number of VUs directly from the provided test script, there is no need to provide this as additional argument to `edamame run`. To see how to specify number of VUs in the test script, see the [k6 documentation](https://k6.io/docs/get-started/running-k6/#using-options).
 - To run a sample test, use one of the sample test files provided in the `k6_tests` directory. For example, `./k6_tests/test1.js` (relative path specified from the root project directory).
@@ -89,20 +92,104 @@ Outputs:
 - Immediately stops the currently running test
 - Removes load generating nodes
 
-### edamame get
+### edamame get --all
 
-Usage: `edamame get`
+Usage: `edamame get --all`
 Outputs:
 
 ```
-[08:44:25:886] ℹ Retrieving all test ids...
-[08:44:31:016] ✔ successfully retrieved all test ids!
-[{"id":1},{"id":2},{"id":3}]
+[07:27:37:430] ℹ Retrieving information about historical tests...
+[07:27:39:705] ✔ Successfully retrieved historical test data. Test names are listed under (index).
+┌─────────────────┬────────────────────────────┬────────────────────────────┬─────────────┐
+│     (index)     │         start time         │          end time          │   status    │
+├─────────────────┼────────────────────────────┼────────────────────────────┼─────────────┤
+│     example     │ '2023-03-20T23:20:03.744Z' │            null            │  'running'  │
+│      50K VUs    │ '2023-03-20T22:52:48.864Z' │ '2023-03-20T22:55:04.873Z' │ 'completed' │
+└─────────────────┴────────────────────────────┴────────────────────────────┴─────────────┘
 ```
 
-- Retrieves all the ids for tests that have been run in JSON format.
+- Retrieves information about tests and displays it in tabular format.
 
-**Note**: In the future, the availability of this command and the format of the return value may change. We'd like to have tests identifiable by some user-specified custom name.
+**Note**: The names of tests are shown under the (index) column. To view an individual test only or the contents of a test script, please run `edamame get --name "<test name>"`.
+
+### edamame get --name
+
+Usage: `edamame get --name "<test name>"`
+Alternative Usage: `edamame get -n "<test name>"`
+Outputs:
+
+```
+[07:49:53:421] ℹ Retrieving details about the test named: 'example'...
+[07:49:55:668] ✔ Successfully retrieved data about the test named: 'example.'
+┌─────────┬────────────────────────────┬────────────────────────────┬─────────────┐
+│ (index) │         start time         │          end time          │   status    │
+├─────────┼────────────────────────────┼────────────────────────────┼─────────────┤
+│ example │ '2023-03-20T22:52:48.864Z' │ '2023-03-20T22:55:04.873Z' │ 'completed' │
+└─────────┴────────────────────────────┴────────────────────────────┴─────────────┘
+                               Test script content:
+-----------------------------------------------------------------------------------
+"import http from ''k6/http'';
+import { check } from ''k6'';
+
+export const options = {
+  scenarios: {
+    shared_iter_scenario: {
+      executor: \"shared-iterations\",
+      vus: 10,
+      iterations: 100,
+      startTime: \"0s\",
+    },
+    per_vu_scenario: {
+      executor: \"per-vu-iterations\",
+      vus: 20,
+      iterations: 10,
+      startTime: \"10s\",
+    },
+  },
+};
+
+export default function () {
+  const result = http.get(''https://test-api.k6.io/public/crocodiles/'');
+  check(result, {
+    ''http response status code is 200'': result.status === 200,
+  });
+}
+
+"
+```
+
+- Shows the full k6 load test script associated with a given test name.
+
+**Note**: Please specify the test name in double quotes when executing this command if the test name includes spaces. For example, if the test name is `example test`, then this command would be executed as: `edamame get -n "example test"`. If your test name is one word or is hyphenated, then you can exclude the quotes.
+
+### edamame delete
+
+Usage: `edamame delete "<test name>"`
+Outputs:
+
+```
+[07:59:41:686] ℹ Deleting the test named: 'example'...
+[07:59:46:150] ✔ Deleted the test named: 'example'
+```
+
+- Deletes all data associated with the test name from the database.
+
+**Note**: If your test name is one word and doesn't contain spaces, then you don't need to include quotes when executing this command. The example output above resulted from executing `edamame delete example`. If your test name contains spaces, like `example test`, then you would execute this command using quotes like the following: `edamame delete "example test"`.
+
+### edamame update
+
+Usage: `edamame update --current "<current test name>" --new "<new proposed name>"`
+Alternative usage: `edamame update -c "<current test name>" -n "<new proposed name>"`
+Outputs:
+
+```
+[08:07:46:290] ℹ Updating test name from 'example test' to '50k VU test'...
+[08:07:56:044] ✔ Successfully updated test's name to: '50k VU test'
+```
+
+- Updates a test name as long as the new proposed name is not already associated with a test.
+
+**Note**: If either your current or proposed test name is one word and doesn't contain spaces, then you don't need to include quotes around that name when executing this command.
 
 ### edamame grafana
 
