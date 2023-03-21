@@ -13,8 +13,9 @@ app.use(express.static(path.join(__dirname, "build")));
 
 // API Routes
 app.use("/tests", testRoutes);
-app.use("/load-test", loadTestRoutes);
+app.use("/load-test", loadTestRoutes); // Will be /load-test/stop etc.
 
+// Fallback to the React app for any other route
 app.get("/");
 
 app.listen(3001, () => {

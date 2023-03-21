@@ -1,5 +1,5 @@
 import { useState } from "react";
-// import { FiUploadCloud } from "react-icons/fi";
+import { FiUploadCloud } from "react-icons/fi";
 
 // Send the file to the express server
 // The express server will write the script to a temporary file

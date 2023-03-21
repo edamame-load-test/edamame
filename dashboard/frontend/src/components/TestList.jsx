@@ -3,9 +3,9 @@
 // · Translate the time into a proper format
 // · Add links to the buttons
 
-import tests from "../assets/test-data/tests";
 import { FiExternalLink, FiMoreVertical } from "react-icons/fi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import testService from "../services/testService";
 import LaunchTestModal from "./LaunchTestModal";
 
 function timeDifferenceFormatted(endTime, startTime) {
@@ -24,8 +24,31 @@ function timeDifferenceFormatted(endTime, startTime) {
   }
 }
 
+function formatDate(date) {
+  const monthDay = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+  }).format(date);
+  const time = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+  return `${monthDay} · ${time}`;
+}
+
 function TestList() {
+  const [tests, setTests] = useState([]);
   const [isModal, setIsModal] = useState(false);
+  useEffect(() => {
+    async function getAllTests() {
+      const data = await testService.getTests();
+      console.log(data);
+      setTests(data);
+    }
+    getAllTests();
+  }, []);
+
   return (
     <>
       {isModal && <LaunchTestModal setIsModal={setIsModal} />}
@@ -52,7 +75,7 @@ function TestList() {
             {tests.map((test) => (
               <tr key={test.id} className="border-b">
                 <td className="px-6 py-5">{test.name}</td>
-                <td>{new Date(test.date).toDateString()}</td>
+                <td>{formatDate(new Date(test.start_time))}</td>
                 {/* This is only if the test is completed */}
                 <td>
                   {timeDifferenceFormatted(test.end_time, test.start_time)}
