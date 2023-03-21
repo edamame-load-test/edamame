@@ -32,7 +32,10 @@ function TestList() {
       <div className="mt-16 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
           <h1 className="font-bold text-xl ml-6">All Tests</h1>
-          <button className="bg-blue antialiased text-white rounded px-3 py-2 flex gap-1">
+          <button
+            className="bg-blue antialiased text-white rounded px-3 py-2 flex gap-1"
+            onClick={() => setIsModal(true)}
+          >
             Launch a test
           </button>
         </div>

@@ -33,7 +33,6 @@ const init = async () => {
     spinner.fail(`Error creating cluster: ${err}`);
     return;
   }
-  s;
 };
 
 export { init };
