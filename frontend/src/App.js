@@ -1,7 +1,13 @@
+import Content from "./components/Content";
+import Heading from "./components/Heading";
+import TopBar from "./components/TopBar";
+
 function App() {
   return (
     <div className="App">
-      <h1>Testing</h1>
+      <TopBar />
+      <Heading />
+      <Content />
     </div>
   );
 }
