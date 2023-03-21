@@ -6,11 +6,10 @@ const updateTestName = (options) => {
   const newName = options.new;
   const spinner = new Spinner(`Updating test name from '${currName}' to '${newName}'...`);
 
-  if (!newName) {
-    spinner.fail(`Proposed name can't be undefined ${err}`);
-  }
-
-  dbApi.nameExists(newName)
+  if (!newName.replace(/\s/g, '').length) {
+    spinner.fail(`Proposed name can't be undefined.`);
+  } else { 
+    dbApi.nameExists(newName)
     .then(exists => {
       if (exists) {
         spinner.fail(`The proposed name, ${newName}, is already associated with a test.`);
@@ -26,9 +25,10 @@ const updateTestName = (options) => {
                 })
             }
           })
-          .catch(err => spinner.fail(`Error updating the test name: ${err}`))
+          .catch(err => spinner.fail(`Error updating the test name: ${err}`));
       }
     });
+  }
 };
 
 export { updateTestName };

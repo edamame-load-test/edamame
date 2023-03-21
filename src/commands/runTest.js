@@ -14,8 +14,8 @@ const runTest = async (options) => {
     const nameExists =  await dbApi.nameExists(name);
     if (numVus === 0) {
       throw new Error(`Either couldn't find k6 test script at path or the file specifies 0 total number of VUs.`);
-    } else if (name && (name.length > 80 || nameExists)) {
-      throw new Error(`Either test name already exists or is over 80 characters long.`);
+    } else if (name && (name.length > 80 || !name.replace(/\s/g, '').length || nameExists)) {
+      throw new Error(`Either test name already exists, consists of only whitespaces, or is over 80 characters long.`);
     }
     spinner.succeed(`Successfully read test script.`);
 
