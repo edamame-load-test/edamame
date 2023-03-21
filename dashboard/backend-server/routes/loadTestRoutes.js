@@ -1,12 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
 router.post("/start", (req, res) => {
-  // Start the load test
+  // Retrieves the file in the body, saves it somewhere temporarily, and starts the test
 });
 
 router.post("/stop", (req, res) => {
   // Stop the load test
 });
 
-module.exports = router;
+export default router;

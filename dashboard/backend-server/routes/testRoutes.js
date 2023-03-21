@@ -1,10 +1,10 @@
 // Get information about tests
 
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
 router.get("/tests", (req, res) => {
   // Fetch and return test information
 });
 
-module.exports = router;
+export default router;
