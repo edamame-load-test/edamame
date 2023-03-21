@@ -1,11 +1,11 @@
-import frontend from "../utilities/frontend.js";
+import { backendServer } from "../utilities/dashboard.js";
 import Spinner from "../utilities/spinner.js";
 
 async function test() {
   const spinner = new Spinner("Setting up your GUI");
   try {
-    await frontend.installPackages();
-    frontend.start();
+    console.log("testing");
+    await backendServer.installPackages();
     spinner.succeed(
       "Success! You can continue using terminal commands, or use the GUI at localhost:3006"
     );

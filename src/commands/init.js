@@ -1,8 +1,6 @@
 import cluster from "../utilities/cluster.js";
 import Spinner from "../utilities/spinner.js";
 import password from "../utilities/password.js";
-import frontend from "../utilities/frontend.js";
-import { launchGui } from "./gui.js";
 
 const init = async () => {
   const spinner = new Spinner(
@@ -35,8 +33,7 @@ const init = async () => {
     spinner.fail(`Error creating cluster: ${err}`);
     return;
   }
-
-  launchGui();
+  s;
 };
 
 export { init };

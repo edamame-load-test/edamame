@@ -10,6 +10,7 @@ import { portForwardGrafana } from "./commands/portForwardGrafana.js";
 import { stopTest } from "./commands/stopTest.js";
 import { NUM_VUS_PER_POD } from "./constants/constants.js";
 import { Command } from "commander";
+
 const program = new Command();
 
 program

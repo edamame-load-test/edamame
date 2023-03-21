@@ -10,7 +10,7 @@ function Heading() {
         <img
           src={logo}
           alt="Edamame Logo"
-          className="w-24 align-center inline"
+          className="w-24 align-center inline" //animate-spin-slow
         />
         <h1 className="font-bold align-center text-xl mt-4">
           Welcome to Edamame
