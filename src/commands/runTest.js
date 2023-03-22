@@ -11,7 +11,8 @@ const runTest = async (options) => {
 
   try {
     const numVus = manifest.numVus(testPath);
-    const nameExists =  await dbApi.nameExists(name);
+    const nameExists = await dbApi.nameExists(name);
+
     if (numVus === 0) {
       throw new Error(`Either couldn't find k6 test script at path or the file specifies 0 total number of VUs.`);
     } else if (name && (name.length > 80 || !name.replace(/\s/g, '').length || nameExists)) {
@@ -22,14 +23,15 @@ const runTest = async (options) => {
     const nodeCount = manifest.parallelism(numVus);
     spinner.info(`Initializing load test with ${nodeCount} ${nodeCount === 1 ? "node" : "nodes"}...`);
     spinner.start();
-    await cluster.launchK6Test(testPath, name, numVus);
+    const testId = await dbApi.newTestId(testPath, name);
+    await cluster.launchK6Test(testPath, name, numVus, testId);
     spinner.succeed("Successfully initialized load test.");
 
     spinner.info("Running load test...");
-    dbApi.updateTestStatus(name, "running");
+    dbApi.updateTestStatus(testId, "running");
     spinner.start();
     await loadGenerators.pollUntilAllComplete(numVus);
-    dbApi.updateTestStatus(name, "completed");
+    dbApi.updateTestStatus(testId, "completed");
     spinner.succeed("Load test completed.");
 
     spinner.info("Tearing down load generating resources.");

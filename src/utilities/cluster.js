@@ -97,16 +97,15 @@ const cluster = {
       .then(() => files.delete(K6_CR_FILE));
   },
 
-  launchK6Test(testPath, name, numVus) {
-    return dbApi
-      .newTestId(testPath, name)
-      .then((testId) => {
-        manifest.createK6Cr(testPath, numVus, testId);
-        return kubectl.createConfigMapWithName(testId, testPath);
-      })
-      .then(() => kubectl.applyManifest(files.path(STATSITE_FILE)))
-      .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
-      .then(() => eksctl.scaleLoadGenNodes(manifest.parallelism(numVus)))
+  launchK6Test(testPath, name, numVus, testId) {
+    manifest.createK6Cr(testPath, numVus, testId);
+
+    return (
+      kubectl.createConfigMapWithName(testId, testPath)
+        .then(() => kubectl.applyManifest(files.path(STATSITE_FILE)))
+        .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
+        .then(() => eksctl.scaleLoadGenNodes(manifest.parallelism(numVus)))
+    );
   },
   
   async destroy() {

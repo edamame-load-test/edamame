@@ -23,6 +23,8 @@ const updateTestName = (options) => {
                 .then(test => {
                   spinner.succeed(`Successfully updated test's name to: '${test.name}'`);
                 })
+            } else {
+              spinner.fail(`Couldn't update name, because couldn't find a test named: ${currName}`);
             }
           })
           .catch(err => spinner.fail(`Error updating the test name: ${err}`));

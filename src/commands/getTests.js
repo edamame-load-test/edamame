@@ -6,8 +6,12 @@ const getTests = () => {
   dbApi
     .getAllTests()
     .then(tests => {
-      spinner.succeed("Successfully retrieved historical test data. Test names are listed under (index).");
-      dbApi.printTestDataTable(tests);
+      if (tests.length > 0) {
+        spinner.succeed("Successfully retrieved historical test data. Test names are listed under (index).");
+        dbApi.printTestDataTable(tests);
+      } else {
+        spinner.succeed("There is no historical test data.");
+      }
     })
     .catch((err) => {
       spinner.fail(`Error retrieving historical test information: ${err}`);

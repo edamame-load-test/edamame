@@ -1,21 +1,20 @@
 import { 
   DB_API_PORT,
-  PORT_FORWARD_DELAY
+  DB_API_SERVICE,
+  EXTERNAL_IP_REGEX
  } from "../constants/constants.js";
 import kubectl from "./kubectl.js";
-import { promisify } from "util";
-import child_process from "child_process";
 import files from "./files.js";
-const exec = promisify(child_process.exec);
 import axios from "axios";
 
 const dbApi = {
   nameExists(name) {
+    if (!name) { return false; }
     return (
       this.getAllTests()
         .then(testData => {
 
-          for (let i = 0; i< testData.length; i++) {
+          for (let i = 0; i < testData.length; i++) {
             const test = testData[i];
             if (test.name === name) {
               return true;
@@ -26,40 +25,52 @@ const dbApi = {
     );
   },
 
-  getLocalAccess() {
-    kubectl
-      .exactPodName("db-api")
-      .then(podName => {
-        kubectl.tempPortForward(podName, DB_API_PORT, DB_API_PORT);
-      });
+  url() {
+    return (
+      kubectl.getIps()
+        .then(({stdout}) => {
+          let url;
+          const services = stdout.split("\n");
+
+          for (let rowIdx = 0; rowIdx < services.length; rowIdx++) {
+            const service = services[rowIdx];
+            if (service.match(DB_API_SERVICE)) {
+              const serviceInfo = service.split(" ");
+
+              for (let colIdx = 0; colIdx < serviceInfo.length; colIdx++) {
+                const detail = serviceInfo[colIdx];
+                if (detail.match(EXTERNAL_IP_REGEX)) {
+                  return  "http://" + detail + ":" + DB_API_PORT + "/tests";
+                }
+              }
+            }
+          }
+        })
+    );
   },
 
   newTestId(testPath, name) {
-    this.getLocalAccess();
     const testContent = JSON.stringify(files.read(testPath));
-    
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        this.postRequest(testContent, name)
-       .then(response => {
-          kubectl.endPortForward("db-api");
-          const testId = response.data.id;
-          resolve(testId);
-       })
-      }, PORT_FORWARD_DELAY)
-    });
+
+    return (
+      this.url()
+        .then(url => {
+          return(
+            this.postRequest(testContent, url, name)
+              .then(res => {
+                return(res.data.id);
+              })
+            );
+        })
+    );
   },
 
-  url(addend="") {
-    return `http://localhost:${DB_API_PORT}/tests`;
-  },
-
-  postRequest(script, name) {
+  postRequest(script, url, name) {
     const body = name ? { script, name } : { script };
 
     return axios({
       method: 'post',
-      url: this.url(),
+      url,
       data: body
     });
   },
@@ -85,62 +96,53 @@ const dbApi = {
     );
   },
 
-  updateTestStatus(name, status) {
-    this.getTest(name)
-      .then(test => {
-        this.putRequest(test.id, { status })
-          .catch(err => {
-            console.log(`Error updating test status: ${err}`);
-          })
+  updateTestStatus(id, status) {
+    this.putRequest(id, { status })
+      .catch(err => {
+        console.log(`Error updating test status: ${err}`);
       });
   },
 
   putRequest(id, data) {
-    this.getLocalAccess();
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        return (
-          axios.put(`${this.url()}/${id}`, data)
-            .then((response) => {
-              kubectl.endPortForward("db-api");
-              resolve(response.data);
-            })
-        );
-      }, PORT_FORWARD_DELAY)
-    });
+    return (
+      this.url()
+        .then(url => {
+          return (
+            axios.put(`${url}/${id}`, data)
+              .then(res => {
+                return(res.data);
+              })
+          );
+        })
+    );
   },
 
   deleteTest(id) {
-    this.getLocalAccess();
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        return (
-          axios.delete(`${this.url()}/${id}`)
-            .then((response) => {
-              kubectl.endPortForward("db-api");
-              resolve(response.status);
-            })
-        );
-      }, PORT_FORWARD_DELAY)
-    });
+    return (
+      this.url()
+        .then(url => {
+          return (
+            axios.delete(`${url}/${id}`)
+              .then(res => {
+                return(res.status);
+              })
+          );
+        })
+    );
   },
 
   getAllTests() {
-    this.getLocalAccess();
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
+    return (
+      this.url()
+      .then(url => {
         return (
-          axios.get(this.url())
-            .then((response) => {
-              kubectl.endPortForward("db-api");
-              resolve(response.data);
+          axios.get(url)
+            .then(res => {
+              return(res.data);
             })
         );
-      }, PORT_FORWARD_DELAY)
-    });
+      })
+    );
   }
 };
 

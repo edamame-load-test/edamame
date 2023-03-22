@@ -119,8 +119,8 @@ Alternative Usage: `edamame get -n "<test name>"`
 Outputs:
 
 ```
-[07:49:53:421] ℹ Retrieving details about the test named: 'example'...
-[07:49:55:668] ✔ Successfully retrieved data about the test named: 'example.'
+[06:33:08:621] ℹ Retrieving details about the test named: 'example'...
+[06:33:09:554] ✔ Successfully retrieved data about the test named: 'example.'
 ┌─────────┬────────────────────────────┬────────────────────────────┬─────────────┐
 │ (index) │         start time         │          end time          │   status    │
 ├─────────┼────────────────────────────┼────────────────────────────┼─────────────┤
@@ -169,7 +169,7 @@ Outputs:
 
 ```
 [07:59:41:686] ℹ Deleting the test named: 'example'...
-[07:59:46:150] ✔ Deleted the test named: 'example'
+[07:59:42:850] ✔ Deleted the test named: 'example'
 ```
 
 - Deletes all data associated with the test name from the database.
@@ -184,7 +184,7 @@ Outputs:
 
 ```
 [08:07:46:290] ℹ Updating test name from 'example test' to '50k VU test'...
-[08:07:56:044] ✔ Successfully updated test's name to: '50k VU test'
+[08:07:51:044] ✔ Successfully updated test's name to: '50k VU test'
 ```
 
 - Updates a test name as long as the new proposed name is not already associated with a test.
