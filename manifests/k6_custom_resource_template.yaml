@@ -24,7 +24,7 @@ spec:
       - name: K6_STATSD_NAMESPACE
         value: '1.'          # default value
       - name: K6_STATSD_BUFFER_SIZE
-        value: '20'
+        value: '1432'
       - name: K6_STATSD_PUSH_INTERVAL
         value: '0.5s'
     affinity:
