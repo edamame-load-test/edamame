@@ -3,7 +3,9 @@
 import { init } from "./commands/init.js";
 import { destroyEKSCluster } from "./commands/destroy.js";
 import { runTest } from "./commands/runTest.js";
-import { getTestIds } from "./commands/getTestIds.js";
+import { get } from "./commands/get.js"
+import { updateTestName } from "./commands/updateTestName.js";
+import { deleteTest } from "./commands/deleteTest.js";
 import { portForwardGrafana } from "./commands/portForwardGrafana.js";
 import { stopTest } from "./commands/stopTest.js"
 import { Command } from "commander";
@@ -19,18 +21,30 @@ program
   });
 
 program
-  .command("run <file>")
+  .command("run")
+  .requiredOption('-p, --path <path>', 'Relative filepath to k6 load test script')
+  .option('-n, --name <name>', 'Name to associate with test')
   .description("run the load test")
-  .action((file) => {
-    runTest(file);
-  });
+  .action(runTest);
 
 program
   .command("get")
-  .description("get a list of all available test IDs")
-  .action(() => {
-    getTestIds();
-  });
+  .option('--all', 'Get all information')
+  .option('-n, --name <name>', 'Name of specific test')
+  .description("get information about all or one historical test(s)")
+  .action(get);
+
+program
+  .command("delete <name>")
+  .description("delete a test and associated metrics from the database")
+  .action(deleteTest);
+
+program
+  .command("update")
+  .requiredOption('-c, --current <current>', 'Current test name')
+  .requiredOption('-n, --new <new>', 'New test name')
+  .description("Update the name associated with a test")
+  .action(updateTestName);
 
 program
   .command("grafana")
@@ -41,7 +55,7 @@ program
 
 program
   .command("stop")
-  .description("get a list of all available test IDs")
+  .description("stop a running test")
   .action(() => {
     stopTest();
   });

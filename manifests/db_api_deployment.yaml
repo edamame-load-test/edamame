@@ -47,3 +47,17 @@ spec:
                 secretKeyRef:
                   name: psql-secret
                   key: psql-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-api-service
+spec:
+  selector:
+    app: db-api
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 4444
+      targetPort: 4444
+      nodePort: 30000

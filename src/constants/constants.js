@@ -2,7 +2,9 @@ const NUM_VUS_PER_POD = 1000;
 const POLL_FREQUENCY = 30000;
 const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
-const PORT_FORWARD_DELAY = 5000;
+const PORT_FORWARD_DELAY = 3500;
+const DB_API_SERVICE = "db-api-service";
+const EXTERNAL_IP_REGEX = "amazonaws.com";
 const GRAF = "grafana.yaml";
 const GRAF_DS_FILE = "grafana_datasource.yaml";
 const GRAF_DB_FILE = "grafana_dashboards.yaml";
@@ -27,6 +29,8 @@ export {
   NUM_VUS_PER_POD,
   POLL_FREQUENCY,
   PORT_FORWARD_DELAY,
+  EXTERNAL_IP_REGEX,
+  DB_API_SERVICE,
   PG_CM,
   GRAF,
   GRAF_DS,

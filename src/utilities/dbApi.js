@@ -1,56 +1,148 @@
 import { 
   DB_API_PORT,
-  PORT_FORWARD_DELAY
+  DB_API_SERVICE,
+  EXTERNAL_IP_REGEX
  } from "../constants/constants.js";
 import kubectl from "./kubectl.js";
-import { promisify } from "util";
-import child_process from "child_process";
-const exec = promisify(child_process.exec);
+import files from "./files.js";
+import axios from "axios";
 
 const dbApi = {
-  newTestId() {
-    kubectl
-      .exactPodName("db-api")
-      .then(podName => {
-        kubectl.tempPortForward(podName, DB_API_PORT, DB_API_PORT);
-      });
-      
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        this.curlRequest("-X POST")
-          .then(({stdout}) => {
-            kubectl.endPortForward("db-api");
-            const testId = stdout.match('[0-9]{1,}');
-            if (testId) {
-              resolve(testId[0]);
+  nameExists(name) {
+    if (!name) { return false; }
+    return (
+      this.getAllTests()
+        .then(testData => {
+
+          for (let i = 0; i < testData.length; i++) {
+            const test = testData[i];
+            if (test.name === name) {
+              return true;
             }
-          })
-      }, PORT_FORWARD_DELAY)
+          }
+          return false;
+      })
+    );
+  },
+
+  url() {
+    return (
+      kubectl.getIps()
+        .then(({stdout}) => {
+          let url;
+          const services = stdout.split("\n");
+
+          for (let rowIdx = 0; rowIdx < services.length; rowIdx++) {
+            const service = services[rowIdx];
+            if (service.match(DB_API_SERVICE)) {
+              const serviceInfo = service.split(" ");
+
+              for (let colIdx = 0; colIdx < serviceInfo.length; colIdx++) {
+                const detail = serviceInfo[colIdx];
+                if (detail.match(EXTERNAL_IP_REGEX)) {
+                  return  "http://" + detail + ":" + DB_API_PORT + "/tests";
+                }
+              }
+            }
+          }
+        })
+    );
+  },
+
+  newTestId(testPath, name) {
+    const testContent = JSON.stringify(files.read(testPath));
+
+    return (
+      this.url()
+        .then(url => {
+          return(
+            this.postRequest(testContent, url, name)
+              .then(res => {
+                return(res.data.id);
+              })
+            );
+        })
+    );
+  },
+
+  postRequest(script, url, name) {
+    const body = name ? { script, name } : { script };
+
+    return axios({
+      method: 'post',
+      url,
+      data: body
     });
   },
 
-  curlRequest(http_method="", path="tests") {
-    return exec(`curl ${http_method} http://localhost:${DB_API_PORT}/${path}`);
+  printTestDataTable(tests) {
+    let testsDataObj = {};
+    tests.forEach(test => {
+      testsDataObj[test.name] = {
+        "start time": test.start_time,
+        "end time": test.end_time,  
+        "status": test.status
+      };
+    });
+    console.table(testsDataObj);
   },
 
-  getTestIds() {
-    kubectl
-      .exactPodName("db-api")
-      .then(podName => {
-        kubectl.tempPortForward(podName, DB_API_PORT, DB_API_PORT);
-      });
+  getTest(name) {
+    return (
+      this.getAllTests()
+        .then(tests => {
+          return tests.find(test => test.name === name);
+        })
+    );
+  },
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
+  updateTestStatus(id, status) {
+    this.putRequest(id, { status })
+      .catch(err => {
+        console.log(`Error updating test status: ${err}`);
+      });
+  },
+
+  putRequest(id, data) {
+    return (
+      this.url()
+        .then(url => {
+          return (
+            axios.put(`${url}/${id}`, data)
+              .then(res => {
+                return(res.data);
+              })
+          );
+        })
+    );
+  },
+
+  deleteTest(id) {
+    return (
+      this.url()
+        .then(url => {
+          return (
+            axios.delete(`${url}/${id}`)
+              .then(res => {
+                return(res.status);
+              })
+          );
+        })
+    );
+  },
+
+  getAllTests() {
+    return (
+      this.url()
+      .then(url => {
         return (
-          this.curlRequest("")
-            .then(({stdout}) => {
-              kubectl.endPortForward("db-api");
-              resolve(stdout);
+          axios.get(url)
+            .then(res => {
+              return(res.data);
             })
         );
-      }, PORT_FORWARD_DELAY)
-    });
+      })
+    );
   }
 };
 

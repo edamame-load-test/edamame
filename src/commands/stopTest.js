@@ -1,6 +1,7 @@
 import Spinner from "../utilities/spinner.js";
 import cluster from "../utilities/cluster.js";
-
+import manifest from "../utilities/manifest.js";
+import dbApi from "../utilities/dbApi.js";
 import { KubeConfig, CustomObjectsApi } from '@kubernetes/client-node';
 
 const stopTest = async () => {
@@ -14,7 +15,9 @@ const stopTest = async () => {
   const tests = res.body.items;
 
   if (tests.length >= 1) {
-    await cluster.phaseOutK6()
+    const testId = manifest.latestK6TestId();
+    await cluster.phaseOutK6();
+    dbApi.putRequest(testId, { status: "completed"});
     spinner.succeed(`Stopped current test.`);
   } else {
     spinner.succeed(`No tests currently running.`);
