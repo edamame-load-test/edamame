@@ -33,12 +33,11 @@ const loadGenerators = {
     );
   },
 
-  pollUntilAllComplete(numVus) {
-    const numLoadGenerators = manifest.parallelism(numVus);
+  pollUntilAllComplete(numNodes) {
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
 
-        const finished = await this.checkAllCompleted(numLoadGenerators);
+        const finished = await this.checkAllCompleted(numNodes);
         if (!finished) {
           return;
         }

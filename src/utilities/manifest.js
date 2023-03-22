@@ -1,6 +1,5 @@
 import { exists } from "fs";
 import {
-  NUM_VUS_PER_POD,
   K6_CR_TEMPLATE,
   K6_CR_FILE,
   CLUSTER_NAME,
@@ -10,11 +9,11 @@ import files from "./files.js";
 import kubectl from "./kubectl.js";
 
 const manifest = {
-  createK6Cr(path, numVus, testId) { // change to kustomize overlay chain
+  createK6Cr(path, testId, numNodes) { // change to kustomize overlay chain
     const k6CrData = files.readYAML(K6_CR_TEMPLATE);
     const envObjs = k6CrData.spec.runner.env;
 
-    k6CrData.spec.parallelism = this.parallelism(numVus);
+    k6CrData.spec.parallelism = numNodes;
     k6CrData.spec.script.configMap.name = String(testId);
     k6CrData.spec.script.configMap.file = files.parseNameFromPath(path);
     envObjs.forEach((obj) => {
@@ -89,8 +88,8 @@ const manifest = {
     return Buffer.from(value, "utf8").toString("base64");
   },
 
-  parallelism(numVus) {
-    return Math.ceil(numVus / NUM_VUS_PER_POD);
+  parallelism(numVus, vusPerPod) {
+    return Math.ceil(numVus / vusPerPod);
   },
 };
 
