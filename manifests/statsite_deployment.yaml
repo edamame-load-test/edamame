@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: statsd
-          image: lukeoguro/custom-statsite:latest
+          image: lukeoguro/custom-statsite:2.0
           ports:
             - name: statsd
               containerPort: 8125
@@ -57,3 +57,19 @@ spec:
                 secretKeyRef:
                   name: psql-secret
                   key: psql-password
+          volumeMounts:
+          - name: config
+            mountPath: /etc/statsite
+      volumes:
+        - name: config
+          configMap:
+            name: statsite-config
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: alpha.eksctl.io/nodegroup-name
+                    operator: In
+                    values:
+                      - statsite
