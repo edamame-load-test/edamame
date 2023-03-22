@@ -4,7 +4,7 @@ import files from "./files.js";
 import eksctl from "./eksctl.js";
 import kubectl from "./kubectl.js";
 import manifest from "./manifest.js";
-import grafana from "./grafana.js";
+
 import {
   CLUSTER_NAME,
   PG_CM,
@@ -15,11 +15,14 @@ import {
   K6_CR_FILE,
   STATSITE_FILE,
   PG_SECRET_FILE,
+  STATSITE_CM,
+  STATSITE_CM_FOLDER,
   PG_CM_FILE,
   PG_SS_FILE,
   DB_API_FILE,
   GRAF_DS_FILE,
   GRAF_DB_FILE,
+  STATSITE_NODE_GRP_FILE
 } from "../constants/constants.js";
 
 const cluster = {
@@ -31,7 +34,9 @@ const cluster = {
           return eksctl.createCluster();
         }
       })
-      .then(() => eksctl.createLoadGenGrp());
+      .then(() => eksctl.createLoadGenGrp())
+      .then(() => eksctl.createStatsiteGrp())
+      .then(() => this.applyStatsiteManifests())
   },
 
   configureEBSCreds() {
@@ -80,6 +85,15 @@ const cluster = {
     });
   },
 
+  applyStatsiteManifests() {
+    return kubectl.configMapExists(STATSITE_CM)
+      .then((exists) => {
+        if (!exists) {
+          return kubectl.createConfigMapWithName(STATSITE_CM, files.path(STATSITE_CM_FOLDER));
+        }
+      })
+  },
+
   deployServersK6Op() {
     return kubectl
       .deployK6Operator()
@@ -93,6 +107,7 @@ const cluster = {
     return kubectl.deleteManifest(files.path(K6_CR_FILE))
       .then(() => kubectl.deleteManifest(files.path(STATSITE_FILE)))
       .then(() => kubectl.deleteConfigMap(testId))
+      .then(() => eksctl.scaleStatsiteNodes(0))
       .then(() => eksctl.scaleLoadGenNodes(0))
       .then(() => files.delete(K6_CR_FILE));
   },
@@ -104,12 +119,14 @@ const cluster = {
       kubectl.createConfigMapWithName(testId, testPath)
         .then(() => kubectl.applyManifest(files.path(STATSITE_FILE)))
         .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
+        .then(() => eksctl.scaleStatsiteNodes(1))
         .then(() => eksctl.scaleLoadGenNodes(manifest.parallelism(numVus)))
     );
   },
-  
+
   async destroy() {
     await eksctl.destroyCluster();
+    files.delete(STATSITE_NODE_GRP_FILE);
     return eksctl.deleteEBSVolumes();
   },
 };
