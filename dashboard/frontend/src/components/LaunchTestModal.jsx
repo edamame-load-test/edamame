@@ -1,16 +1,41 @@
 import { useState } from "react";
 import { FiUploadCloud } from "react-icons/fi";
+import testService from "../services/testService";
 
 // Send the file to the express server
 // The express server will write the script to a temporary file
 // It will then run the script, and delete it afterwards
 
-const handleFileSelect = (file) => {};
-function handleSubmit() {}
+// To Do:
+// · Only allow the user to click  the button when the file has been uploaded
 
 function LaunchTestModal({ setIsModal }) {
-  const [title, setTitle] = useState("");
-  const [filePath, setFilePath] = useState("");
+  const [title, setTitle] = useState(null);
+  const [file, setFile] = useState(null);
+  const [isFileSelected, setIsFileSelected] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false); // Only allow this when the file has been uploaded. Otherwise don't let user click button
+
+  function handleSubmit() {
+    testService.startTest(title, file);
+    setIsModal(false);
+  }
+
+  // When the file gets uploaded, retrieve the content and give it to our "file" state
+  const handleFileSelect = (e) => {
+    const selectedFile = e.target.files[0];
+
+    const reader = new FileReader();
+    reader.readAsText(selectedFile);
+
+    reader.onload = () => {
+      setFile(reader.result);
+    };
+
+    reader.onerror = (e) => {
+      console.error("file error", reader.error);
+    };
+    setIsFileSelected(true);
+  };
   return (
     <div className="inset-0 ">
       <div
@@ -21,7 +46,7 @@ function LaunchTestModal({ setIsModal }) {
         <h2 className="text-lg font-bold">Create Test</h2>
         <form onSubmit={() => handleSubmit()}>
           <div className="mt-4">
-            <label for="title" className="font-semibold text-sm">
+            <label htmlFor="title" className="font-semibold text-sm">
               Title
             </label>
             <input
@@ -37,10 +62,15 @@ function LaunchTestModal({ setIsModal }) {
             ></input>
           </div>
           <div className="mt-4">
-            <label for="script" className="font-semibold text-sm">
+            <label htmlFor="script" className="font-semibold text-sm">
               Script
             </label>
-            <input type="file" accept=".js" onFileSelect={handleFileSelect} />
+            {
+              !isFileSelected ? (
+                <input type="file" accept=".js" onChange={handleFileSelect} />
+              ) : null
+              // <p>{file.name}</p>
+            }
             {/* <input
               className="border border-blue w-full text-blue rounded py-2 flex gap-2 justify-center"
               type="file"
@@ -56,7 +86,10 @@ function LaunchTestModal({ setIsModal }) {
             >
               Cancel
             </button>
-            <button className="bg-blue antialiased text-white rounded px-3 py-2 flex gap-1">
+            <button
+              className="bg-blue antialiased text-white rounded px-3 py-2 flex gap-1"
+              onClick={handleSubmit}
+            >
               Launch a test
             </button>
           </div>

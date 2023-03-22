@@ -78,7 +78,9 @@ function TestList() {
                 <td>{formatDate(new Date(test.start_time))}</td>
                 {/* This is only if the test is completed */}
                 <td>
-                  {timeDifferenceFormatted(test.end_time, test.start_time)}
+                  {test.status === "completed"
+                    ? timeDifferenceFormatted(test.end_time, test.start_time)
+                    : "In Progress"}
                 </td>
                 <td>
                   <div className="flex gap-4 items-center">
