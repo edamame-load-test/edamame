@@ -43,7 +43,6 @@ function TestList() {
   useEffect(() => {
     async function getAllTests() {
       const data = await testService.getTests();
-      console.log(data);
       setTests(data);
     }
     getAllTests();
@@ -51,7 +50,9 @@ function TestList() {
 
   return (
     <>
-      {isModal && <LaunchTestModal setIsModal={setIsModal} />}
+      {isModal && (
+        <LaunchTestModal setIsModal={setIsModal} setTests={setTests} />
+      )}
       <div className="mt-16 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
           <h1 className="font-bold text-xl ml-6">All Tests</h1>
@@ -85,7 +86,7 @@ function TestList() {
                 <td>
                   <div className="flex gap-4 items-center">
                     <a href="http://www.google.com">
-                      <button className="border-blue border rounded px-3 py-2 text-blue flex gap-1">
+                      <button className="border-blue border rounded px-3 py-2 text-blue flex gap-1 hover:bg-blue hover:text-white hover:antialiased transition ease-in-out">
                         Open in Grafana <FiExternalLink />
                       </button>
                     </a>

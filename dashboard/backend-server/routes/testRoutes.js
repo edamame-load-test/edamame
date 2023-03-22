@@ -24,17 +24,24 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const script = req.body.script;
+  const { title, script } = req.body;
   const filename = "script.js";
   const filePath = path.join(__dirname, filename);
-  fs.writeFile(filePath, script, (error) => {
+  const scriptString = JSON.stringify(script, null, 2);
+
+  const options = {
+    name: title,
+    path: filePath,
+  };
+
+  fs.writeFile(filePath, scriptString, (error) => {
     if (error) {
       console.error("Error writing the script file:", error);
       res.status(500).send("Error writing the script file");
       return;
     } else {
       console.log(path.join(__dirname, filename));
-      runTest(path.join(__dirname, filename));
+      runTest(options);
     }
   });
 });

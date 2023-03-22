@@ -2,20 +2,14 @@ import { useState } from "react";
 import { FiUploadCloud } from "react-icons/fi";
 import testService from "../services/testService";
 
-// Send the file to the express server
-// The express server will write the script to a temporary file
-// It will then run the script, and delete it afterwards
-
-// To Do:
-// · Only allow the user to click  the button when the file has been uploaded
-
-function LaunchTestModal({ setIsModal }) {
-  const [title, setTitle] = useState(null);
+function LaunchTestModal({ setIsModal, setTests }) {
+  const [title, setTitle] = useState("");
   const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState(null);
   const [isFileSelected, setIsFileSelected] = useState(false);
-  const [canSubmit, setCanSubmit] = useState(false); // Only allow this when the file has been uploaded. Otherwise don't let user click button
 
-  function handleSubmit() {
+  function handleSubmit(e) {
+    e.preventDefault();
     testService.startTest(title, file);
     setIsModal(false);
   }
@@ -23,6 +17,7 @@ function LaunchTestModal({ setIsModal }) {
   // When the file gets uploaded, retrieve the content and give it to our "file" state
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
+    setFileName(selectedFile.name);
 
     const reader = new FileReader();
     reader.readAsText(selectedFile);
@@ -62,22 +57,26 @@ function LaunchTestModal({ setIsModal }) {
             ></input>
           </div>
           <div className="mt-4">
-            <label htmlFor="script" className="font-semibold text-sm">
-              Script
-            </label>
-            {
-              !isFileSelected ? (
-                <input type="file" accept=".js" onChange={handleFileSelect} />
-              ) : null
-              // <p>{file.name}</p>
-            }
-            {/* <input
-              className="border border-blue w-full text-blue rounded py-2 flex gap-2 justify-center"
-              type="file"
+            <label
+              htmlFor="script"
+              className="border-blue border rounded px-3 py-2 text-blue flex text-center justify-center gap-2 hover:bg-blue hover:antialiased hover:text-white hover:cursor-pointer transition ease-in-out "
             >
-              <FiUploadCloud size={20} />
-              Import a script
-            </input> */}
+              {fileName ? (
+                fileName
+              ) : (
+                <>
+                  <FiUploadCloud size={20} /> <p>"Import a script"</p>
+                </>
+              )}
+              {console.log(file)}
+            </label>
+            <input
+              id="script"
+              type="file"
+              accept=".js"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
           </div>
           <div className="flex gap-2 justify-end mt-6">
             <button
@@ -87,7 +86,10 @@ function LaunchTestModal({ setIsModal }) {
               Cancel
             </button>
             <button
-              className="bg-blue antialiased text-white rounded px-3 py-2 flex gap-1"
+              className={`bg-blue antialiased text-white rounded px-3 py-2 flex gap-1 ${
+                !isFileSelected || title === "" ? "opacity-50" : ""
+              }`}
+              disabled={!isFileSelected || title === ""}
               onClick={handleSubmit}
             >
               Launch a test
