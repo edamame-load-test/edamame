@@ -6,8 +6,9 @@ import dbApi from "../utilities/dbApi.js";
 
 const runTest = async (options) => {
   const spinner = new Spinner("Reading test script...");
-  const testPath = options.path;
+  const testPath = options.file;
   const name = options.name;
+  const vusPerPod = options.vusPerPod;
 
   try {
     const numVus = manifest.numVus(testPath);
@@ -20,17 +21,17 @@ const runTest = async (options) => {
     }
     spinner.succeed(`Successfully read test script.`);
 
-    const nodeCount = manifest.parallelism(numVus);
-    spinner.info(`Initializing load test with ${nodeCount} ${nodeCount === 1 ? "node" : "nodes"}...`);
+    const numNodes = manifest.parallelism(numVus, vusPerPod);
+    spinner.info(`Initializing load test with ${numNodes} load ${numNodes === 1 ? "generator" : "generators"} (${vusPerPod} VUs per pod)...`);
     spinner.start();
     const testId = await dbApi.newTestId(testPath, name);
-    await cluster.launchK6Test(testPath, name, numVus, testId);
+    await cluster.launchK6Test(testPath, testId, numNodes);
     spinner.succeed("Successfully initialized load test.");
 
     spinner.info("Running load test...");
     dbApi.updateTestStatus(testId, "running");
     spinner.start();
-    await loadGenerators.pollUntilAllComplete(numVus);
+    await loadGenerators.pollUntilAllComplete(numNodes);
     dbApi.updateTestStatus(testId, "completed");
     spinner.succeed("Load test completed.");
 
