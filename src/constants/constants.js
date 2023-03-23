@@ -1,4 +1,4 @@
-const NUM_VUS_PER_POD = 5000;
+const NUM_VUS_PER_POD = 20000;
 const POLL_FREQUENCY = 30000;
 const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
@@ -20,8 +20,8 @@ const PG_CM_FILE = "postgres_configmap.yaml";
 const PG_SS_FILE = "postgres_statefulset.yaml";
 const STATSITE_FILE = "statsite_deployment.yaml";
 const STATSITE_NODE_GRP = "statsite";
-const STATSITE_NODE_GRP_TEMPLATE = "statsite_nodegroup_template.yaml";
-const STATSITE_NODE_GRP_FILE = "load_test_crds/statsite_nodegroup.yaml";
+const NODE_GROUPS_TEMPLATE = "nodegroups_template.yaml";
+const NODE_GROUPS_FILE = "load_test_crds/nodegroups.yaml";
 const STATSITE_CM = "statsite-config";
 const STATSITE_CM_FOLDER = "statsite-config";
 const DB_API_FILE = "db_api_deployment.yaml";
@@ -62,11 +62,11 @@ export {
   PG_CM_FILE,
   PG_SS_FILE,
   STATSITE_FILE,
-  STATSITE_NODE_GRP_TEMPLATE,
+  NODE_GROUPS_TEMPLATE,
   STATSITE_NODE_GRP,
   STATSITE_CM,
   STATSITE_CM_FOLDER,
-  STATSITE_NODE_GRP_FILE,
+  NODE_GROUPS_FILE,
   DB_API_FILE,
   CLUSTER_NAME,
   LOAD_GEN_NODE_GRP,

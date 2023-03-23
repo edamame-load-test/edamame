@@ -9,7 +9,7 @@ spec:
       name: '1'              # default value
       file: test.js          # default value
   separate: true
-  arguments: '--out distributed-statsd'
+  arguments: '--out distributed-statsd --no-thresholds --no-summary'
   runner:
     image: lukeoguro/xk6-statsd:latest
     env:
@@ -36,3 +36,11 @@ spec:
                   operator: In
                   values:
                     - load-generators
+    securityContext:
+      sysctls:
+      - name: net.ipv4.ip_local_port_range
+        value: "1024 65535"
+      - name: net.ipv4.tcp_tw_reuse
+        value: "1"
+      - name: net.ipv4.tcp_timestamps
+        value: "1"

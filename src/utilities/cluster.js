@@ -22,7 +22,7 @@ import {
   GRAF_DS_FILE,
   GRAF_DB_FILE,
   DB_API_INGRESS,
-  STATSITE_NODE_GRP_FILE
+  NODE_GROUPS_FILE
 } from "../constants/constants.js";
 import { promisify } from "util";
 import child_process from "child_process";
@@ -36,13 +36,13 @@ const cluster = {
         .then(() => eksctl.existsOrError())
         .then(() => {
           return this.checkInstallation("make --version",
-            "Make", 
+            "Make",
             "https://www.gnu.org/software/make/#download"
           );
         })
         .then(() => {
-          return this.checkInstallation("aws --version", 
-            "AWS Cli", 
+          return this.checkInstallation("aws --version",
+            "AWS Cli",
             "https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
           );
         })
@@ -53,10 +53,10 @@ const cluster = {
   checkInstallation(command, name, link) {
     return (
       exec(command)
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           if (!stdout) {
             const msg = `${name} isn't installed. Please install it.` +
-             `Instructions can be found at: ${link} `;
+              `Instructions can be found at: ${link} `;
             throw new Error(msg);
           }
         })
@@ -71,8 +71,7 @@ const cluster = {
           return eksctl.createCluster();
         }
       })
-      .then(() => eksctl.createLoadGenGrp())
-      .then(() => eksctl.createStatsiteGrp())
+      .then(() => eksctl.createNodeGroups())
       .then(() => this.applyStatsiteManifests())
   },
 
@@ -100,7 +99,7 @@ const cluster = {
     return (
       eksctl
         .createIamLBCPolicy(iam.existingEdamameAWSLbcPolArn())
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           const policyArn = iam.lbcPolicyArn(stdout);
           return eksctl.createIamRoleLBCPol(policyArn);
         })
@@ -109,7 +108,7 @@ const cluster = {
         .then(() => helm.upgradeAWSLBC())
         .then(() => kubectl.deployHelmChartRepo())
         .then(() => eksctl.localIp())
-        .then(({stdout}) => manifest.createDbApiIngress(stdout))
+        .then(({ stdout }) => manifest.createDbApiIngress(stdout))
         .then(() => kubectl.applyManifest(files.path(DB_API_INGRESS)))
     );
   },
@@ -170,11 +169,11 @@ const cluster = {
     const testId = manifest.latestK6TestId();
     return (
       kubectl.deleteManifest(files.path(K6_CR_FILE))
-      .then(() => kubectl.deleteManifest(files.path(STATSITE_FILE)))
-      .then(() => kubectl.deleteConfigMap(testId))
-      .then(() => eksctl.scaleStatsiteNodes(0))
-      .then(() => eksctl.scaleLoadGenNodes(0))
-      .then(() => files.delete(K6_CR_FILE))
+        .then(() => kubectl.deleteManifest(files.path(STATSITE_FILE)))
+        .then(() => kubectl.deleteConfigMap(testId))
+        .then(() => eksctl.scaleStatsiteNodes(0))
+        .then(() => eksctl.scaleLoadGenNodes(0))
+        .then(() => files.delete(K6_CR_FILE))
     );
   },
 
@@ -192,7 +191,7 @@ const cluster = {
 
   async destroy() {
     await eksctl.destroyCluster();
-    files.delete(STATSITE_NODE_GRP_FILE);
+    files.delete(NODE_GROUPS_FILE);
     return eksctl.deleteEBSVolumes();
   },
 };

@@ -14,3 +14,14 @@ managedNodeGroups:
     preBootstrapCommands:
       - sysctl -w net.core.rmem_default=536870912 # Set to 512M
       - sysctl -w net.core.rmem_max=536870912 # Set to 512M
+
+nodeGroups:
+  - name: load-generators
+    instanceType: m5.large # m5.24xlarge
+    desiredCapacity: 0
+    minSize: 0
+    maxSize: 20
+    kubeletExtraConfig:
+      allowedUnsafeSysctls:
+        - "net.ipv4.tcp_tw_reuse"
+        - "net.ipv4.tcp_timestamps"
