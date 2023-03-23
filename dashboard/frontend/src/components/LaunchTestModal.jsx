@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { FiUploadCloud } from "react-icons/fi";
+import { v4 as uuidv4 } from "uuid";
 import testService from "../services/testService";
 
-function LaunchTestModal({ setIsModal, setTests }) {
+function LaunchTestModal({ setIsModal, setTests, setCurrTest }) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(null);
@@ -10,7 +11,17 @@ function LaunchTestModal({ setIsModal, setTests }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    const newID = uuidv4();
     testService.startTest(title, file);
+    const newTest = {
+      id: newID,
+      name: title,
+      status: "Pending",
+      start_time: Date.now(),
+      script: JSON.stringify(file),
+    };
+    setCurrTest(newTest); // Sets the current test instantly. It will get reset later through polling
+    // setTests((prevTests) => [...prevTests, newTest]);
     setIsModal(false);
   }
 
@@ -37,7 +48,10 @@ function LaunchTestModal({ setIsModal, setTests }) {
         className="block fixed inset-0 cursor-default bg-black/50"
         onClick={() => setIsModal(false)}
       ></div>
-      <div className="bg-white max-w-xl rounded p-5 absolute w-[50%] left-[33%] top-48">
+      <div
+        className="bg-white max-w-xl rounded p-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[140%]
+w-[70%]"
+      >
         <h2 className="text-lg font-bold">Create Test</h2>
         <form onSubmit={() => handleSubmit()}>
           <div className="mt-4">

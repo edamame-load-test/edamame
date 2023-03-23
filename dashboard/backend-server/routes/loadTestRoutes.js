@@ -1,12 +1,10 @@
 import express from "express";
 const router = express.Router();
-
-router.post("/start", (req, res) => {
-  // Retrieves the file in the body, saves it somewhere temporarily, and starts the test
-});
+import { stopTest } from "../../../src/commands/stopTest.js";
 
 router.post("/stop", (req, res) => {
-  // Stop the load test
+  stopTest();
+  res.status(200).json({ message: "Load test stopped successfully" });
 });
 
 export default router;

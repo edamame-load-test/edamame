@@ -4,7 +4,7 @@ const testService = {
   async getTests() {
     try {
       const { data } = await axios.get("/tests");
-      return data;
+      return data === "" ? [] : data;
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
     }
@@ -18,6 +18,9 @@ const testService = {
     } catch (error) {
       console.log(`Error uploading a test: ${error}`);
     }
+  },
+  async stopTest() {
+    await axios.post("/load-test/stop");
   },
 };
 
