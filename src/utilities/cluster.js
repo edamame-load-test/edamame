@@ -5,7 +5,7 @@ import files from "./files.js";
 import eksctl from "./eksctl.js";
 import kubectl from "./kubectl.js";
 import manifest from "./manifest.js";
-import grafana from "./grafana.js";
+
 import {
   CLUSTER_NAME,
   PG_CM,
@@ -14,12 +14,15 @@ import {
   GRAF_DBS,
   K6_CR_FILE,
   STATSITE_FILE,
+  STATSITE_CM,
+  STATSITE_CM_FOLDER,
   PG_CM_FILE,
   PG_SS_FILE,
   DB_API_FILE,
   GRAF_DS_FILE,
   GRAF_DB_FILE,
   DB_API_INGRESS
+  STATSITE_NODE_GRP_FILE
 } from "../constants/constants.js";
 import { promisify } from "util";
 import child_process from "child_process";
@@ -61,16 +64,16 @@ const cluster = {
   },
 
   create() {
-    return (
-      eksctl
-        .clusterDesc()
-        .then(({ stdout }) => {
-          if (!stdout.match(CLUSTER_NAME)) {
-            return eksctl.createCluster();
-          }
-        })
-        .then(() => eksctl.createLoadGenGrp())
-    );
+    return eksctl
+      .clusterDesc()
+      .then(({ stdout }) => {
+        if (!stdout.match(CLUSTER_NAME)) {
+          return eksctl.createCluster();
+        }
+      })
+      .then(() => eksctl.createLoadGenGrp())
+      .then(() => eksctl.createStatsiteGrp())
+      .then(() => this.applyStatsiteManifests())
   },
 
   configureEBSCreds() {
@@ -143,6 +146,15 @@ const cluster = {
     );
   },
 
+  applyStatsiteManifests() {
+    return kubectl.configMapExists(STATSITE_CM)
+      .then((exists) => {
+        if (!exists) {
+          return kubectl.createConfigMapWithName(STATSITE_CM, files.path(STATSITE_CM_FOLDER));
+        }
+      })
+  },
+
   deployServersK6Op() {
     return (
       kubectl
@@ -160,24 +172,27 @@ const cluster = {
       kubectl.deleteManifest(files.path(K6_CR_FILE))
       .then(() => kubectl.deleteManifest(files.path(STATSITE_FILE)))
       .then(() => kubectl.deleteConfigMap(testId))
+      .then(() => eksctl.scaleStatsiteNodes(0))
       .then(() => eksctl.scaleLoadGenNodes(0))
       .then(() => files.delete(K6_CR_FILE))
     );
   },
 
-  launchK6Test(testPath, name, numVus, testId) {
-    manifest.createK6Cr(testPath, numVus, testId);
+  launchK6Test(testPath, testId, numNodes) {
+    manifest.createK6Cr(testPath, testId, numNodes);
 
     return (
       kubectl.createConfigMapWithName(testId, testPath)
         .then(() => kubectl.applyManifest(files.path(STATSITE_FILE)))
         .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
-        .then(() => eksctl.scaleLoadGenNodes(manifest.parallelism(numVus)))
+        .then(() => eksctl.scaleStatsiteNodes(1))
+        .then(() => eksctl.scaleLoadGenNodes(numNodes))
     );
   },
-  
+
   async destroy() {
     await eksctl.destroyCluster();
+    files.delete(STATSITE_NODE_GRP_FILE);
     return eksctl.deleteEBSVolumes();
   },
 };
