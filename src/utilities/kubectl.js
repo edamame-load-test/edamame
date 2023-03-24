@@ -2,8 +2,36 @@ import files from "./files.js";
 import { promisify } from "util";
 import child_process from "child_process";
 const exec = promisify(child_process.exec);
+import {
+  AWS_LBC_CRD
+} from "../constants/constants.js";
 
 const kubectl = {
+  existsOrError() {
+    const msg = `Kubectl isn't installed. Please install it; ` +
+    `instructions can be found at: ` +
+    `https://kubernetes.io/docs/tasks/tools/`;
+
+    return (
+      exec(`kubectl version --output=yaml`)
+        .then(({stdout}) => {
+          if (!stdout) {
+              throw new Error(msg);
+            }
+        })
+        .catch(({stdout}) => {
+          // will throw error if not currently connected to a cluster
+          if (!stdout.match("Version")) {
+            throw new Error(msg);
+          }
+        })
+    );
+  },
+
+  appplyAwsLbcCrd() {
+    return exec(`kubectl apply -k ${AWS_LBC_CRD}`);
+  },
+
   deployK6Operator() {
     const path = files.path("", "../k6-operator");
     return exec(`cd ${path} && make deploy`);
@@ -114,6 +142,14 @@ const kubectl = {
     // deployment even though could see psql-host in psql-configmap when used
     // createConfigMapWithName to create psql configmap
     return exec(`kubectl create -f ${path}`);
+  },
+
+  deployHelmChartRepo() {
+    return exec(`kubectl -n kube-system rollout status deployment aws-load-balancer-controller`);
+  },
+
+  getIngress(ingressName) {
+    return exec(`kubectl get ingress/${ingressName}`);
   },
 
   deletePv(type, name) {

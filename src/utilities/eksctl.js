@@ -1,9 +1,24 @@
+import files from "./files.js";
 import { promisify } from "util";
 import child_process from "child_process";
 import { CLUSTER_NAME, LOAD_GEN_NODE_GRP } from "../constants/constants.js";
 const exec = promisify(child_process.exec);
 
 const eksctl = {
+  existsOrError() {
+    return (
+      exec(`eksctl version`)
+        .then(({stdout}) => {
+          if (!stdout) {
+            const msg = `Eksctl isn't installed. Please install eksctl; ` +
+              `instructions can be found at: ` +
+              `https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html`;
+            throw new Error(msg);
+          }
+        })
+    );
+  },
+
   createCluster() {
     return exec(`eksctl create cluster --name ${CLUSTER_NAME}`);
   },
@@ -41,6 +56,47 @@ const eksctl = {
         "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy " +
         "--approve --role-only " +
         "--role-name AmazonEKS_EBS_CSI_DriverRole"
+    );
+  },
+
+  createIamLBCPolicy(existingPol) {
+    if (existingPol) {
+      return (
+        this.deleteOldIamLBCPolicy(existingPol)
+          .then(() => this.newIamLBCPolicy())
+      );
+    } else {
+      return this.newIamLBCPolicy();
+    }
+  },
+
+  localIp() {
+    return exec(`curl ipinfo.io/ip`);
+  },
+
+  newIamLBCPolicy() {
+    return exec(
+      `cd ${files.path("")} && aws iam create-policy ` +
+      "--policy-name EdamameAWSLoadBalancerControllerIAMPolicy " +
+      "--policy-document file://iam_policy.json"
+    );
+  },
+
+  deleteOldIamLBCPolicy(policy) {
+    return exec(
+      `aws iam delete-policy --policy-arn ${policy}`
+    );
+  },
+
+  createIamRoleLBCPol(policyArn) {
+    return exec(
+      "eksctl create iamserviceaccount " +
+      "--name aws-load-balancer-controller " +
+      `--cluster ${CLUSTER_NAME} ` + 
+      `--namespace kube-system ` + 
+      `--attach-policy-arn ${policyArn} ` +
+      `--override-existing-serviceaccounts ` +
+      "--approve"
     );
   },
 

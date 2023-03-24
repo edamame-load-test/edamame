@@ -3,11 +3,11 @@
 import { init } from "./commands/init.js";
 import { destroyEKSCluster } from "./commands/destroy.js";
 import { runTest } from "./commands/runTest.js";
-import { get } from "./commands/get.js"
+import { get } from "./commands/get.js";
 import { updateTestName } from "./commands/updateTestName.js";
 import { deleteTest } from "./commands/deleteTest.js";
 import { portForwardGrafana } from "./commands/portForwardGrafana.js";
-import { stopTest } from "./commands/stopTest.js"
+import { stopTest } from "./commands/stopTest.js";
 import { Command } from "commander";
 const program = new Command();
 
