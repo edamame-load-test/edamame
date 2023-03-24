@@ -7,9 +7,7 @@ metadata:
 
 managedNodeGroups:
   - name: ng-agg
-    labels:
-    - node-role.kubernetes.io/agg: ''
-    instanceType: m5.large # m5zn.xlarge
+    instanceType: m5zn.xlarge # Testing: m5.large; Production: m5zn.xlarge
     desiredCapacity: 0
     minSize: 0
     maxSize: 1
@@ -23,9 +21,7 @@ managedNodeGroups:
 
 nodeGroups:
   - name: ng-gen
-    labels:
-    - node-role.kubernetes.io/gen: ''
-    instanceType: m5.large # m5.24xlarge
+    instanceType: m5.24xlarge # Testing: m5.large; Production: m5.24xlarge
     desiredCapacity: 0
     minSize: 0
     maxSize: 20

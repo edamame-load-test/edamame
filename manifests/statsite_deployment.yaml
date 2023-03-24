@@ -76,4 +76,4 @@ spec:
                   - key: alpha.eksctl.io/nodegroup-name
                     operator: In
                     values:
-                      - ng-gen
+                      - ng-agg
