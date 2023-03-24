@@ -5,8 +5,8 @@ import {
   CLUSTER_NAME,
   LOAD_GEN_NODE_GRP,
   STATSITE_NODE_GRP,
-  STATSITE_NODE_GRP_TEMPLATE,
-  STATSITE_NODE_GRP_FILE
+  NODE_GROUPS_TEMPLATE,
+  NODE_GROUPS_FILE
 } from "../constants/constants.js";
 // import files from '../utilities/files.js';
 const exec = promisify(child_process.exec);
@@ -27,33 +27,25 @@ const eksctl = {
   },
 
   createCluster() {
-    return exec(`eksctl create cluster --name ${CLUSTER_NAME}`);
+    return exec(`eksctl create cluster --name ${CLUSTER_NAME} --version=1.25`);
   },
 
   clusterDesc() {
     return exec(`eksctl get cluster`);
   },
 
-  createLoadGenGrp() {
-    return exec(
-      `eksctl create nodegroup --cluster=${CLUSTER_NAME} ` +
-      `--name=${LOAD_GEN_NODE_GRP} --node-type=m5.large ` +
-      `--nodes=0 --nodes-min=0 --nodes-max=100 `
-    );
-  },
-
-  async createStatsiteGrp() {
-    const nodeGrpData = files.readYAML(STATSITE_NODE_GRP_TEMPLATE);
-    nodeGrpData.metadata.region = await this.getRegion();
+  async createNodeGroups() {
+    const nodeGroupsData = files.readYAML(NODE_GROUPS_TEMPLATE);
+    nodeGroupsData.metadata.region = await this.getRegion();
 
     if (!files.exists(files.path('/load_test_crds'))) {
       files.makeDir('/load_test_crds')
     }
 
-    files.writeYAML(STATSITE_NODE_GRP_FILE, nodeGrpData);
+    files.writeYAML(NODE_GROUPS_FILE, nodeGroupsData);
 
     return exec(
-      `eksctl create nodegroup --config-file ${files.path(STATSITE_NODE_GRP_FILE)}`
+      `eksctl create nodegroup --config-file ${files.path(NODE_GROUPS_FILE)}`
     );
   },
 
