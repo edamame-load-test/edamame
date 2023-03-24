@@ -8,7 +8,7 @@ import {
   STATSITE_NODE_GRP_TEMPLATE,
   STATSITE_NODE_GRP_FILE
 } from "../constants/constants.js";
-import files from '../utilities/files.js';
+// import files from '../utilities/files.js';
 const exec = promisify(child_process.exec);
 
 const eksctl = {

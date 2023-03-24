@@ -21,7 +21,7 @@ import {
   DB_API_FILE,
   GRAF_DS_FILE,
   GRAF_DB_FILE,
-  DB_API_INGRESS
+  DB_API_INGRESS,
   STATSITE_NODE_GRP_FILE
 } from "../constants/constants.js";
 import { promisify } from "util";
