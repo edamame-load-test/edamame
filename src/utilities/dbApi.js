@@ -1,9 +1,11 @@
 import { 
-  DB_API_PORT,
-  DB_API_SERVICE,
-  EXTERNAL_IP_REGEX
+  DB_API_INGRESS,
+  EXTERNAL_IP_REGEX,
+  DB_API_INGRESS_NAME
  } from "../constants/constants.js";
+ import manifest from "./manifest.js";
 import kubectl from "./kubectl.js";
+import eksctl from "./eksctl.js";
 import files from "./files.js";
 import axios from "axios";
 
@@ -12,8 +14,9 @@ const dbApi = {
     if (!name) { return false; }
     return (
       this.getAllTests()
+        .catch(() => this.restoreIp())
+        .then(() => this.getAllTests())
         .then(testData => {
-
           for (let i = 0; i < testData.length; i++) {
             const test = testData[i];
             if (test.name === name) {
@@ -25,22 +28,24 @@ const dbApi = {
     );
   },
 
-  url() {
+  logUrl() {
     return (
-      kubectl.getIps()
+      kubectl.getIngress(DB_API_INGRESS_NAME)
         .then(({stdout}) => {
-          let url;
-          const services = stdout.split("\n");
+          const ingresses = stdout.split("\n");
 
-          for (let rowIdx = 0; rowIdx < services.length; rowIdx++) {
-            const service = services[rowIdx];
-            if (service.match(DB_API_SERVICE)) {
-              const serviceInfo = service.split(" ");
+          for (let rowIdx = 0; rowIdx < ingresses.length; rowIdx++) {
+            const ingress = ingresses[rowIdx];
+            if (ingress.match(DB_API_INGRESS_NAME)) {
+              const ingressInfo = ingress.split(" ");
 
-              for (let colIdx = 0; colIdx < serviceInfo.length; colIdx++) {
-                const detail = serviceInfo[colIdx];
+              for (let colIdx = 0; colIdx < ingressInfo.length; colIdx++) {
+                const detail = ingressInfo[colIdx];
                 if (detail.match(EXTERNAL_IP_REGEX)) {
-                  return  "http://" + detail + ":" + DB_API_PORT + "/tests";
+                  const url = "http://" + detail + "/tests";
+                  const policyData = files.read(files.path(".env")).split("\n")[0];
+                  const desiredData = policyData + `\ndb_api_url=${url}`;
+                  files.write(".env", desiredData);
                 }
               }
             }
@@ -49,18 +54,38 @@ const dbApi = {
     );
   },
 
+  url() {
+    const data = files.read(files.path(".env"));
+    const dbApiUrlEntry = data.split("\n")[1];
+    return dbApiUrlEntry.split("=")[1];
+  },
+
+  restoreIp() {
+    return (
+      eksctl
+        .localIp()
+        .then(({stdout}) => manifest.createDbApiIngress(stdout))
+        .then(() => kubectl.applyManifest(files.path(DB_API_INGRESS)))
+        .then(() => this.logUrl())
+    );
+  },
+
   newTestId(testPath, name) {
     const testContent = JSON.stringify(files.read(testPath));
-
-    return (
-      this.url()
-        .then(url => {
-          return(
-            this.postRequest(testContent, url, name)
-              .then(res => {
-                return(res.data.id);
-              })
-            );
+    const url = this.url();
+      
+    return(
+      this
+        .postRequest(testContent, url, name)
+        .catch(() => {
+          return (
+            this
+              .restoreIp()
+              .then(() => this.postRequest(testContent, this.url(), name))
+          );
+        })
+        .then(res => {
+          return(res.data.id);
         })
     );
   },
@@ -77,6 +102,7 @@ const dbApi = {
 
   printTestDataTable(tests) {
     let testsDataObj = {};
+
     tests.forEach(test => {
       testsDataObj[test.name] = {
         "start time": test.start_time,
@@ -89,7 +115,15 @@ const dbApi = {
 
   getTest(name) {
     return (
-      this.getAllTests()
+      this
+        .getAllTests()
+        .catch(() => {
+          return (
+            this
+              .restoreIp()
+              .then(() => this.getAllTests())
+          );
+        })
         .then(tests => {
           return tests.find(test => test.name === name);
         })
@@ -97,52 +131,72 @@ const dbApi = {
   },
 
   updateTestStatus(id, status) {
-    this.putRequest(id, { status })
-      .catch(err => {
-        console.log(`Error updating test status: ${err}`);
-      });
+    this
+      .putRequest(id, { status })
+      .catch(() => {
+        return (
+          this
+            .restoreIp()
+            .then(() => this.putRequest(id, { status }))
+        );
+      })
   },
 
   putRequest(id, data) {
+    const url = this.url();
+
     return (
-      this.url()
-        .then(url => {
+      axios
+        .put(`${url}/${id}`, data)
+        .catch(() => {
           return (
-            axios.put(`${url}/${id}`, data)
-              .then(res => {
-                return(res.data);
-              })
+            this
+              .restoreIp()
+              .then(() => axios.put(`${this.url()}/${id}`, data))
           );
+        })
+        .then(res => {
+          return(res.data);
         })
     );
   },
 
   deleteTest(id) {
+    const url = this.url();
+
     return (
-      this.url()
-        .then(url => {
+      axios
+        .delete(`${url}/${id}`)
+        .catch(() => {
           return (
-            axios.delete(`${url}/${id}`)
-              .then(res => {
-                return(res.status);
-              })
+            this
+              .restoreIp()
+              .then(() => axios.delete(`${this.url()}/${id}`))
           );
+        })
+        .then(res => {
+          return(res.status);
         })
     );
   },
 
   getAllTests() {
+    const url = this.url();
+
     return (
-      this.url()
-      .then(url => {
-        return (
-          axios.get(url)
-            .then(res => {
-              return(res.data);
-            })
-        );
-      })
-    );
+      axios
+        .get(url)
+        .catch(() => {
+          return (
+            this
+              .restoreIp()
+              .then(() => axios.get(this.url()))
+          );
+        })
+        .then(res => {
+          return(res.data);
+        })
+    ); 
   }
 };
 

@@ -10,6 +10,7 @@ In order to run `edamame`, you will need the following:
 - [`eksctl`](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html), a command line tool for working with EKS clusters, should be installed.
 - [`Make`](https://www.gnu.org/software/make/), a build automation tool used to build executable programs and libraries from source code
 - [`Go`](https://go.dev/doc/install),the programming language used by K6.
+- [`Helm`](https://helm.sh/docs/intro/install/), a package manager for Kubernetes.
 
 ## Installation
 
