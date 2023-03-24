@@ -5,6 +5,7 @@ import files from "./files.js";
 import eksctl from "./eksctl.js";
 import kubectl from "./kubectl.js";
 import manifest from "./manifest.js";
+import loadGenerators from "./loadGenerators.js";
 
 import {
   CLUSTER_NAME,
@@ -103,7 +104,7 @@ const cluster = {
           const policyArn = iam.lbcPolicyArn(stdout);
           return eksctl.createIamRoleLBCPol(policyArn);
         })
-        .then(() => kubectl.appplyAwsLbcCrd())
+        .then(() => kubectl.applyAwsLbcCrd())
         .then(() => helm.addEKSRepo())
         .then(() => helm.upgradeAWSLBC())
         .then(() => kubectl.deployHelmChartRepo())
@@ -173,19 +174,27 @@ const cluster = {
         .then(() => kubectl.deleteConfigMap(testId))
         .then(() => eksctl.scaleStatsiteNodes(0))
         .then(() => eksctl.scaleLoadGenNodes(0))
+        .then(() => loadGenerators.pollUntilGenNodesScaledToZero())
         .then(() => files.delete(K6_CR_FILE))
     );
+  },
+
+  async provisionStatsiteNode() {
+    await eksctl.scaleStatsiteNodes(1)
+  },
+
+  async provisionGenNodes(numNodes) {
+    await eksctl.scaleLoadGenNodes(numNodes)
+    await loadGenerators.pollUntilGenNodesReady(numNodes)
   },
 
   launchK6Test(testPath, testId, numNodes) {
     manifest.createK6Cr(testPath, testId, numNodes);
 
     return (
-      kubectl.createConfigMapWithName(testId, testPath)
-        .then(() => kubectl.applyManifest(files.path(STATSITE_FILE)))
+      kubectl.applyManifest(files.path(STATSITE_FILE))
+        .then(() => kubectl.createConfigMapWithName(testId, testPath))
         .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
-        .then(() => eksctl.scaleStatsiteNodes(1))
-        .then(() => eksctl.scaleLoadGenNodes(numNodes))
     );
   },
 

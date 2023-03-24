@@ -5,7 +5,7 @@ import manifest from "../utilities/manifest.js";
 import dbApi from "../utilities/dbApi.js";
 
 const runTest = async (options) => {
-  const spinner = new Spinner("Reading test script...");
+  const spinner = new Spinner("Initializing load test...");
   const testPath = options.file;
   const name = options.name;
   const vusPerPod = options.vusPerPod;
@@ -19,26 +19,29 @@ const runTest = async (options) => {
     } else if (name && (name.length > 80 || !name.replace(/\s/g, '').length || nameExists)) {
       throw new Error(`Either test name already exists, consists of only whitespaces, or is over 80 characters long.`);
     }
-    spinner.succeed(`Successfully read test script.`);
 
-    const numNodes = manifest.parallelism(numVus, vusPerPod);
-    spinner.info(`Initializing load test with ${numNodes} load ${numNodes === 1 ? "generator" : "generators"} (max of ${vusPerPod} VUs per pod)...`);
-    spinner.start();
     const testId = await dbApi.newTestId(testPath, name);
-    await cluster.launchK6Test(testPath, testId, numNodes);
     spinner.succeed("Successfully initialized load test.");
 
-    spinner.info("Running load test...");
-    dbApi.updateTestStatus(testId, "running");
+    const numNodes = manifest.parallelism(numVus, vusPerPod);
+    spinner.info(`Provisioning load test resources (${numNodes} generator${numNodes === 1 ? "" : "s"})...`);
     spinner.start();
+    await cluster.provisionStatsiteNode();
+    await cluster.provisionGenNodes(numNodes);
+    spinner.succeed(`Successfully provisioned load test resources.`);
+
+    spinner.info("Running load test...");
+    spinner.start();
+    await cluster.launchK6Test(testPath, testId, numNodes);
+    dbApi.updateTestStatus(testId, "running");
     await loadGenerators.pollUntilAllComplete(numNodes);
     dbApi.updateTestStatus(testId, "completed");
     spinner.succeed("Load test completed.");
 
-    spinner.info("Tearing down load generating resources.");
+    spinner.info("Tearing down load test resources.");
     spinner.start();
     await cluster.phaseOutK6();
-    spinner.succeed("Successfully removed load generating resources from cluster.");
+    spinner.succeed("Successfully removed load test resources from cluster.");
   } catch (err) {
     spinner.fail(`Error running test: ${err}`);
   }

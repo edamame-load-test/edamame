@@ -46,6 +46,30 @@ const loadGenerators = {
         resolve();
       }, POLL_FREQUENCY);
     });
+  },
+
+  pollUntilGenNodesReady(numNodes) {
+    return new Promise(resolve => {
+      const interval = setInterval(async () => {
+        const readyNodes = await kubectl.getGeneratorNodesReadyCount();
+        if (readyNodes !== numNodes) return;
+
+        clearInterval(interval);
+        resolve();
+      }, POLL_FREQUENCY);
+    });
+  },
+
+  pollUntilGenNodesScaledToZero() {
+    return new Promise(resolve => {
+      const interval = setInterval(async () => {
+        const nodes = await kubectl.getGeneratorNodesCount();
+        if (nodes !== 0) return;
+
+        clearInterval(interval);
+        resolve();
+      }, POLL_FREQUENCY);
+    });
   }
 };
 

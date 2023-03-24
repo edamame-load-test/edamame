@@ -3,23 +3,24 @@ import { promisify } from "util";
 import child_process from "child_process";
 const exec = promisify(child_process.exec);
 import {
-  AWS_LBC_CRD
+  AWS_LBC_CRD,
+  LOAD_GEN_NODE_GRP
 } from "../constants/constants.js";
 
 const kubectl = {
   existsOrError() {
     const msg = `Kubectl isn't installed. Please install it; ` +
-    `instructions can be found at: ` +
-    `https://kubernetes.io/docs/tasks/tools/`;
+      `instructions can be found at: ` +
+      `https://kubernetes.io/docs/tasks/tools/`;
 
     return (
       exec(`kubectl version --output=yaml`)
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           if (!stdout) {
-              throw new Error(msg);
-            }
+            throw new Error(msg);
+          }
         })
-        .catch(({stdout}) => {
+        .catch(({ stdout }) => {
           // will throw error if not currently connected to a cluster
           if (!stdout.match("Version")) {
             throw new Error(msg);
@@ -28,7 +29,7 @@ const kubectl = {
     );
   },
 
-  appplyAwsLbcCrd() {
+  applyAwsLbcCrd() {
     return exec(`kubectl apply -k ${AWS_LBC_CRD}`);
   },
 
@@ -60,7 +61,7 @@ const kubectl = {
   pidPortForward(name) {
     return (
       exec(`ps aux | grep -i ${name} | grep -v grep | awk {'print $2'}`)
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           return stdout;
         })
     );
@@ -69,7 +70,7 @@ const kubectl = {
   exactPodName(abbreviatedName) {
     return (
       this.getPods()
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           const pods = stdout.split("\n");
 
           for (let i = 0; i < pods.length; i++) {
@@ -94,12 +95,12 @@ const kubectl = {
           return exec(`kubectl port-forward ${podName} ${localAccessPort}:${podPort} &`);
         }
       });
-  }, 
+  },
 
   checkPodAvailable(podNameRegex) {
     return (
       this.getPods()
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           const pods = stdout.split("\n");
 
           for (let rowIdx = 0; rowIdx < pods.length; rowIdx++) {
@@ -107,7 +108,7 @@ const kubectl = {
 
             if (pod.match(podNameRegex)) {
               const podDetails = pod.split(" ");
-      
+
               for (let colIdx = 0; colIdx < podDetails.length; colIdx++) {
                 const detail = podDetails[colIdx];
                 if (detail && detail.match('Running')) {
@@ -123,7 +124,7 @@ const kubectl = {
   endPortForward(name) {
     return (
       this.pidPortForward(name)
-      .then(pid => exec(`kill ${pid}`))
+        .then(pid => exec(`kill ${pid}`))
     );
   },
 
@@ -131,7 +132,7 @@ const kubectl = {
   configMapExists(name) {
     return (
       exec(`kubectl get configmaps`)
-        .then(({stdout}) => {
+        .then(({ stdout }) => {
           return !!stdout.match(name);
         })
     );
@@ -166,8 +167,24 @@ const kubectl = {
 
   getPods() {
     return exec(`kubectl get pods`);
+  },
+
+  async getGeneratorNodes() {
+    const { stdout } = await exec(`kubectl get nodes --selector alpha.eksctl.io/nodegroup-name=ng-gen`);
+    const nodes = stdout.split("\n").filter(line => line !== '').slice(1);
+    return nodes;
+  },
+
+  async getGeneratorNodesCount() {
+    const nodes = await this.getGeneratorNodes();
+    return nodes.length;
+  },
+
+  async getGeneratorNodesReadyCount() {
+    const nodes = await this.getGeneratorNodes();
+    const readyNodes = nodes.filter(node => node.match(/\sReady\s/));
+    return readyNodes.length;
   }
 };
 
 export default kubectl;
-
