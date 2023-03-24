@@ -25,7 +25,7 @@ program
   .command("run")
   .requiredOption('-f, --file <file>', 'File path of k6 load test script')
   .option('-n, --name <name>', 'Name to associate with test')
-  .option('-v, --vus-per-pod <vus>', 'Specify the number of VUs per pod', NUM_VUS_PER_POD)
+  .option('-v, --vus-per-pod <vus>', 'Specify the maximum number of VUs per pod', NUM_VUS_PER_POD)
   .description("run the load test")
   .action(runTest);
 

@@ -64,6 +64,10 @@ spec:
         - name: config
           configMap:
             name: statsite-config
+      tolerations:
+        - key: special
+          value: "sysctl-udp-buffer"
+          effect: NoSchedule
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -72,4 +76,4 @@ spec:
                   - key: alpha.eksctl.io/nodegroup-name
                     operator: In
                     values:
-                      - statsite
+                      - ng-gen

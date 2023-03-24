@@ -35,7 +35,11 @@ spec:
                 - key: alpha.eksctl.io/nodegroup-name
                   operator: In
                   values:
-                    - load-generators
+                    - ng-gen
+    tolerations:
+    - key: "special"
+      value: "sysctl-network-capacity"
+      effect: NoSchedule
     securityContext:
       sysctls:
       - name: net.ipv4.ip_local_port_range

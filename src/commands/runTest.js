@@ -22,7 +22,7 @@ const runTest = async (options) => {
     spinner.succeed(`Successfully read test script.`);
 
     const numNodes = manifest.parallelism(numVus, vusPerPod);
-    spinner.info(`Initializing load test with ${numNodes} load ${numNodes === 1 ? "generator" : "generators"} (${vusPerPod} VUs per pod)...`);
+    spinner.info(`Initializing load test with ${numNodes} load ${numNodes === 1 ? "generator" : "generators"} (max of ${vusPerPod} VUs per pod)...`);
     spinner.start();
     const testId = await dbApi.newTestId(testPath, name);
     await cluster.launchK6Test(testPath, testId, numNodes);
