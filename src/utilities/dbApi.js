@@ -1,6 +1,4 @@
 import { 
-  DB_API_PORT,
-  DB_API_SERVICE,
   DB_API_INGRESS,
   EXTERNAL_IP_REGEX,
   DB_API_INGRESS_NAME
@@ -203,7 +201,3 @@ const dbApi = {
 };
 
 export default dbApi;
-
-//dbApi.restoreIp();
-
-
