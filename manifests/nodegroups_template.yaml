@@ -7,7 +7,7 @@ metadata:
 
 managedNodeGroups:
   - name: ng-agg
-    instanceType: m5zn.xlarge # Testing: m5.large; Production: m5zn.xlarge
+    instanceType: m5.large # Testing: m5.large; Production: m5zn.xlarge
     desiredCapacity: 0
     minSize: 0
     maxSize: 1
@@ -21,7 +21,7 @@ managedNodeGroups:
 
 nodeGroups:
   - name: ng-gen
-    instanceType: m5.24xlarge # Testing: m5.large; Production: m5.24xlarge
+    instanceType: m5.large # Testing: m5.large; Production: m5.24xlarge
     desiredCapacity: 0
     minSize: 0
     maxSize: 20
