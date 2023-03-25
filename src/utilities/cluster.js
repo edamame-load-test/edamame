@@ -104,12 +104,12 @@ const cluster = {
           const policyArn = iam.lbcPolicyArn(stdout);
           return eksctl.createIamRoleLBCPol(policyArn);
         })
-        .then(() => kubectl.applyAwsLbcCrd())
         .then(() => helm.addEKSRepo())
-        .then(() => helm.upgradeAWSLBC())
-        .then(() => kubectl.deployHelmChartRepo())
+        .then(() => kubectl.applyAwsLbcCrd())
+        .then(() => helm.installAWSLBC())
         .then(() => eksctl.localIp())
         .then(({ stdout }) => manifest.createDbApiIngress(stdout))
+        .then(() => new Promise(res => setTimeout(res, 15 * 1000)))
         .then(() => kubectl.applyManifest(files.path(DB_API_INGRESS)))
     );
   },

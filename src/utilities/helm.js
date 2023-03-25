@@ -25,16 +25,13 @@ const helm = {
     return exec(`helm repo add eks https://aws.github.io/eks-charts`);
   },
 
-  upgradeAWSLBC() {
+  installAWSLBC() {
     return exec(
-      `helm upgrade -i aws-load-balancer-controller \
-      eks/aws-load-balancer-controller \
-      -n kube-system \
+      `helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
       --set clusterName=${CLUSTER_NAME} \
       --set serviceAccount.create=false \
       --set serviceAccount.name=aws-load-balancer-controller \
-      --set image.tag="${AWS_LBC_VERSION}" \
-      --version="${AWS_LBC_CHART_VERSION}"`
+      -n kube-system`
     );
   }
 };
