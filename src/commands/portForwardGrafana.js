@@ -8,7 +8,7 @@ const portForwardGrafana = () => {
   const spinner = new Spinner(
     "Configuring local access to grafana dashboard..."
   );
-  grafana
+  return grafana
     .getLocalAddressWhenReady()
     .then((message) => {
       message.match(`because port ${GRAF_PORT}`)

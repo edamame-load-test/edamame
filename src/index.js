@@ -13,7 +13,7 @@ import {
 import { stopTest } from "./commands/stopTest.js";
 import { NUM_VUS_PER_POD } from "./constants/constants.js";
 import { Command } from "commander";
-import { initGui } from "./commands/initGui.js";
+import { startGui, stopGui } from "./commands/gui.js";
 
 const program = new Command();
 
@@ -81,10 +81,16 @@ program
 
 program
   .command("dashboard")
+  .option("--start", "Start Dashboard")
+  .option("--stop", "Stop Dashboard (leave grafana running)")
   .description("Spin up grafana, and the express app serving react")
-  .action(() => {
-    portForwardGrafana(); // Spin up grafana
-    initGui();
+  .action(async (options) => {
+    if (options.start) {
+      await portForwardGrafana(); // Spin up grafana
+      startGui();
+    } else if (options.stop) {
+      stopGui();
+    }
   });
 
 program

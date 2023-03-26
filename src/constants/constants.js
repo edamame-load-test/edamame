@@ -2,6 +2,7 @@ const NUM_VUS_PER_POD = 20000;
 const POLL_FREQUENCY = 30000;
 const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
+const DASHBOARD_PORT = 3001;
 const PORT_FORWARD_DELAY = 3500;
 const DB_API_SERVICE = "db-api-service";
 const DB_API_INGRESS_NAME = "ingress-db-api";
@@ -12,8 +13,8 @@ const GRAF_DB_FILE = "grafana_dashboards.yaml";
 const GRAF_DS = "grafana-datasources";
 const GRAF_DBS = "grafana-dashboards";
 const GRAF_JSON_DBS = "grafana_json_dbs";
-const K6_CR_TEMPLATE = "k6_custom_resource_template.yaml"
-const K6_CR_FILE = 'load_test_crds/k6_crd.yaml';
+const K6_CR_TEMPLATE = "k6_custom_resource_template.yaml";
+const K6_CR_FILE = "load_test_crds/k6_crd.yaml";
 const PG_SECRET_FILE = "postgres_secret.yaml";
 const PG_CM = "psql-configmap";
 const PG_CM_FILE = "postgres_configmap.yaml";
@@ -34,8 +35,7 @@ const AWS_LBC_VERSION = "v2.4.1";
 const AWS_LBC_CHART_VERSION = "1.4.1";
 const EBS_CSI_DRIVER_REGEX =
   "ebs-csi-controller-sa.*AmazonEKS_EBS_CSI_DriverRole";
-const AWS_LBC_CRD = 
-`"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"`;
+const AWS_LBC_CRD = `"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"`;
 const AWS_LBC_POLICY_REGEX = `arn:aws:iam::.*EdamameAWSLoadBalancerControllerIAMPolicy`;
 
 export {
@@ -75,5 +75,6 @@ export {
   AWS_LBC_CRD,
   AWS_LBC_VERSION,
   AWS_LBC_POLICY_REGEX,
-  AWS_LBC_CHART_VERSION
+  AWS_LBC_CHART_VERSION,
+  DASHBOARD_PORT,
 };
