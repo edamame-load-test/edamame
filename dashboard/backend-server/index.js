@@ -2,7 +2,7 @@ import express from "express";
 import { fileURLToPath } from "url";
 import path from "path";
 import testRoutes from "./routes/testRoutes.js";
-import loadTestRoutes from "./routes/loadTestRoutes.js";
+import clusterRoutes from "./routes/clusterRoutes.js";
 const app = express();
 app.use(express.json());
 
@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, "build")));
 
 // API Routes
 app.use("/tests", testRoutes);
-app.use("/load-test", loadTestRoutes); // Will be /load-test/stop etc.
+app.use("/cluster", clusterRoutes);
 
 // Fallback to the React app for any other route
 app.get("/");

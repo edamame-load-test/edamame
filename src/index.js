@@ -10,6 +10,7 @@ import { portForwardGrafana } from "./commands/portForwardGrafana.js";
 import { stopTest } from "./commands/stopTest.js";
 import { NUM_VUS_PER_POD } from "./constants/constants.js";
 import { Command } from "commander";
+import { initGui } from "./commands/initGui.js";
 
 const program = new Command();
 
@@ -67,6 +68,14 @@ program
   .description("stop a running test")
   .action(() => {
     stopTest();
+  });
+
+program
+  .command("dashboard")
+  .description("Spin up grafana, and the express app serving react")
+  .action(() => {
+    portForwardGrafana(); // Spin up grafana
+    initGui();
   });
 
 program

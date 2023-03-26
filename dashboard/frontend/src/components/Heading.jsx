@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FiExternalLink } from "react-icons/fi";
 import logo from "../assets/logo.svg";
 import testService from "../services/testService";
+import generateGrafanaUrl from "../utilities/generateGrafanaUrl";
 
 // Check if I'm getting infinite loops in my useEffect. I might be making a mistake here
 // Figure out why my heading is switching to something to not running right away.
@@ -12,8 +13,8 @@ function Heading({ currTest, setCurrTest }) {
 
   useEffect(() => {
     async function checkRunningTest() {
-      const tests = await testService.getTests();
-      const activeTests = tests.filter((test) => test.status !== "completed");
+      const tests = await testService.getTests(); // Query the DB to get an updated list of tests
+      const activeTests = tests.filter((test) => test.status !== "completed"); // Check if any tests are active
       if (activeTests.length === 0) {
         setCurrTest({});
         setIsStopping(false); // If there are no tests, there should be no tests stopping either
@@ -21,10 +22,9 @@ function Heading({ currTest, setCurrTest }) {
         setCurrTest(activeTests[0]);
       }
     }
-    const intervalId = setInterval(checkRunningTest, 5000);
-
+    const intervalId = setInterval(checkRunningTest, 3000);
     return () => clearInterval(intervalId); // Cleanup function
-  }, [setCurrTest, isStopping]);
+  }, []);
 
   useEffect(() => {
     function formatElapsedTime(seconds) {
@@ -77,7 +77,7 @@ function Heading({ currTest, setCurrTest }) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <button className="border border-white rounded px-3 py-[8px] my-4">
+              <button className="border border-white rounded px-3 py-[8px] my-4 hover:bg-white transition hover:text-green-900">
                 Learn to write tests using K6
               </button>
             </a>
@@ -107,9 +107,15 @@ function Heading({ currTest, setCurrTest }) {
             )}
 
             <div className="flex gap-2 justify-center mt-2">
-              <button className="bg-blue antialiased flex gap-1 align-middle text-white rounded px-3 py-2 mt-4">
-                Open in Grafana <FiExternalLink />
-              </button>
+              <a
+                href={generateGrafanaUrl(currTest.name)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <button className="bg-blue antialiased flex gap-1 align-middle text-white rounded px-3 py-2 mt-4">
+                  Open in Grafana <FiExternalLink />
+                </button>
+              </a>
               <button
                 className={`bg-pink antialiased flex text-white gap-1 align-middle rounded px-3 py-2 mt-4 ${
                   isStopping ? "opacity-50" : ""

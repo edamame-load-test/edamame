@@ -20,7 +20,19 @@ const testService = {
     }
   },
   async stopTest() {
-    await axios.post("/load-test/stop");
+    await axios.post("/tests/stop");
+  },
+
+  async deleteTest(name) {
+    await axios.delete(`/tests/${name}`);
+  },
+
+  async teardown() {
+    await axios.post("/tests/teardown");
+  },
+  async getTest(name) {
+    const { data } = await axios.get(`/tests/${name}`);
+    return data;
   },
 };
 

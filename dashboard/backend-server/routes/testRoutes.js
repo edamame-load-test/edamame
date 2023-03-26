@@ -6,9 +6,10 @@ import express from "express";
 import { fileURLToPath } from "url";
 import path from "path";
 import { runTest } from "../../../src/commands/runTest.js";
+import { deleteTest } from "../../../src/commands/deleteTest.js";
+import { stopTest } from "../../../src/commands/stopTest.js";
+import { destroyEKSCluster } from "../../../src/commands/destroy.js";
 import dbApi from "../../../src/utilities/dbApi.js";
-import axios from "axios";
-import { portForwardGrafana } from "../../../src/commands/portFotwardGrafana.js";
 const router = express.Router();
 router.use(express.json());
 
@@ -18,7 +19,6 @@ const __dirname = path.dirname(__filename);
 
 router.get("/", async (req, res) => {
   try {
-    // const { data } = await axios.get(`${process.env.TEMPORARY_DB_API_URL}/tests`); // ← This is currently much faster until we make the fix
     const data = await dbApi.getAllTests();
     res.json(data);
   } catch (error) {
@@ -37,8 +37,6 @@ router.post("/", async (req, res) => {
     path: filePath,
   };
 
-  console.log(filePath);
-
   fs.writeFile(filePath, scriptString, (error) => {
     if (error) {
       console.error("Error writing the script file:", error);
@@ -48,6 +46,27 @@ router.post("/", async (req, res) => {
       runTest(options);
     }
   });
+});
+
+router.delete("/:name", async (req, res) => {
+  const name = req.params.name;
+  deleteTest(name);
+});
+
+router.post("/stop", (req, res) => {
+  stopTest();
+  res.status(200).json({ message: "Load test stopped successfully" });
+});
+
+router.post("/teardown", (req, res) => {
+  console.log("destroying");
+  destroyEKSCluster();
+});
+
+router.get("/:name", async (req, res) => {
+  const name = req.params.name;
+  const data = await dbApi.getTest(name);
+  res.status(200).json(data);
 });
 
 export default router;

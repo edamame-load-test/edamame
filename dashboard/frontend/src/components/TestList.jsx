@@ -6,40 +6,20 @@
 import { FiExternalLink, FiMoreVertical } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import testService from "../services/testService";
+import ScriptModal from "./ScriptModal";
 import LaunchTestModal from "./LaunchTestModal";
-
-function timeDifferenceFormatted(endTime, startTime) {
-  let seconds = Math.floor((new Date(endTime) - new Date(startTime)) / 1000); // convert to seconds and round down
-  let hours = Math.floor(seconds / 3600);
-  let minutes = Math.floor((seconds - hours * 3600) / 60);
-  let hoursFormatted = hours > 0 ? `${hours}hr${hours === 1 ? "" : "s"}` : ""; // handle singular/plural
-  let minutesFormatted =
-    minutes > 0 ? `${minutes}min${minutes === 1 ? "" : "s"}` : ""; // handle singular/plural
-  if (hours > 0) {
-    return `${hoursFormatted} ${minutesFormatted}`; // include both hours and minutes
-  } else if (minutes > 0) {
-    return minutesFormatted; // only include minutes
-  } else {
-    return "0 mins"; // if below a minute
-  }
-}
-
-function formatDate(date) {
-  const monthDay = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "2-digit",
-  }).format(date);
-  const time = new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(date);
-  return `${monthDay} · ${time}`;
-}
+import generateGrafanaUrl from "../utilities/generateGrafanaUrl";
+import formatDate from "../utilities/formatDate";
+import Menu from "./Menu";
+import timeDifferenceFormatted from "../utilities/timeDifferenceFormatted";
 
 function TestList({ currTest, setCurrTest }) {
   const [tests, setTests] = useState([]);
+  const [isScriptModal, setIsScriptModal] = useState(false);
+  const [currScript, setCurrScript] = useState({});
   const [isModal, setIsModal] = useState(false);
+  const [menu, setMenu] = useState(null);
+
   useEffect(() => {
     async function getAllTests() {
       const data = await testService.getTests();
@@ -67,8 +47,7 @@ function TestList({ currTest, setCurrTest }) {
             will appear below.
           </p>
           <button
-            data-tooltip-target="tooltip-default"
-            className="bg-blue antialiased text-white rounded px-3 py-2 mt-4"
+            className="bg-blue antialiased text-white rounded px-3 py-2 mt-4 hover:bg-darkBlue"
             onClick={() => setIsModal(true)}
             title="testing a title"
           >
@@ -88,12 +67,17 @@ function TestList({ currTest, setCurrTest }) {
             setCurrTest={setCurrTest}
           />
         )}
+        {isScriptModal && (
+          <ScriptModal
+            setIsScriptModal={setIsScriptModal}
+            currScript={currScript}
+          />
+        )}
         <div className="mt-10 max-w-4xl mx-auto">
           <div className="flex items-center justify-between">
             <h1 className="font-bold text-xl ml-6">All Tests</h1>
             <button
-              data-tooltip-target="tooltip-default"
-              className={`bg-blue antialiased text-white rounded px-3 py-2 flex gap-1 ${
+              className={`bg-blue antialiased text-white rounded px-3 py-2 flex gap-1 hover:bg-darkBlue ${
                 Object.keys(currTest).length !== 0 ? "opacity-50" : ""
               }`}
               onClick={() => setIsModal(true)}
@@ -131,13 +115,41 @@ function TestList({ currTest, setCurrTest }) {
                       )}
                     </td>
                     <td>
-                      <div className="flex gap-4 items-center">
-                        <a href="http://www.google.com">
-                          <button className="border-blue border rounded px-3 py-2 text-blue flex gap-1 hover:bg-blue hover:text-white hover:antialiased transition ease-in-out">
+                      <div className="flex gap-5 items-center">
+                        <a
+                          href={generateGrafanaUrl(test.name)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <button className="whitespace-nowrap border-blue  border rounded px-3 py-2 text-blue flex gap-1 hover:bg-blue hover:text-white hover:antialiased transition ease-in-out">
                             Open in Grafana <FiExternalLink />
                           </button>
                         </a>
-                        <FiMoreVertical size={20} className="text-slate-500" />
+                        <div>
+                          <div
+                            className="hover:bg-slate-200 hover:cursor-pointer p-2 rounded-full transition z-60 relative"
+                            onClick={() => {
+                              if (!menu) {
+                                setMenu(test.id);
+                              } else {
+                                setMenu(null);
+                              }
+                            }}
+                          >
+                            <FiMoreVertical
+                              size={20}
+                              className="text-slate-500"
+                            />
+                          </div>
+                          {test.id === menu ? (
+                            <Menu
+                              name={test.name}
+                              setMenu={setMenu}
+                              setCurrScript={setCurrScript}
+                              setIsScriptModal={setIsScriptModal}
+                            />
+                          ) : null}
+                        </div>
                       </div>
                     </td>
                   </tr>
