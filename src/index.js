@@ -6,7 +6,10 @@ import { runTest } from "./commands/runTest.js";
 import { get } from "./commands/get.js";
 import { updateTestName } from "./commands/updateTestName.js";
 import { deleteTest } from "./commands/deleteTest.js";
-import { portForwardGrafana } from "./commands/portForwardGrafana.js";
+import {
+  portForwardGrafana,
+  stopGrafana,
+} from "./commands/portForwardGrafana.js";
 import { stopTest } from "./commands/stopTest.js";
 import { NUM_VUS_PER_POD } from "./constants/constants.js";
 import { Command } from "commander";
@@ -56,11 +59,17 @@ program
 
 program
   .command("grafana")
+  .option("--start", "Start Grafana")
+  .option("--stop", "Stop Grafana")
   .description(
     "configure local access to grafana dashboard to analyze test metrics"
   )
-  .action(() => {
-    portForwardGrafana();
+  .action((options) => {
+    if (options.start) {
+      portForwardGrafana();
+    } else if (options.stop) {
+      stopGrafana();
+    }
   });
 
 program

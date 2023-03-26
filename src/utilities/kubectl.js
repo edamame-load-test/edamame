@@ -1,32 +1,29 @@
 import files from "./files.js";
 import { promisify } from "util";
 import child_process from "child_process";
+import { spawn } from "child_process";
 const exec = promisify(child_process.exec);
-import {
-  AWS_LBC_CRD,
-  LOAD_GEN_NODE_GRP
-} from "../constants/constants.js";
+import { AWS_LBC_CRD, LOAD_GEN_NODE_GRP } from "../constants/constants.js";
 
 const kubectl = {
   existsOrError() {
-    const msg = `Kubectl isn't installed. Please install it; ` +
+    const msg =
+      `Kubectl isn't installed. Please install it; ` +
       `instructions can be found at: ` +
       `https://kubernetes.io/docs/tasks/tools/`;
 
-    return (
-      exec(`kubectl version --output=yaml`)
-        .then(({ stdout }) => {
-          if (!stdout) {
-            throw new Error(msg);
-          }
-        })
-        .catch(({ stdout }) => {
-          // will throw error if not currently connected to a cluster
-          if (!stdout.match("Version")) {
-            throw new Error(msg);
-          }
-        })
-    );
+    return exec(`kubectl version --output=yaml`)
+      .then(({ stdout }) => {
+        if (!stdout) {
+          throw new Error(msg);
+        }
+      })
+      .catch(({ stdout }) => {
+        // will throw error if not currently connected to a cluster
+        if (!stdout.match("Version")) {
+          throw new Error(msg);
+        }
+      });
   },
 
   applyAwsLbcCrd() {
@@ -59,29 +56,25 @@ const kubectl = {
   },
 
   pidPortForward(name) {
-    return (
-      exec(`ps aux | grep -i ${name} | grep -v grep | awk {'print $2'}`)
-        .then(({ stdout }) => {
-          return stdout;
-        })
-    );
+    return exec(
+      `ps aux | grep -i ${name} | grep -v grep | awk {'print $2'}`
+    ).then(({ stdout }) => {
+      return stdout;
+    });
   },
 
   exactPodName(abbreviatedName) {
-    return (
-      this.getPods()
-        .then(({ stdout }) => {
-          const pods = stdout.split("\n");
+    return this.getPods().then(({ stdout }) => {
+      const pods = stdout.split("\n");
 
-          for (let i = 0; i < pods.length; i++) {
-            const pod = pods[i];
-            if (pod.match(abbreviatedName)) {
-              const podDetails = pod.split(" ");
-              return podDetails[0];
-            }
-          }
-        })
-    );
+      for (let i = 0; i < pods.length; i++) {
+        const pod = pods[i];
+        if (pod.match(abbreviatedName)) {
+          const podDetails = pod.split(" ");
+          return podDetails[0];
+        }
+      }
+    });
   },
 
   localPortAlreadyBound(port) {
@@ -89,53 +82,52 @@ const kubectl = {
   },
 
   tempPortForward(podName, localAccessPort, podPort) {
-    this.pidPortForward(podName)
-      .then(pid => {
-        if (!pid) {
-          return exec(`kubectl port-forward ${podName} ${localAccessPort}:${podPort} &`);
-        }
-      });
+    const options = {
+      detached: true,
+      stdio: "ignore",
+      shell: true, // Use a shell to execute the command
+    };
+
+    const command = `kubectl port-forward ${podName} ${localAccessPort}:${podPort}`;
+
+    this.pidPortForward(podName).then((pid) => {
+      if (!pid) {
+        const child = spawn(command, [], options);
+        child.unref();
+        return child;
+      }
+    });
   },
 
   checkPodAvailable(podNameRegex) {
-    return (
-      this.getPods()
-        .then(({ stdout }) => {
-          const pods = stdout.split("\n");
+    return this.getPods().then(({ stdout }) => {
+      const pods = stdout.split("\n");
 
-          for (let rowIdx = 0; rowIdx < pods.length; rowIdx++) {
-            const pod = pods[rowIdx];
+      for (let rowIdx = 0; rowIdx < pods.length; rowIdx++) {
+        const pod = pods[rowIdx];
 
-            if (pod.match(podNameRegex)) {
-              const podDetails = pod.split(" ");
+        if (pod.match(podNameRegex)) {
+          const podDetails = pod.split(" ");
 
-              for (let colIdx = 0; colIdx < podDetails.length; colIdx++) {
-                const detail = podDetails[colIdx];
-                if (detail && detail.match('Running')) {
-                  return true;
-                }
-              }
+          for (let colIdx = 0; colIdx < podDetails.length; colIdx++) {
+            const detail = podDetails[colIdx];
+            if (detail && detail.match("Running")) {
+              return true;
             }
           }
-        })
-    );
+        }
+      }
+    });
   },
 
   endPortForward(name) {
-    return (
-      this.pidPortForward(name)
-        .then(pid => exec(`kill ${pid}`))
-    );
+    return this.pidPortForward(name).then((pid) => exec(`kill ${pid}`));
   },
 
-
   configMapExists(name) {
-    return (
-      exec(`kubectl get configmaps`)
-        .then(({ stdout }) => {
-          return !!stdout.match(name);
-        })
-    );
+    return exec(`kubectl get configmaps`).then(({ stdout }) => {
+      return !!stdout.match(name);
+    });
   },
 
   createConfigMap(path) {
@@ -146,7 +138,9 @@ const kubectl = {
   },
 
   deployHelmChartRepo() {
-    return exec(`kubectl -n kube-system rollout status deployment aws-load-balancer-controller`);
+    return exec(
+      `kubectl -n kube-system rollout status deployment aws-load-balancer-controller`
+    );
   },
 
   getIngress(ingressName) {
@@ -170,8 +164,13 @@ const kubectl = {
   },
 
   async getGeneratorNodes() {
-    const { stdout } = await exec(`kubectl get nodes --selector alpha.eksctl.io/nodegroup-name=ng-gen`);
-    const nodes = stdout.split("\n").filter(line => line !== '').slice(1);
+    const { stdout } = await exec(
+      `kubectl get nodes --selector alpha.eksctl.io/nodegroup-name=ng-gen`
+    );
+    const nodes = stdout
+      .split("\n")
+      .filter((line) => line !== "")
+      .slice(1);
     return nodes;
   },
 
@@ -182,9 +181,21 @@ const kubectl = {
 
   async getGeneratorNodesReadyCount() {
     const nodes = await this.getGeneratorNodes();
-    const readyNodes = nodes.filter(node => node.match(/\sReady\s/));
+    const readyNodes = nodes.filter((node) => node.match(/\sReady\s/));
     return readyNodes.length;
-  }
+  },
+  // If there's a process on a port, it kills it, otherwise it throws an error
+  async stopProcessOnPort(port) {
+    try {
+      const { stdout } = await exec(
+        `lsof -i :${port} | grep LISTEN | awk '{print $2}'`
+      );
+      const pid = stdout.trim();
+      if (pid) {
+        return exec(`kill ${pid}`);
+      }
+    } catch (err) {}
+  },
 };
 
 export default kubectl;
