@@ -118,7 +118,7 @@ test('base 64 encodes a value appropriately', () => {
 });
 
 test('calculates parallelism argument accurately with appropriate rounding', () => {
-  expect(manifest.parallelism(10)).toBe(1);
+  expect(manifest.parallelism(10, 50)).toBe(1);
 });
 
 test('reads latest test id property accurately from k6 custom resource file', () => {

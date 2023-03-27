@@ -10,22 +10,18 @@ import {
 const kubectl = {
   existsOrError() {
     const msg = `Kubectl isn't installed. Please install it; ` +
-      `instructions can be found at: ` +
-      `https://kubernetes.io/docs/tasks/tools/`;
+    `instructions can be found at: ` +
+    `https://kubernetes.io/docs/tasks/tools/`;
 
     return (
       exec(`kubectl version --output=yaml`)
-        .then(({ stdout }) => {
-          if (!stdout) {
-            throw new Error(msg);
-          }
-        })
-        .catch(({ stdout }) => {
-          // will throw error if not currently connected to a cluster
-          if (!stdout.match("Version")) {
-            throw new Error(msg);
-          }
-        })
+      .catch(({ stdout }) => {
+        // need to check stdout b/c will throw error if kubectl is installed 
+        //  but user not currently connected to a cluster 
+        if (!stdout.match("Version")) {
+          throw new Error(msg);
+        }
+      })
     );
   },
 

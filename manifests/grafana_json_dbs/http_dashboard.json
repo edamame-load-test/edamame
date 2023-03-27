@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -25,152 +28,521 @@
   "liveNow": false,
   "panels": [
     {
-      "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
-      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
       "fieldConfig": {
         "defaults": {
-          "decimals": 0,
+          "color": {
+            "fixedColor": "transparent",
+            "mode": "fixed"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           },
-          "unit": "requests"
+          "unit": "none"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
-      "id": 2,
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 90
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT value \nFROM samples\nLEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE \n  samples.metric = 'vus'\n  AND $__timeFilter(ts)\nORDER BY ts DESC\nLIMIT 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Latest Number of VUs",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "transparent",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 26,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 90
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT value \n  FROM samples\n  LEFT JOIN tests\n    ON samples.test_id = tests.id\n    AND tests.name = '${testName}'\n  WHERE \n    samples.metric = 'ws_current_connections'\n    AND $__timeFilter(ts)\n  ORDER BY ts DESC\n  LIMIT 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Latest Number of Websocket Connections",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#087634",
+                "value": null
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 22,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["sum"],
-          "fields": "/^sum$/",
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
           "values": false
         },
-        "text": {},
-        "textMode": "value"
-      },
-      "pluginVersion": "9.1.0",
-      "targets": [
-        {
-          "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
-          "format": "time_series",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT ts AS \"time\",\nSUM(value)\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric = 'counts.http_reqs'\nGROUP BY 1\nORDER BY 1 ASC",
-          "refId": "A",
-          "select": [[{ "params": ["value"], "type": "column" }]],
-          "timeColumn": "time",
-          "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
-        }
-      ],
-      "title": "Requests Made",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 50 }
-            ]
-          },
-          "unit": "reqs failed"
+        "text": {
+          "valueSize": 90
         },
-        "overrides": []
-      },
-      "gridPos": { "h": 6, "w": 7, "x": 8, "y": 0 },
-      "id": 4,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
-        "text": {},
         "textMode": "auto"
       },
       "pluginVersion": "9.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
-          "format": "time_series",
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT ts AS \"time\",\nMAX(value)\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric = 'counts.http_req_failed'\nGROUP BY 1\nORDER BY 1 ASC",
+          "rawSql": "SELECT\n  SUM(value)\n  FROM samples\nLEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric = 'counts.ws_failed_handshakes'\n",
           "refId": "A",
-          "select": [[{ "params": ["value"], "type": "column" }]],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
           "timeColumn": "time",
-          "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
-      "title": "HTTP Failures",
+      "title": "Total Failed Websocket Handshakes",
       "type": "stat"
     },
     {
-      "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "description": "",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "continuous-RdYlGr" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "red", "value": 8000 }
+              {
+                "color": "#087634",
+                "value": null
+              },
+              {
+                "color": "#C4162A",
+                "value": 80
+              }
             ]
           },
-          "unit": "ms"
+          "unit": "none"
         },
         "overrides": []
       },
-      "gridPos": { "h": 6, "w": 8, "x": 15, "y": 0 },
-      "id": 8,
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 20,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": ["max"], "fields": "", "values": false },
-        "text": { "titleSize": 32, "valueSize": 111 },
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 90
+        },
         "textMode": "auto"
       },
       "pluginVersion": "9.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  SUM(value)\n  FROM samples\nLEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric = 'counts.ws_abnormal_closure_error'\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Abnormal Websocket Connection Closures",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-reds"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "vus"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current Websocket Connections"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#0a5760",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed Websocket Handshakes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
           "format": "time_series",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT ts as \"time\", MAX(value) AS max_value \nFROM samples \nWHERE metric IN ('counts.http_reqs', 'timers.http_req_duration.p99') AND $__timeFilter(ts)\nGROUP BY ts \nHAVING COUNT(DISTINCT metric) = 2 \nORDER BY max_value DESC ",
+          "rawSql": "SELECT \n  ts AS time,\n  value,\n  CASE metric\n    WHEN 'ws_current_connections' THEN 'Current Websocket Connections'\n    WHEN 'counts.ws_failed_handshakes' THEN 'Failed Websocket Handshakes'\n    WHEN 'counts.ws_abnormal_closure_error' THEN 'Abnormal Websocket Closure Errors'\n    ELSE metric\n  END metric\nFROM samples\n  LEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric IN ('vus', 'ws_current_connections', 'counts.ws_failed_handshakes', 'counts.ws_abnormal_closure_error')\nORDER BY ts\n",
           "refId": "A",
-          "select": [[{ "params": ["value"], "type": "column" }]],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
           "timeColumn": "time",
-          "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
-      "title": "Request Duration (99th percentile)",
-      "type": "stat"
+      "title": "Number of VUs & Websocket Connections",
+      "type": "timeseries"
     },
     {
-      "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
@@ -180,30 +552,54 @@
             "drawStyle": "line",
             "fillOpacity": 13,
             "gradientMode": "hue",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "lineInterpolation": "smooth",
-            "lineStyle": { "fill": "solid" },
+            "lineStyle": {
+              "fill": "solid"
+            },
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": { "type": "linear" },
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "off" }
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
             ]
           },
           "unit": "none"
         },
         "overrides": []
       },
-      "gridPos": { "h": 12, "w": 23, "x": 0, "y": 6 },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
       "id": 6,
       "options": {
         "legend": {
@@ -212,32 +608,424 @@
           "placement": "bottom",
           "showLegend": true
         },
-        "timezones": [""],
-        "tooltip": { "mode": "single", "sort": "none" }
+        "timezones": [
+          ""
+        ],
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "9.1.0",
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
           "format": "time_series",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT ts AS time,\nmetric,\nvalue\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric IN ('vus', 'counts.http_reqs')\nORDER BY ts",
+          "rawSql": "SELECT \n  ts AS time,\n  CASE metric\n    WHEN 'counts.ws_bytes_sent' THEN 'Bytes Sent' \n    WHEN 'counts.ws_bytes_received' THEN 'Bytes Received' \n    ELSE metric\n  END,\n  value\nFROM samples\n  LEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric IN ('counts.ws_bytes_sent', 'counts.ws_bytes_received')\nORDER BY ts",
           "refId": "Requsts",
-          "select": [[{ "params": ["value"], "type": "column" }]],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
           "timeColumn": "time",
-          "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
-      "title": "# of Requests & VUs",
+      "title": "Websocket Messages: Bytes Sent & Received",
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#087634",
+                "value": null
+              },
+              {
+                "color": "dark-yellow",
+                "value": 500
+              },
+              {
+                "color": "dark-red",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 19
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 32,
+          "valueSize": 90
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT value\n  FROM samples \n    LEFT JOIN tests\n    ON samples.test_id = tests.id\n    AND tests.name = '${testName}'\n  WHERE \n    metric = 'timers.http_req_duration.p90' \n    AND $__timeFilter(ts)\n  ORDER BY value DESC ",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Max 90th Percentile HTTP Request Duration",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#087634",
+                "value": null
+              },
+              {
+                "color": "dark-yellow",
+                "value": 500
+              },
+              {
+                "color": "dark-red",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 19
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 32,
+          "valueSize": 90
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT value\n  FROM samples \n    LEFT JOIN tests\n    ON samples.test_id = tests.id\n    AND tests.name = '${testName}'\n  WHERE \n    metric = 'timers.http_req_duration.p99' \n    AND $__timeFilter(ts)\n  ORDER BY value DESC ",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Max 99th Percentile HTTP Request Duration",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "transparent",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#087634",
+                "value": null
+              },
+              {
+                "color": "#C4162A",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 19
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 90
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  SUM(value)\nFROM samples\nLEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric = 'counts.http_req_failed'\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total HTTP Request Failures",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "transparent",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#087634",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 19
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "/^sum$/",
+          "values": false
+        },
+        "text": {
+          "valueSize": 90
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  SUM(value)\nFROM samples\nLEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric = 'counts.http_reqs'",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total HTTP Requests",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd",
+            "seriesBy": "last"
+          },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
@@ -245,24 +1033,37 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "fillOpacity": 40,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": { "type": "linear" },
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "off" }
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
+              {
+                "color": "green",
+                "value": null
+              }
             ]
           },
           "unit": "ms"
@@ -271,51 +1072,287 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "timers.http_req_duration.count"
-            },
-            "properties": [{ "id": "custom.axisPlacement", "value": "right" }]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "timers.http_req_duration.p99"
+              "options": "99th Percentile HTTP Req Duration"
             },
             "properties": [
               {
                 "id": "color",
-                "value": { "fixedColor": "red", "mode": "fixed" }
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "95th Percentile HTTP Req Duration"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "90th Percentile HTTP Req Duration"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "vus"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-blue",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Number of Vus"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 4
               }
             ]
           }
         ]
       },
-      "gridPos": { "h": 12, "w": 23, "x": 0, "y": 18 },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
       "id": 10,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "table",
+          "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
-        "timezones": [""],
-        "tooltip": { "mode": "single", "sort": "none" }
+        "timezones": [
+          ""
+        ],
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "targets": [
         {
-          "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
           "format": "time_series",
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  ts AS time,\n  metric,\n  value\nFROM samples\nWHERE\n  $__timeFilter(ts)\n  AND test_id = $testid\n  AND metric IN ('timers.http_req_duration.p99', 'timers.http_req_duration.count')\nORDER BY ts",
+          "rawSql": "SELECT\n  ts AS time,\n  CASE metric\n    WHEN 'timers.http_req_duration.p99' THEN '99th Percentile HTTP Req Duration'\n    WHEN 'timers.http_req_duration.p90' THEN '90th Percentile HTTP Req Duration'\n    WHEN 'timers.http_req_duration.p95' THEN '95th Percentile HTTP Req Duration' \n    ELSE metric\n  END,\n  value\nFROM samples\nLEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric IN ('timers.http_req_duration.p99', 'timers.http_req_duration.p90', 'timers.http_req_duration.p95', 'vus')\nORDER BY ts",
           "refId": "A",
-          "select": [[{ "params": ["value"], "type": "column" }]],
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
           "timeColumn": "time",
-          "where": [{ "name": "$__timeFilter", "params": [], "type": "macro" }]
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
-      "title": "Request Duration",
+      "title": "HTTP Request Duration Percentiles",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 24,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "stepBefore",
+            "lineWidth": 3,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Count HTTP Requests"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Count HTTP Failed Requests"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "timezones": [
+          ""
+        ],
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  ts AS time,\n  CASE metric\n    WHEN 'counts.http_reqs' THEN 'Count Total HTTP Requests'\n    WHEN 'counts.http_req_failed' THEN 'Count HTTP Failed Requests'\n    ELSE metric\n  END,\n  value\nFROM samples\nLEFT JOIN tests\n  ON samples.test_id = tests.id\n  AND tests.name = '${testName}'\nWHERE\n  $__timeFilter(ts)\n  AND metric IN ('counts.http_reqs', 'counts.http_req_failed')\nORDER BY ts",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Counts Failed vs Total HTTP Requests ",
       "type": "timeseries"
     }
   ],
@@ -326,16 +1363,22 @@
   "templating": {
     "list": [
       {
-        "current": { "selected": true, "text": "23", "value": "23" },
-        "datasource": { "type": "postgres", "uid": "P44368ADAD746BC27" },
-        "definition": "SELECT DISTINCT test_id from samples;",
+        "current": {
+          "selected": true,
+          "text": "50kVUs",
+          "value": "50kVUs"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "P44368ADAD746BC27"
+        },
+        "definition": "SELECT DISTINCT name from tests;",
         "hide": 0,
         "includeAll": false,
-        "label": "Your Test",
         "multi": false,
-        "name": "testid",
+        "name": "testName",
         "options": [],
-        "query": "SELECT DISTINCT test_id from samples;",
+        "query": "SELECT DISTINCT name from tests;",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -344,11 +1387,14 @@
       }
     ]
   },
-  "time": { "from": "now-1h", "to": "now" },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
   "timepicker": {},
   "timezone": "",
-  "title": "http-data",
-  "uid": "IWSghv-4k",
-  "version": 2,
+  "title": "http-ws-data",
+  "uid": "IWSghv-5k",
+  "version": 1,
   "weekStart": ""
 }

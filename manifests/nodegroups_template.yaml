@@ -7,7 +7,7 @@ metadata:
 
 managedNodeGroups:
   - name: ng-agg
-    instanceType: m5zn.xlarge # Testing: m5.large; Production: m5zn.xlarge
+    instanceType: m5.large # Testing: m5.large; Production: m5zn.xlarge
     desiredCapacity: 0
     minSize: 0
     maxSize: 1
@@ -15,20 +15,20 @@ managedNodeGroups:
       - sysctl -w net.core.rmem_default=536870912 # Set to 512M
       - sysctl -w net.core.rmem_max=536870912 # Set to 512M
     taints:
-    - key: "special"
-      value: "sysctl-udp-buffer"
-      effect: NoSchedule
+      - key: "special"
+        value: "sysctl-udp-buffer"
+        effect: NoSchedule
 
 nodeGroups:
   - name: ng-gen
-    instanceType: m5.24xlarge # Testing: m5.large; Production: m5.24xlarge
+    instanceType: m5.large # Testing: m5.large; Production: m5.24xlarge
     desiredCapacity: 0
     minSize: 0
     maxSize: 20
     taints:
-    - key: "special"
-      value: "sysctl-network-capacity"
-      effect: NoSchedule
+      - key: "special"
+        value: "sysctl-network-capacity"
+        effect: NoSchedule
     kubeletExtraConfig:
       allowedUnsafeSysctls:
         - "net.ipv4.tcp_tw_reuse"
