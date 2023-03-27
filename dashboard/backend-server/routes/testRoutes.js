@@ -10,6 +10,7 @@ import { deleteTest } from "../../../src/commands/deleteTest.js";
 import { stopTest } from "../../../src/commands/stopTest.js";
 import { destroyEKSCluster } from "../../../src/commands/destroy.js";
 import dbApi from "../../../src/utilities/dbApi.js";
+import { NUM_VUS_PER_POD } from "../../../src/constants/constants.js";
 const router = express.Router();
 router.use(express.json());
 
@@ -34,7 +35,8 @@ router.post("/", async (req, res) => {
 
   const options = {
     name: title,
-    path: filePath,
+    file: filePath,
+    vusPerPod: NUM_VUS_PER_POD,
   };
 
   fs.writeFile(filePath, scriptString, (error) => {
@@ -59,7 +61,6 @@ router.post("/stop", (req, res) => {
 });
 
 router.post("/teardown", (req, res) => {
-  console.log("destroying");
   destroyEKSCluster();
 });
 

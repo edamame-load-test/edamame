@@ -5,7 +5,6 @@ import manifest from "../utilities/manifest.js";
 import dbApi from "../utilities/dbApi.js";
 
 const runTest = async (options) => {
-  console.log(options);
   const spinner = new Spinner("Initializing load test...");
   const testPath = options.file;
   const name = options.name;
