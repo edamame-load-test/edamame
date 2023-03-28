@@ -3,15 +3,15 @@ kind: K6
 metadata:
   name: k6-edamame-test
 spec:
-  parallelism: 1             # default value
+  parallelism: 1 # default value
   script:
     configMap:
-      name: '1'              # default value
-      file: test.js          # default value
+      name: "1" # default value
+      file: test.js # default value
   separate: true
-  arguments: '--out distributed-statsd --no-thresholds --no-summary'
+  arguments: "--out distributed-statsd --no-thresholds --no-summary"
   runner:
-    image: lukeoguro/xk6-statsd:latest
+    image: gcpinckert/k6-edamame:1.0
     env:
       - name: K6_STATSD_ADDR
         value: statsd-service:8125
@@ -22,11 +22,11 @@ spec:
       - name: K6_STATSD_GAUGE_NAMESPACE
         value: $(POD_NAME).
       - name: K6_STATSD_NAMESPACE
-        value: '1.'          # default value
+        value: "1." # default value
       - name: K6_STATSD_BUFFER_SIZE
-        value: '1432'
+        value: "1432"
       - name: K6_STATSD_PUSH_INTERVAL
-        value: '0.5s'
+        value: "0.5s"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -37,14 +37,14 @@ spec:
                   values:
                     - ng-gen
     tolerations:
-    - key: "special"
-      value: "sysctl-network-capacity"
-      effect: NoSchedule
+      - key: "special"
+        value: "sysctl-network-capacity"
+        effect: NoSchedule
     securityContext:
       sysctls:
-      - name: net.ipv4.ip_local_port_range
-        value: "1024 65535"
-      - name: net.ipv4.tcp_tw_reuse
-        value: "1"
-      - name: net.ipv4.tcp_timestamps
-        value: "1"
+        - name: net.ipv4.ip_local_port_range
+          value: "1024 65535"
+        - name: net.ipv4.tcp_tw_reuse
+          value: "1"
+        - name: net.ipv4.tcp_timestamps
+          value: "1"

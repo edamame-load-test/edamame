@@ -15,9 +15,9 @@ managedNodeGroups:
       - sysctl -w net.core.rmem_default=536870912 # Set to 512M
       - sysctl -w net.core.rmem_max=536870912 # Set to 512M
     taints:
-    - key: "special"
-      value: "sysctl-udp-buffer"
-      effect: NoSchedule
+      - key: "special"
+        value: "sysctl-udp-buffer"
+        effect: NoSchedule
 
 nodeGroups:
   - name: ng-gen
@@ -26,9 +26,9 @@ nodeGroups:
     minSize: 0
     maxSize: 20
     taints:
-    - key: "special"
-      value: "sysctl-network-capacity"
-      effect: NoSchedule
+      - key: "special"
+        value: "sysctl-network-capacity"
+        effect: NoSchedule
     kubeletExtraConfig:
       allowedUnsafeSysctls:
         - "net.ipv4.tcp_tw_reuse"

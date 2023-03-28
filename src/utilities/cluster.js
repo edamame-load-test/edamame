@@ -54,12 +54,10 @@ const cluster = {
   checkInstallation(command, name, link) {
     return (
       exec(command)
-        .then(({ stdout }) => {
-          if (!stdout) {
+        .catch(() => {
             const msg = `${name} isn't installed. Please install it.` +
-              `Instructions can be found at: ${link} `;
+             `Instructions can be found at: ${link} `;
             throw new Error(msg);
-          }
         })
     );
   },
@@ -99,8 +97,8 @@ const cluster = {
   setupAWSLoadBalancerController() {
     return (
       eksctl
-        .createIamLBCPolicy(iam.existingEdamameAWSLbcPolArn())
-        .then(({ stdout }) => {
+        .newIamLBCPolicy()
+        .then(({stdout}) => {
           const policyArn = iam.lbcPolicyArn(stdout);
           return eksctl.createIamRoleLBCPol(policyArn);
         })
@@ -201,8 +199,10 @@ const cluster = {
   async destroy() {
     await eksctl.destroyCluster();
     files.delete(NODE_GROUPS_FILE);
+    await eksctl.deleteOldIamLBCPolicy(iam.deleteAWSLbcPolArn());
     return eksctl.deleteEBSVolumes();
   },
 };
 
 export default cluster;
+
