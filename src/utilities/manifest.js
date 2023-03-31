@@ -88,7 +88,7 @@ const manifest = {
     const names = files.fileNames(dirPath);
     names.forEach((name) => {
       if (name.match(".json")) {
-        const nameNoExt = name.replace(".json", "").replace("_", "-");
+        const nameNoExt = name.replace(".json", "").replaceAll("_", "-");
         callback(nameNoExt, `${dirPath}/${name}`);
       }
     });

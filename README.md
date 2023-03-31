@@ -25,17 +25,14 @@ Usage: `edamame init`
 Outputs:
 
 ```
-[06:57:41:533] ℹ Creating Edamame cluster... (this may take up to 20 minutes)
-[07:17:37:273] ✔ Successfully created Edamame cluster.
-[07:17:37:273] ℹ Configuring EBS credentials...
-[07:18:17:884] ✔ Successfully configured EBS credentials.
-Please enter a password to associate with your Edamame Grafana dashboard & Postgres database account.
-Password: {password}
-Password for PG & Grafana has been set as:
-{password}
-[07:18:23:735] ℹ Deploying Grafana, Postgres, & K6 Operator...
-[07:19:13:287] ℹ Please find your Grafana dashboard at: a0423fc7c84b24a7696178bc915f9fb0-1778855885.us-west-2.elb.amazonaws.com:3000
-[07:19:13:287] ✔ Cluster configured. Welcome to Edamame!
+[09:15:51:909] ℹ Creating Edamame cluster... (this may take up to 20 minutes)
+[09:34:27:582] ✔ Successfully created Edamame cluster.
+[09:34:27:583] ℹ Configuring EBS credentials...
+[09:35:14:030] ✔ Successfully configured EBS credentials.
+[09:35:14:030] ℹ Setting up AWS Load Balancer Controller...
+[09:36:16:613] ✔ Set up AWS Load Balancer Controller.
+[09:36:17:446] ℹ Deploying Grafana, Postgres, & K6 Operator...
+[09:36:49:854] ✔ Cluster configured. Welcome to Edamame!
 ```
 
 - Creates an EKS cluster using the associated AWS account (~15 mins)
@@ -52,8 +49,8 @@ Password for PG & Grafana has been set as:
 
 ### edamame run
 
-Usage: `edamame run --path {/path/to/test.js} --name "<desired name>"`
-Alternative usage:`edamame run -p {/path/to/test.js} -n "<desired name>"`
+Usage: `edamame run --file {/path/to/test.js} --name "<desired name>" --vus-per-pod <num_vus>`
+Alternative usage:`edamame run -p {/path/to/test.js} -n "<desired name>" -v <num_vus>`
 Outputs:
 
 ```
@@ -73,8 +70,8 @@ Outputs:
 
 **Notes**:
 
-- The name flag is optional. If you do not specify a name, a unique identifier will be generated for you and assigned to the test.
-- If your test name is one word, then you do not need to include quotes when executing this command. For example, if the test's name is `example`, then the command could be executed as: `edamame run --path {/relativepath/to/test.js} --name example`. If the test's name is `example test`, then the command would need to be executed as: `edamame run --path {/relativepath/to/test.js} --name "example test"`.
+- The name and vus-per-pod flags are optional. If you do not specify a name, a unique identifier will be generated for you and assigned to the test. If you do not specify a desired number of vus per pod, edamame will establish that amount for you.
+- If your test name is one word, then you do not need to include quotes when executing this command. For example, if the test's name is `example`, then the command could be executed as: `edamame run --file {/relativepath/to/test.js} --name example`. If the test's name is `example test`, then the command would need to be executed as: `edamame run --file {/relativepath/to/test.js} --name "example test"`.
 - The command takes the relative path of the test script you want to run. This should be written in JavaScript, and follow conventions of k6 testing scripts. See [here](https://k6.io/docs/examples/) for examples and tutorials on how to write a k6 test script.
 - `edamame` will read the max number of VUs directly from the provided test script, there is no need to provide this as additional argument to `edamame run`. To see how to specify number of VUs in the test script, see the [k6 documentation](https://k6.io/docs/get-started/running-k6/#using-options).
 - To run a sample test, use one of the sample test files provided in the `k6_tests` directory. For example, `./k6_tests/test1.js` (relative path specified from the root project directory).
@@ -205,7 +202,7 @@ Outputs:
 
 - Provides local access to the grafana dashboard.
 
-**Note**: If you enter `CTRL+C` in the terminal after running edamame grafana, that will end your local access to the dashboard. To run a test while maintaining access to the grafana dashboard, please open a new terminal and execute `edamame run {/path/to/test.js}`
+**Note**: If you enter `CTRL+C` in the terminal after running edamame grafana, that will end your local access to the dashboard. To run a test while maintaining access to the grafana dashboard, please open a new terminal and execute `edamame run`
 
 ### edamame teardown
 

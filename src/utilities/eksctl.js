@@ -13,15 +13,15 @@ const exec = promisify(child_process.exec);
 
 const eksctl = {
   existsOrError() {
-    return exec(`eksctl version`).then(({ stdout }) => {
-      if (!stdout) {
-        const msg =
-          `Eksctl isn't installed. Please install eksctl; ` +
-          `instructions can be found at: ` +
-          `https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html`;
-        throw new Error(msg);
-      }
-    });
+    return (
+      exec(`eksctl version`)
+        .catch(() => {
+          const msg = `Eksctl isn't installed. Please install eksctl; ` +
+            `instructions can be found at: ` +
+            `https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html`;
+          throw new Error(msg);
+        })
+    );
   },
 
   createCluster() {
@@ -94,7 +94,11 @@ const eksctl = {
   },
 
   deleteOldIamLBCPolicy(policy) {
-    return exec(`aws iam delete-policy --policy-arn ${policy}`);
+    if (policy) {
+      return exec(
+        `aws iam delete-policy --policy-arn ${policy}`
+      );
+    }
   },
 
   createIamRoleLBCPol(policyArn) {

@@ -5,10 +5,11 @@ import {
  import files from "./files.js";
 
 const iam = {
-  existingEdamameAWSLbcPolArn() {
+  deleteAWSLbcPolArn() {
     if (files.exists(files.path(".env"))) {
       const data = files.read(files.path(".env"));
       const policyArn = data.split("\n")[0].split("=")[1];
+      files.write(".env", "");
       return policyArn;
     }
     return "";
