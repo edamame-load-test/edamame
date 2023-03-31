@@ -16,43 +16,43 @@ spec:
         app: psql
     spec:
       containers:
-      - name: psql
-        image: "postgres:latest"
-        env:
-          - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name: psql-secret
-                key: psql-username
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: psql-secret
-                key: psql-password
-          - name: PGDATA
-            value: /var/lib/postgresql/data/pgdata
-        ports:
-        - containerPort: 5432
-          protocol: TCP
-        volumeMounts:
-        - name: data
-          mountPath: /var/lib/postgresql/data
-        - name: postgres-initdb
-          mountPath: /docker-entrypoint-initdb.d
+        - name: psql
+          image: "postgres:latest"
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: psql-secret
+                  key: psql-username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: psql-secret
+                  key: psql-password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-initdb
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
-      - name: postgres-initdb
-        configMap:
-          name: postgres-initdb-config
+        - name: postgres-initdb
+          configMap:
+            name: postgres-initdb-config
   volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: gp2
-      resources:
-        requests:
-          storage: 10Gi
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 10Gi
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -89,7 +89,7 @@ spec:
   selector:
     app: psql
   ports:
-  - protocol: TCP
-    port: 5432
-    targetPort: 5432
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
   clusterIP: None

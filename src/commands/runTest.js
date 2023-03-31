@@ -13,18 +13,28 @@ const runTest = async (options) => {
   try {
     const numVus = manifest.numVus(testPath);
     const nameExists = await dbApi.nameExists(name);
-
     if (numVus === 0) {
-      throw new Error(`Either couldn't find k6 test script at path or the file specifies 0 total number of VUs.`);
-    } else if (name && (name.length > 80 || !name.replace(/\s/g, '').length || nameExists)) {
-      throw new Error(`Either test name already exists, consists of only whitespaces, or is over 80 characters long.`);
+      throw new Error(
+        `Either couldn't find k6 test script at path or the file specifies 0 total number of VUs.`
+      );
+    } else if (
+      name &&
+      (name.length > 80 || !name.replace(/\s/g, "").length || nameExists)
+    ) {
+      throw new Error(
+        `Either test name already exists, consists of only whitespaces, or is over 80 characters long.`
+      );
     }
 
     const testId = await dbApi.newTestId(testPath, name);
     spinner.succeed("Successfully initialized load test.");
 
     const numNodes = manifest.parallelism(numVus, vusPerPod);
-    spinner.info(`Provisioning load test resources (${numNodes} generator${numNodes === 1 ? "" : "s"})...`);
+    spinner.info(
+      `Provisioning load test resources (${numNodes} generator${
+        numNodes === 1 ? "" : "s"
+      })...`
+    );
     spinner.start();
     await cluster.provisionStatsiteNode();
     await cluster.provisionGenNodes(numNodes);
@@ -47,6 +57,4 @@ const runTest = async (options) => {
   }
 };
 
-export {
-  runTest
-};
+export { runTest };

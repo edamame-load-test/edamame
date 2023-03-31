@@ -4,13 +4,13 @@ import {
   CLUSTER_NAME,
   GRAF_JSON_DBS,
   DB_API_INGRESS,
-  DB_API_ING_TEMPLATE
+  DB_API_ING_TEMPLATE,
 } from "../constants/constants.js";
 import files from "./files.js";
 import kubectl from "./kubectl.js";
 
 const manifest = {
-  createDbApiIngress(userIp) { 
+  createDbApiIngress(userIp) {
     const data = files.readYAML(DB_API_ING_TEMPLATE);
     const cidr = `${userIp}/32`;
     data.metadata.annotations["alb.ingress.kubernetes.io/inbound-cidrs"] = cidr;
@@ -18,7 +18,8 @@ const manifest = {
     files.writeYAML(DB_API_INGRESS, data);
   },
 
-  createK6Cr(path, testId, numNodes) { // change to kustomize overlay chain
+  createK6Cr(path, testId, numNodes) {
+    // change to kustomize overlay chain
     const k6CrData = files.readYAML(K6_CR_TEMPLATE);
     const envObjs = k6CrData.spec.runner.env;
 
@@ -31,8 +32,8 @@ const manifest = {
       }
     });
 
-    if (!files.exists(files.path('/load_test_crds'))) {
-      files.makeDir('/load_test_crds')
+    if (!files.exists(files.path("/load_test_crds"))) {
+      files.makeDir("/load_test_crds");
     }
 
     files.writeYAML(K6_CR_FILE, k6CrData);
@@ -103,4 +104,3 @@ const manifest = {
 };
 
 export default manifest;
-

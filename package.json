@@ -47,6 +47,7 @@
     "dateformat": "^5.0.3",
     "js-yaml": "^4.1.0",
     "ora": "^6.1.2",
+    "react-icons": "^4.8.0",
     "readline-sync": "^1.4.10"
   }
 }

@@ -6,7 +6,7 @@ import {
   LOAD_GEN_NODE_GRP,
   STATSITE_NODE_GRP,
   NODE_GROUPS_TEMPLATE,
-  NODE_GROUPS_FILE
+  NODE_GROUPS_FILE,
 } from "../constants/constants.js";
 // import files from '../utilities/files.js';
 const exec = promisify(child_process.exec);
@@ -36,8 +36,8 @@ const eksctl = {
     const nodeGroupsData = files.readYAML(NODE_GROUPS_TEMPLATE);
     nodeGroupsData.metadata.region = await this.getRegion();
 
-    if (!files.exists(files.path('/load_test_crds'))) {
-      files.makeDir('/load_test_crds')
+    if (!files.exists(files.path("/load_test_crds"))) {
+      files.makeDir("/load_test_crds");
     }
 
     files.writeYAML(NODE_GROUPS_FILE, nodeGroupsData);
@@ -54,28 +54,27 @@ const eksctl = {
   createOIDC() {
     return exec(
       "eksctl utils associate-iam-oidc-provider " +
-      `--cluster ${CLUSTER_NAME} --approve`
+        `--cluster ${CLUSTER_NAME} --approve`
     );
   },
 
   addIAMDriverRole() {
     return exec(
       "eksctl create iamserviceaccount " +
-      "--name ebs-csi-controller-sa " +
-      "--namespace kube-system " +
-      `--cluster ${CLUSTER_NAME} ` +
-      "--attach-policy-arn " +
-      "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy " +
-      "--approve --role-only " +
-      "--role-name AmazonEKS_EBS_CSI_DriverRole"
+        "--name ebs-csi-controller-sa " +
+        "--namespace kube-system " +
+        `--cluster ${CLUSTER_NAME} ` +
+        "--attach-policy-arn " +
+        "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy " +
+        "--approve --role-only " +
+        "--role-name AmazonEKS_EBS_CSI_DriverRole"
     );
   },
 
   createIamLBCPolicy(existingPol) {
     if (existingPol) {
-      return (
-        this.deleteOldIamLBCPolicy(existingPol)
-          .then(() => this.newIamLBCPolicy())
+      return this.deleteOldIamLBCPolicy(existingPol).then(() =>
+        this.newIamLBCPolicy()
       );
     } else {
       return this.newIamLBCPolicy();
@@ -89,8 +88,8 @@ const eksctl = {
   newIamLBCPolicy() {
     return exec(
       `cd ${files.path("")} && aws iam create-policy ` +
-      "--policy-name EdamameAWSLoadBalancerControllerIAMPolicy " +
-      "--policy-document file://iam_policy.json"
+        "--policy-name EdamameAWSLoadBalancerControllerIAMPolicy " +
+        "--policy-document file://iam_policy.json"
     );
   },
 
@@ -105,12 +104,12 @@ const eksctl = {
   createIamRoleLBCPol(policyArn) {
     return exec(
       "eksctl create iamserviceaccount " +
-      "--name aws-load-balancer-controller " +
-      `--cluster ${CLUSTER_NAME} ` + 
-      `--namespace kube-system ` + 
-      `--attach-policy-arn ${policyArn} ` +
-      `--override-existing-serviceaccounts ` +
-      "--approve"
+        "--name aws-load-balancer-controller " +
+        `--cluster ${CLUSTER_NAME} ` +
+        `--namespace kube-system ` +
+        `--attach-policy-arn ${policyArn} ` +
+        `--override-existing-serviceaccounts ` +
+        "--approve"
     );
   },
 
@@ -129,24 +128,24 @@ const eksctl = {
   addCsiDriver(roleArn) {
     return exec(
       "eksctl create addon " +
-      "--name aws-ebs-csi-driver " +
-      `--cluster ${CLUSTER_NAME} ` +
-      `--service-account-role-arn ${roleArn} --force`
+        "--name aws-ebs-csi-driver " +
+        `--cluster ${CLUSTER_NAME} ` +
+        `--service-account-role-arn ${roleArn} --force`
     );
   },
 
   scaleLoadGenNodes(numNodes) {
     return exec(
       `eksctl scale nodegroup --cluster=${CLUSTER_NAME} ` +
-      `--nodes=${numNodes} ${LOAD_GEN_NODE_GRP}`
+        `--nodes=${numNodes} ${LOAD_GEN_NODE_GRP}`
     );
   },
 
   scaleStatsiteNodes(numNodes) {
     return exec(
       `eksctl scale nodegroup --cluster=${CLUSTER_NAME} ` +
-      `--nodes=${numNodes} ${STATSITE_NODE_GRP}`
-    )
+        `--nodes=${numNodes} ${STATSITE_NODE_GRP}`
+    );
   },
 
   destroyCluster() {
@@ -155,7 +154,7 @@ const eksctl = {
 
   async getRegion() {
     const { stdout } = await exec(`eksctl get cluster --verbose 0`);
-    const line = stdout.split("\n").find(line => line.includes("edamame"));
+    const line = stdout.split("\n").find((line) => line.includes("edamame"));
     return line.split("\t")[1];
   },
 
