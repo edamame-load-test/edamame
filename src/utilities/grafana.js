@@ -38,7 +38,7 @@ const grafana = {
 
     return (
       `http://localhost:${GRAF_PORT}/d/IWSghv-4k/` +
-      `http-data?orgId=1&var-testid=${testId}` +
+      `http-ws-data?orgId=1&var-testid=${testId}` +
       `&refresh=5s&from=now-15m&to=now`
     );
   },
