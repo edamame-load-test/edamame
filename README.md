@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-In order to run `edamame`, you will need the following:
+In order to execute a load test with the `edamame` command line interface or graphical user interface, you will need the following:
 
 - An [AWS Account](https://docs.aws.amazon.com/SetUp/latest/UserGuide/setup-prereqs-instructions.html).
 - The [AWS CLI tool](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) should be installed and configured.
@@ -44,20 +44,20 @@ Outputs:
 
 **Notes**:
 
-- It can as long as _20 minutes_ to create the cluster and apply the necessary permissions.
-- To access the Grafana dashboards, use the provided link. For now, the default Grafana username and password are used (`admin` and `admin`). In Grafana, navigate to the Dashboards, and select the `testid` for the data you wish to view. If no tests have been run, you may see an error, until there are test ids in the database to display.
+- It can take as long as _20 minutes_ to create the cluster and apply the necessary permissions.
+- To access the Grafana dashboards, use the provided link. For now, the default Grafana username and password are used (`admin` and `admin`). In Grafana, navigate to the Dashboards. From within the default HTTP & WebSockets dashboard, select the `test name` for the data you wish to view. If no tests have been run, you may see an error until there are test names in the database to display.
 
 ### edamame run
 
 Usage: `edamame run --file {/path/to/test.js} --name "<desired name>" --vus-per-pod <num_vus>`
-Alternative usage:`edamame run -p {/path/to/test.js} -n "<desired name>" -v <num_vus>`
+Alternative usage:`edamame run -f {/path/to/test.js} -n "<desired name>" -v <num_vus>`
 Outputs:
 
 ```
-[07:24:33:021] ℹ Reading test script...
-[07:24:33:027] ✔ Successfully read test script.
-[07:24:33:027] ℹ Initializing load test with 3 nodes...
-[07:25:11:079] ✔ Successfully initialized load test.
+[07:24:33:021] ℹ Initializing load test...
+[07:24:33:027] ✔ Successfully initialized load test.
+[07:24:33:027] ℹ Provisioning load test resources (2 generators)...
+[07:25:11:079] ✔ Successfully provisioned load test resources.
 [07:25:11:080] ℹ Running load test...
 [07:28:12:527] ✔ Load test completed.
 [07:28:12:527] ℹ Tearing down load generating resources.
@@ -75,7 +75,7 @@ Outputs:
 - The command takes the relative path of the test script you want to run. This should be written in JavaScript, and follow conventions of k6 testing scripts. See [here](https://k6.io/docs/examples/) for examples and tutorials on how to write a k6 test script.
 - `edamame` will read the max number of VUs directly from the provided test script, there is no need to provide this as additional argument to `edamame run`. To see how to specify number of VUs in the test script, see the [k6 documentation](https://k6.io/docs/get-started/running-k6/#using-options).
 - To run a sample test, use one of the sample test files provided in the `k6_tests` directory. For example, `./k6_tests/test1.js` (relative path specified from the root project directory).
-- To see data displayed in real time, select an "auto-refresh" rate of `5s` in the Grafana dashboard, and select the `testid` for the currently running test.
+- To see data displayed in real time, select an "auto-refresh" rate of `5s` in the Grafana dashboard, and select the `test name` of the currently running test.
 
 ### edamame stop
 
@@ -102,7 +102,7 @@ Outputs:
 │     (index)     │         start time         │          end time          │   status    │
 ├─────────────────┼────────────────────────────┼────────────────────────────┼─────────────┤
 │     example     │ '2023-03-20T23:20:03.744Z' │            null            │  'running'  │
-│      50K VUs    │ '2023-03-20T22:52:48.864Z' │ '2023-03-20T22:55:04.873Z' │ 'completed' │
+│     50K VUs     │ '2023-03-20T22:52:48.864Z' │ '2023-03-20T22:55:04.873Z' │ 'completed' │
 └─────────────────┴────────────────────────────┴────────────────────────────┴─────────────┘
 ```
 
@@ -189,9 +189,9 @@ Outputs:
 
 **Note**: If either your current or proposed test name is one word and doesn't contain spaces, then you don't need to include quotes around that name when executing this command.
 
-### edamame grafana
+### edamame grafana --start
 
-Usage: `edamame grafana`
+Usage: `edamame grafana --start`
 Outputs:
 
 ```
@@ -200,9 +200,56 @@ Outputs:
 
 ```
 
-- Provides local access to the grafana dashboard.
+- Provides secure local access to the Grafana dashboard.
 
-**Note**: If you enter `CTRL+C` in the terminal after running edamame grafana, that will end your local access to the dashboard. To run a test while maintaining access to the grafana dashboard, please open a new terminal and execute `edamame run`
+### edamame grafana --stop
+
+Usage: `edamame grafana --stop`
+Outputs:
+
+```
+[12:07:38:477] ℹ Stopping grafana
+[12:07:38:774] ✔ Grafana dashboard has been removed
+```
+
+- Terminates secure local access to the Grafana dashboard and frees up port 3000 for other processes to run on it.
+
+### edamame dashboard --start
+
+Usage: `edamame dashboard --start`
+Outputs:
+
+```
+[12:00:32:022] ℹ Configuring local access to grafana dashboard...
+[12:01:02:671] ✔ Please find your Grafana dashboard at: http://localhost:3000
+[12:00:32:022] ℹ Initializing your dashboard
+[12:01:02:671] ℹ Installed packages for your backend
+[12:00:32:022] ℹ Installed packages for your frontend
+[12:00:32:022] ℹ Generated frontend build
+[12:01:02:671] ✔ Your dashboard is now running at http://localhost:3001
+```
+
+- Establishes local access to a graphical user interface (GUI) and the Grafana dashboard.
+- The GUI provides an alternative interface relative to the CLI that a user can interact with. A user can use the GUI to:
+  - Execute a load test
+    - Specifically, the user can upload a test script and then start a test from within the GUI.
+    - While the load test is being executed, the GUI will show updates about the duration and status of the test.
+  - Review information about all load tests (current and historical)
+  - Delete existing load test(s)
+  - Delete all existing AWS infrastructure and associated data
+
+### edamame dashboard --stop
+
+Usage: `edamame dashboard --stop`
+Outputs:
+
+```
+[02:17:24:140] ℹ Stopping dashboard
+[02:17:24:520] ✔ Dashboard has been removed
+```
+
+- Ends local access to the graphical user interface (GUI) and the Grafana dashboard.
+- This frees up ports 3000 and 3001 for other processes.
 
 ### edamame teardown
 
@@ -220,6 +267,6 @@ Outputs:
 
 **Notes**:
 
-- Because this command will delete the entire cluster, it will also _delete all data_. In order to maintain historical data, the cluster must remain up. In the future, we will be providing an additional command to export data, so that it is not lost when the cluster is deleted.
+- Because this command will delete the entire cluster, it will also _delete all data_. In order to maintain historical data, the cluster must remain up.
 - The process of deleting a cluster can take 10-15 mins.
-- If you try to create a new cluster directly after deleting a cluster, you may run into errors. This is because AWS continues to remove resources associated with the EKS cluster for up to 10 minutes after the command completes. Try waiting for a little while, and seeing if that fixes the problem.
+- If you try to create a new cluster directly after deleting a cluster, you may run into errors. This is because AWS continues to remove resources associated with the EKS cluster for up to 10 minutes after the command completes. Try waiting for a little while before creating a new cluster, and see if that fixes the problem.

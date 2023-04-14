@@ -1,4 +1,4 @@
-const NUM_VUS_PER_POD = 5000;
+const NUM_VUS_PER_POD = 20000;
 const POLL_FREQUENCY = 30000;
 const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
