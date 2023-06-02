@@ -3,21 +3,26 @@ import grafana from "../utilities/grafana.js";
 import { GRAF_PORT } from "../constants/constants.js";
 import kubectl from "../utilities/kubectl.js";
 
-// Remove the "nothing exists log line"
-const portForwardGrafana = () => {
+const portForwardGrafana = async () => {
   const spinner = new Spinner(
     "Configuring local access to grafana dashboard..."
   );
-  return grafana
-    .getLocalAddressWhenReady()
-    .then((message) => {
-      message.match(`because port ${GRAF_PORT}`)
-        ? spinner.fail(message)
-        : spinner.succeed(`Please find your Grafana dashboard at: ${message}`);
-    })
-    .catch((err) => {
-      console.log("nothing exists");
-    });
+
+  try {
+    let message = await grafana.getLocalAddressWhenReady();
+    if (message.match(`because port ${GRAF_PORT}`)) {
+      spinner.fail(message);
+    } else {
+      spinner.succeed(
+        `Please find your Grafana dashboard at: ${message}`
+      );
+    }
+  } catch (err) {
+    spinner.fail(
+      `Error port forwardng to Grafana: ${err.message}`
+    );
+  }
+
 };
 
 const stopGrafana = async () => {

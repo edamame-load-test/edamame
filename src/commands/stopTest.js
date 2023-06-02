@@ -18,7 +18,6 @@ const stopTest = async () => {
     const testId = manifest.latestK6TestId();
     await cluster.phaseOutK6();
     dbApi.updateTestStatus(testId, "completed");
-    // dbApi.putRequest(testId, { status: "completed"});
     spinner.succeed(`Stopped current test.`);
   } else {
     spinner.succeed(`No tests currently running.`);

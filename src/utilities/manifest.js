@@ -86,10 +86,10 @@ const manifest = {
   forEachGrafJsonDB(callback) {
     const dirPath = files.path(`/${GRAF_JSON_DBS}`);
     const names = files.fileNames(dirPath);
-    names.forEach((name) => {
+    names.forEach(async (name) => {
       if (name.match(".json")) {
         const nameNoExt = name.replace(".json", "").replaceAll("_", "-");
-        callback(nameNoExt, `${dirPath}/${name}`);
+        await callback(nameNoExt, `${dirPath}/${name}`);
       }
     });
   },

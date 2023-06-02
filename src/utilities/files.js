@@ -51,7 +51,6 @@ const files = {
   delete(fileName) {
     return fs.rm(this.path(fileName), (err) => err)
   }
-
 };
 
 export default files;

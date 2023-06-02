@@ -11,30 +11,26 @@ const grafana = {
         }
         clearInterval(interval);
 
-        kubectl
-          .localPortAlreadyBound(GRAF_PORT)
-          .then(({ stdout }) => {
-            if (stdout) {
-              resolve(
-                `Couldn't establish local grafana connection, because port ${GRAF_PORT} is already taken.`
-              );
-            }
-          })
-          .catch((error) => {
-            // localPortAlreadyBound within child_process fails if no process running at the port
-            kubectl.exactPodName("grafana").then((podName) => {
-              kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT);
-            });
-            resolve(`http://localhost:${GRAF_PORT}`);
-          });
+        try {
+          const { stdout } = await kubectl.localPortAlreadyBound(GRAF_PORT);
+          if (stdout) {
+            resolve(
+              `Couldn't establish local grafana connection, because port ${GRAF_PORT} is already taken.`
+            );
+          }
+        } catch {
+          // localPortAlreadyBound within child_process fails if no process running at the port
+          let podName = await kubectl.exactPodName("grafana");
+          await kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT);
+          resolve(`http://localhost:${GRAF_PORT}`);
+        }
       }, POLL_FREQUENCY);
     });
   },
 
-  detailedUrl(testId) {
-    kubectl.exactPodName("grafana").then((podName) => {
-      kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT);
-    });
+  async detailedUrl(testId) {
+    let podName = await kubectl.exactPodName("grafana");
+    await kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT);
 
     return (
       `http://localhost:${GRAF_PORT}/d/IWSghv-4k/` +

@@ -6,7 +6,6 @@ import eksctl from "./eksctl.js";
 import kubectl from "./kubectl.js";
 import manifest from "./manifest.js";
 import loadGenerators from "./loadGenerators.js";
-
 import {
   CLUSTER_NAME,
   PG_CM,
@@ -30,170 +29,145 @@ import child_process from "child_process";
 const exec = promisify(child_process.exec);
 
 const cluster = {
-  checkForAllInstallations() {
-    return (
-      helm.existsOrError()
-        .then(() => kubectl.existsOrError())
-        .then(() => eksctl.existsOrError())
-        .then(() => {
-          return this.checkInstallation("make --version",
-            "Make",
-            "https://www.gnu.org/software/make/#download"
-          );
-        })
-        .then(() => {
-          return this.checkInstallation("aws --version",
-            "AWS Cli",
-            "https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
-          );
-        })
-        .then(() => this.checkInstallation("go version", "Go", "https://go.dev/doc/install"))
+  async checkForAllInstallations() {
+    await helm.existsOrError();
+    await kubectl.existsOrError();
+    await eksctl.existsOrError();
+    await this.checkInstallation(
+      "make --version",
+      "Make",
+      "https://www.gnu.org/software/make/#download"
+    );
+    await this.checkInstallation(
+      "aws --version",
+      "AWS Cli",
+      "https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
+    );
+
+    await this.checkInstallation(
+      "go version", 
+      "Go", 
+      "https://go.dev/doc/install"
     );
   },
 
-  checkInstallation(command, name, link) {
-    return (
-      exec(command)
-        .catch(() => {
-            const msg = `${name} isn't installed. Please install it.` +
-             `Instructions can be found at: ${link} `;
-            throw new Error(msg);
-        })
-    );
+  async checkInstallation(command, name, link) {
+    try {
+      await exec(command);
+    } catch {
+      const msg = `${name} isn't installed. Please install it.` +
+      `Instructions can be found at: ${link} `;
+      throw new Error(msg);
+    }
   },
 
-  create() {
-    return eksctl
-      .clusterDesc()
-      .then(({ stdout }) => {
-        if (!stdout.match(CLUSTER_NAME)) {
-          return eksctl.createCluster();
-        }
-      })
-      .then(() => eksctl.createNodeGroups())
-      .then(() => this.applyStatsiteManifests())
+  async create() {
+    const { stdout } = await eksctl.clusterDesc();
+    if (!stdout.match(CLUSTER_NAME)) {
+      await eksctl.createCluster();
+    }
+
+    await eksctl.createNodeGroups();
+    await this.applyStatsiteManifests();
   },
 
-  configureEBSCreds() {
-    return (
-      eksctl
-        .fetchOIDCs()
-        .then(({ stdout }) => {
-          if (!iam.OIDCexists(stdout)) {
-            return eksctl.createOIDC();
-          }
-        })
-        .then(() => eksctl.addIAMDriverRole())
-        .then(() => eksctl.fetchIamRoles())
-        .then(({ stdout }) => {
-          const role = iam.ebsRole(stdout);
-          if (role) {
-            return eksctl.addCsiDriver(role);
-          }
-        })
-    );
+  async configureEBSCreds() {
+    const { stdout } = await eksctl.fetchOIDCs();
+    if (!iam.OIDCexists(stdout)) {
+      await eksctl.createOIDC();
+    }
+    await eksctl.addIAMDriverRole();
+    let response = await eksctl.fetchIamRoles()
+
+    const role = iam.ebsRole(response.stdout);
+    if (role) {
+      await eksctl.addCsiDriver(role);
+    }
   },
 
-  setupAWSLoadBalancerController() {
-    return (
-      eksctl
-        .newIamLBCPolicy()
-        .then(({stdout}) => {
-          const policyArn = iam.lbcPolicyArn(stdout);
-          return eksctl.createIamRoleLBCPol(policyArn);
-        })
-        .then(() => helm.addEKSRepo())
-        .then(() => kubectl.applyAwsLbcCrd())
-        .then(() => helm.installAWSLBC())
-        .then(() => eksctl.localIp())
-        .then(({ stdout }) => manifest.createDbApiIngress(stdout))
-        .then(() => new Promise(res => setTimeout(res, 15 * 1000)))
-        .then(() => kubectl.applyManifest(files.path(DB_API_INGRESS)))
-    );
+  async setupAWSLoadBalancerController() {
+    await eksctl.newIamLBCPolicy();
+    await helm.addEKSRepo();
+    await kubectl.applyAwsLbcCrd();
+    await helm.installAWSLBC();
+    let response = await eksctl.localIp();
+    manifest.createDbApiIngress(response.stdout);
+    
+    await new Promise(res => setTimeout(res, 15000));
+    await kubectl.applyManifest(files.path(DB_API_INGRESS));
   },
 
-  applyPgManifests() {
-    return (
-      kubectl.configMapExists(PG_CM)
-        .then((exists) => {
-          if (!exists) {
-            return kubectl.createConfigMap(files.path(PG_CM_FILE));
-          }
-        })
-        .then(() => kubectl.applyManifest(files.path(PG_SS_FILE)))
-        .then(() => new Promise(res => setTimeout(res, 10000)))
-      // setting a 10s delay on return above to see if it fixes issue with timing
-    );
+  async applyPgManifests() {
+    let exists = await kubectl.configMapExists(PG_CM);
+
+    if (!exists) {
+      await kubectl.createConfigMap(files.path(PG_CM_FILE));
+    }
+    await kubectl.applyManifest(files.path(PG_SS_FILE));
+    return new Promise(res => setTimeout(res, 10000));
   },
 
-  applyGrafanaManifests() {
-    return (
-      kubectl.configMapExists(GRAF_DS).then((exists) => {
-        if (!exists) {
-          return kubectl
-            .createConfigMapWithName(GRAF_DS, files.path(GRAF_DS_FILE))
-            .then(() =>
-              manifest.forEachGrafJsonDB(kubectl.createConfigMapWithName)
-            )
-            .then(() =>
-              kubectl.createConfigMapWithName(GRAF_DBS, files.path(GRAF_DB_FILE))
-            )
-            .then(() => kubectl.applyManifest(files.path(GRAF)))
-        }
-      })
-    );
+  async applyGrafanaManifests() {
+    let exists = await kubectl.configMapExists(GRAF_DS);
+    if (!exists) {
+      await kubectl.createConfigMapWithName(
+        GRAF_DS, 
+        files.path(GRAF_DS_FILE)
+      );
+      manifest.forEachGrafJsonDB(kubectl.createConfigMapWithName);
+      await kubectl.createConfigMapWithName(
+        GRAF_DBS, 
+        files.path(GRAF_DB_FILE)
+      );
+      await kubectl.applyManifest(files.path(GRAF));
+    }
   },
 
-  applyStatsiteManifests() {
-    return kubectl.configMapExists(STATSITE_CM)
-      .then((exists) => {
-        if (!exists) {
-          return kubectl.createConfigMapWithName(STATSITE_CM, files.path(STATSITE_CM_FOLDER));
-        }
-      })
+  async applyStatsiteManifests() {
+    let exists = await kubectl.configMapExists(STATSITE_CM);
+    if (!exists) {
+      return kubectl.createConfigMapWithName(
+        STATSITE_CM, 
+        files.path(STATSITE_CM_FOLDER)
+      );
+    }
   },
 
-  deployServersK6Op() {
-    return (
-      kubectl
-        .applyManifest(files.path(DB_API_FILE))
-        .then(() => kubectl.deployK6Operator())
-        .then(() => this.applyPgManifests()) // added 10 s delay here
-        .then(() => this.applyGrafanaManifests())
-        .then(() => dbApi.logUrl())
-    );
+  async deployServersK6Op() {
+    await kubectl.applyManifest(files.path(DB_API_FILE));
+    await kubectl.deployK6Operator();
+    await this.applyPgManifests();
+    await this.applyGrafanaManifests();
+    await dbApi.logUrl();
   },
 
-  phaseOutK6() {
+  async phaseOutK6() {
     const testId = manifest.latestK6TestId();
-    return (
-      kubectl.deleteManifest(files.path(K6_CR_FILE))
-        .then(() => kubectl.deleteManifest(files.path(STATSITE_FILE)))
-        .then(() => kubectl.deleteConfigMap(testId))
-        .then(() => eksctl.scaleStatsiteNodes(0))
-        .then(() => eksctl.scaleLoadGenNodes(0))
-        .then(() => loadGenerators.pollUntilGenNodesScaledToZero())
-        .then(() => files.delete(K6_CR_FILE))
-    );
+
+    await kubectl.deleteManifest(files.path(K6_CR_FILE));
+    await kubectl.deleteManifest(files.path(STATSITE_FILE));
+    await kubectl.deleteConfigMap(testId);
+    await eksctl.scaleStatsiteNodes(0);
+    await eksctl.scaleLoadGenNodes(0);
+    await loadGenerators.pollUntilGenNodesScaledToZero();
+    files.delete(K6_CR_FILE);
   },
 
   async provisionStatsiteNode() {
-    await eksctl.scaleStatsiteNodes(1)
+    await eksctl.scaleStatsiteNodes(1);
   },
 
   async provisionGenNodes(numNodes) {
-    await eksctl.scaleLoadGenNodes(numNodes)
-    await loadGenerators.pollUntilGenNodesReady(numNodes)
+    await eksctl.scaleLoadGenNodes(numNodes);
+    await loadGenerators.pollUntilGenNodesReady(numNodes);
   },
 
-  launchK6Test(testPath, testId, numNodes) {
+  async launchK6Test(testPath, testId, numNodes) {
     manifest.createK6Cr(testPath, testId, numNodes);
 
-    return (
-      kubectl.applyManifest(files.path(STATSITE_FILE))
-        .then(() => kubectl.createConfigMapWithName(testId, testPath))
-        .then(() => kubectl.applyManifest(files.path(K6_CR_FILE)))
-    );
+    await kubectl.applyManifest(files.path(STATSITE_FILE));
+    await kubectl.createConfigMapWithName(testId, testPath);
+    await kubectl.applyManifest(files.path(K6_CR_FILE));
   },
 
   async destroy() {
@@ -201,8 +175,7 @@ const cluster = {
     files.delete(NODE_GROUPS_FILE);
     await eksctl.deleteOldIamLBCPolicy(iam.deleteAWSLbcPolArn());
     return eksctl.deleteEBSVolumes();
-  },
+  }
 };
 
 export default cluster;
-

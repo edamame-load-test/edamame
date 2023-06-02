@@ -1,6 +1,7 @@
 import loadGenerators from "../utilities/loadGenerators.js";
 import Spinner from "../utilities/spinner.js";
 import cluster from "../utilities/cluster.js";
+import kubectl from "../utilities/kubectl.js";
 import manifest from "../utilities/manifest.js";
 import dbApi from "../utilities/dbApi.js";
 
@@ -43,9 +44,9 @@ const runTest = async (options) => {
     spinner.info("Running load test...");
     spinner.start();
     await cluster.launchK6Test(testPath, testId, numNodes);
-    dbApi.updateTestStatus(testId, "running");
+    await dbApi.updateTestStatus(testId, "running");
     await loadGenerators.pollUntilAllComplete(numNodes);
-    dbApi.updateTestStatus(testId, "completed");
+    await dbApi.updateTestStatus(testId, "completed");
     spinner.succeed("Load test completed.");
 
     spinner.info("Tearing down load test resources.");

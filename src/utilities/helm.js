@@ -1,24 +1,19 @@
 import { promisify } from "util";
 import child_process from "child_process";
 import { 
-  CLUSTER_NAME,
-  AWS_LBC_VERSION,
-  AWS_LBC_CHART_VERSION
+  CLUSTER_NAME 
 } from "../constants/constants.js";
 const exec = promisify(child_process.exec);
 
 const helm = {
-  existsOrError() {
-    return (
-      exec(`helm version`)
-        .then(({stdout}) => {
-          if (!stdout) {
-            const msg = `Helm isn't installed. Please install helm; ` +
-            `instructions can be found at: https://helm.sh/docs/intro/install/`;
-            throw new Error(msg);
-          }
-        })
-    );
+  async existsOrError() {
+    let { stdout } = await exec(`helm version`);
+    if (!stdout) {
+      const msg = `Helm isn't installed. Please install helm; ` +
+      `instructions can be found at: https://helm.sh/docs/intro/install/`;
+      
+      throw new Error(msg);
+    }
   },
 
   addEKSRepo() {
