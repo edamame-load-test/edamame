@@ -2,16 +2,15 @@ import { backendServer } from "../utilities/dashboard.js";
 import Spinner from "../utilities/spinner.js";
 
 async function test() {
-  const spinner = new Spinner("Setting up your GUI");
+  const spinner = new Spinner("Setting up your UI");
   try {
-    console.log("testing");
     await backendServer.installPackages();
     spinner.succeed(
-      "Success! You can continue using terminal commands, or use the GUI at localhost:3006"
+      "Success! You can continue using terminal commands, or use the UI at localhost:3006"
     );
   } catch (err) {
     console.log(err);
-    spinner.fail(`Error creating your GUI`);
+    spinner.fail(`Error creating your UI`);
   }
 }
 

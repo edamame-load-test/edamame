@@ -3,24 +3,26 @@ import { promisify } from "util";
 import child_process from "child_process";
 import { spawn } from "child_process";
 const exec = promisify(child_process.exec);
-import { AWS_LBC_CRD, LOAD_GEN_NODE_GRP } from "../constants/constants.js";
+import { 
+  AWS_LBC_CRD, 
+  LOAD_GEN_NODE_GRP } 
+from "../constants/constants.js";
 
 const kubectl = {
-  existsOrError() {
+  async existsOrError() {
     const msg = `Kubectl isn't installed. Please install it; ` +
     `instructions can be found at: ` +
     `https://kubernetes.io/docs/tasks/tools/`;
 
-    return (
-      exec(`kubectl version --output=yaml`)
-      .catch(({ stdout }) => {
-        // need to check stdout b/c will throw error if kubectl is installed 
-        //  but user not currently connected to a cluster 
-        if (!stdout.match("Version")) {
-          throw new Error(msg);
-        }
-      })
-    );
+    try {
+      await exec(`kubectl version --output=yaml`);
+    } catch (err) {
+      // need to check stdout b/c will throw error if kubectl is installed 
+      //  but user is not currently connected to a cluster 
+      if (!err.stdout.match("Version")) {
+        throw new Error(msg);
+      }
+    }
   },
 
   applyAwsLbcCrd() {
@@ -52,33 +54,29 @@ const kubectl = {
     return exec(`kubectl get svc`);
   },
 
-  pidPortForward(name) {
-    return exec(
-      `ps aux | grep -i ${name} | grep -v grep | awk {'print $2'}`
-    ).then(({ stdout }) => {
-      return stdout;
-    });
+  async pidPortForward(name) {
+    const { stdout } = await exec(`ps aux | grep -i ${name} | grep -v grep | awk {'print $2'}`);
+    return stdout;
   },
 
-  exactPodName(abbreviatedName) {
-    return this.getPods().then(({ stdout }) => {
-      const pods = stdout.split("\n");
+  async exactPodName(abbreviatedName) {
+    const { stdout } = await this.getPods();
+    const pods = stdout.split("\n");
 
-      for (let i = 0; i < pods.length; i++) {
-        const pod = pods[i];
-        if (pod.match(abbreviatedName)) {
-          const podDetails = pod.split(" ");
-          return podDetails[0];
-        }
+    for (let i = 0; i < pods.length; i++) {
+      const pod = pods[i];
+      if (pod.match(abbreviatedName)) {
+        const podDetails = pod.split(" ");
+        return podDetails[0];
       }
-    });
+    }
   },
 
   localPortAlreadyBound(port) {
     return exec(`lsof -iTCP:${port} -sTCP:LISTEN`);
   },
 
-  tempPortForward(podName, localAccessPort, podPort) {
+  async tempPortForward(podName, localAccessPort, podPort) {
     const options = {
       detached: true,
       stdio: "ignore",
@@ -86,51 +84,46 @@ const kubectl = {
     };
 
     const command = `kubectl port-forward ${podName} ${localAccessPort}:${podPort}`;
-
-    this.pidPortForward(podName).then((pid) => {
-      if (!pid) {
-        const child = spawn(command, [], options);
-        child.unref();
-        return child;
-      }
-    });
+    let pid = await this.pidPortForward(podName);
+  
+    if (!pid) {
+      const child = spawn(command, [], options);
+      child.unref();
+      return child;
+    }
   },
 
-  checkPodAvailable(podNameRegex) {
-    return this.getPods().then(({ stdout }) => {
-      const pods = stdout.split("\n");
+  async checkPodAvailable(podNameRegex) {
+    const { stdout } = await this.getPods();
+    const pods = stdout.split("\n");
 
-      for (let rowIdx = 0; rowIdx < pods.length; rowIdx++) {
-        const pod = pods[rowIdx];
+    for (let rowIdx = 0; rowIdx < pods.length; rowIdx++) {
+      const pod = pods[rowIdx];
 
-        if (pod.match(podNameRegex)) {
-          const podDetails = pod.split(" ");
+      if (pod.match(podNameRegex)) {
+        const podDetails = pod.split(" ");
 
-          for (let colIdx = 0; colIdx < podDetails.length; colIdx++) {
-            const detail = podDetails[colIdx];
-            if (detail && detail.match("Running")) {
-              return true;
-            }
+        for (let colIdx = 0; colIdx < podDetails.length; colIdx++) {
+          const detail = podDetails[colIdx];
+          if (detail && detail.match("Running")) {
+            return true;
           }
         }
       }
-    });
+    }
   },
 
-  endPortForward(name) {
-    return this.pidPortForward(name).then((pid) => exec(`kill ${pid}`));
+  async endPortForward(name) {
+    let pid = await this.pidPortForward(name);
+    return exec(`kill ${pid}`);
   },
 
-  configMapExists(name) {
-    return exec(`kubectl get configmaps`).then(({ stdout }) => {
-      return !!stdout.match(name);
-    });
+  async configMapExists(name) {
+    const { stdout } = await exec(`kubectl get configmaps`);
+    return !!stdout.match(name);
   },
 
   createConfigMap(path) {
-    // added this b/c psql-host key wasn't being properly registered by db api
-    // deployment even though could see psql-host in psql-configmap when used
-    // createConfigMapWithName to create psql configmap
     return exec(`kubectl create -f ${path}`);
   },
 
@@ -191,7 +184,9 @@ const kubectl = {
       if (pid) {
         return exec(`kill ${pid}`);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log(`Error stopping process on port ${port}: ${err.message}`);
+    }
   },
 };
 

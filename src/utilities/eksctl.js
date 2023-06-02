@@ -1,4 +1,5 @@
 import files from "./files.js";
+import iam from "./iam.js";
 import { promisify } from "util";
 import child_process from "child_process";
 import {
@@ -7,21 +8,20 @@ import {
   STATSITE_NODE_GRP,
   NODE_GROUPS_TEMPLATE,
   NODE_GROUPS_FILE,
+  AWS_LBC_IAM_POLNAME,
 } from "../constants/constants.js";
-// import files from '../utilities/files.js';
 const exec = promisify(child_process.exec);
 
 const eksctl = {
-  existsOrError() {
-    return (
-      exec(`eksctl version`)
-        .catch(() => {
-          const msg = `Eksctl isn't installed. Please install eksctl; ` +
-            `instructions can be found at: ` +
-            `https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html`;
-          throw new Error(msg);
-        })
-    );
+  async existsOrError() {
+    try {
+      await exec(`eksctl version`);
+    } catch {
+      const msg = `Eksctl isn't installed. Please install eksctl; ` +
+      `instructions can be found at: ` +
+      `https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html`;
+      throw new Error(msg);
+    }
   },
 
   createCluster() {
@@ -71,26 +71,29 @@ const eksctl = {
     );
   },
 
-  createIamLBCPolicy(existingPol) {
+  async createIamLBCPolicy(existingPol) {
     if (existingPol) {
-      return this.deleteOldIamLBCPolicy(existingPol).then(() =>
-        this.newIamLBCPolicy()
-      );
-    } else {
-      return this.newIamLBCPolicy();
+      await this.deleteOldIamLBCPolicy(existingPol);
     }
+
+    return this.newIamLBCPolicy();
   },
 
   localIp() {
     return exec(`curl ipinfo.io/ip`);
   },
 
-  newIamLBCPolicy() {
-    return exec(
+  async newIamLBCPolicy() {
+    let oldPolicy = iam.deleteAWSLbcPolArn();
+    await this.deleteOldIamLBCPolicy(oldPolicy);
+
+    const { stdout } = await exec(
       `cd ${files.path("")} && aws iam create-policy ` +
-        "--policy-name EdamameAWSLoadBalancerControllerIAMPolicy " +
-        "--policy-document file://iam_policy.json"
+      `--policy-name ${AWS_LBC_IAM_POLNAME} ` +
+      "--policy-document file://iam_policy.json"
     );
+    const policyArn = iam.lbcPolicyArn(stdout);
+    await eksctl.createIamRoleLBCPol(policyArn);
   },
 
   deleteOldIamLBCPolicy(policy) {
@@ -159,16 +162,19 @@ const eksctl = {
   },
 
   async deleteEBSVolumes() {
-    let volumes = await exec(
-      `aws ec2 describe-volumes --filter "Name=tag:kubernetes.io/created-for/pvc/name,Values=data-psql-0,grafana-pvc" --query 'Volumes[].VolumeId' --output json`
-    );
+    let volumesCommand = `aws ec2 describe-volumes --filter ` +
+      `"Name=tag:kubernetes.io/created-for/pvc/name,Values=data-psql-0,grafana-pvc"` +
+      ` --query 'Volumes[].VolumeId' --output json`;
+
+    let volumes = await exec(`${volumesCommand}`);
     volumes = JSON.parse(volumes.stdout);
+
     return Promise.allSettled(
       volumes.map((volume) => {
         exec(`aws ec2 delete-volume --volume-id ${volume}`);
       })
     );
-  },
+  }
 };
 
 export default eksctl;

@@ -7,7 +7,6 @@ const init = async () => {
     "Creating Edamame cluster... (this may take up to 20 minutes)"
   );
 
-  // Initiate Cluster
   try {
     await cluster.checkForAllInstallations();
     await cluster.create();
@@ -17,14 +16,12 @@ const init = async () => {
     spinner.start();
     await cluster.configureEBSCreds();
     spinner.succeed("Successfully configured EBS credentials.");
-
     spinner.info("Setting up AWS Load Balancer Controller...");
     spinner.start();
     await cluster.setupAWSLoadBalancerController();
-    spinner.succeed("Set up AWS Load Balancer Controller.");
+    spinner.succeed("Set up AWS Load Balancer Controller."); 
 
     await password.assign();
-
     spinner.info("Deploying Grafana, Postgres, & K6 Operator...");
     spinner.start();
     const grafanaUrl = await cluster.deployServersK6Op();

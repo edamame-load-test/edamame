@@ -21,16 +21,13 @@ const loadGenerators = {
     return testsCompleted;
   },
 
-  checkAllCompleted(totalTests) {
-    return (
-      kubectl.getPods()
-        .then(({ stdout }) => {
-          const currComplete = this.numTestsCompleted(stdout);
-          if (currComplete === totalTests) {
-            return true;
-          }
-        })
-    );
+  async checkAllCompleted(totalTests) {
+    let { stdout } = await kubectl.getPods();
+    const currComplete = this.numTestsCompleted(stdout);
+    
+    if (currComplete === totalTests) {
+      return true;
+    }
   },
 
   pollUntilAllComplete(numNodes) {

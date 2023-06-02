@@ -25,6 +25,8 @@ const NODE_GROUPS_TEMPLATE = "nodegroups_template.yaml";
 const NODE_GROUPS_FILE = "load_test_crds/nodegroups.yaml";
 const STATSITE_CM = "statsite-config";
 const STATSITE_CM_FOLDER = "statsite-config";
+const DISPLAY_TEST_TITLE_SPACES = 30;
+const DISPLAY_TESTS_NUM_DASHES = 83;
 const DB_API_FILE = "db_api_deployment.yaml";
 const DB_API_ING_TEMPLATE = "db_api_ingress_template.yaml";
 const DB_API_INGRESS = "db_api_ingress.yaml";
@@ -33,6 +35,7 @@ const LOAD_GEN_NODE_GRP = "ng-gen";
 const K6_TEST_POD_REGEX = "k6-edamame-test-[0-9]{1,}";
 const AWS_LBC_VERSION = "v2.4.1";
 const AWS_LBC_CHART_VERSION = "1.4.1";
+const AWS_LBC_IAM_POLNAME = "EdamameAWSLoadBalancerControllerIAMPolicy";
 const EBS_CSI_DRIVER_REGEX =
   "ebs-csi-controller-sa.*AmazonEKS_EBS_CSI_DriverRole";
 const AWS_LBC_CRD = `"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"`;
@@ -66,6 +69,8 @@ export {
   STATSITE_NODE_GRP,
   STATSITE_CM,
   STATSITE_CM_FOLDER,
+  DISPLAY_TEST_TITLE_SPACES,
+  DISPLAY_TESTS_NUM_DASHES,
   NODE_GROUPS_FILE,
   DB_API_FILE,
   CLUSTER_NAME,
@@ -75,6 +80,7 @@ export {
   AWS_LBC_CRD,
   AWS_LBC_VERSION,
   AWS_LBC_POLICY_REGEX,
+  AWS_LBC_IAM_POLNAME,
   AWS_LBC_CHART_VERSION,
   DASHBOARD_PORT,
 };
