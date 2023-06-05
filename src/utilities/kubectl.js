@@ -141,6 +141,10 @@ const kubectl = {
     return exec(`kubectl delete ${type} ${name}`);
   },
 
+  getCrds() {
+    return exec(`kubectl get customresourcedefinitions`);
+  },
+
   getPv(type, name) {
     return exec(`kubectl get ${type} ${name}`);
   },

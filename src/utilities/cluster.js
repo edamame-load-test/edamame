@@ -134,11 +134,15 @@ const cluster = {
   },
 
   async deployServersK6Op() {
-    await kubectl.applyManifest(files.path(DB_API_FILE));
-    await kubectl.deployK6Operator();
-    await this.applyPgManifests();
-    await this.applyGrafanaManifests();
-    await dbApi.logUrl();
+    const crds = await kubectl.getCrds();
+    const { stdout } = await kubectl.getPods();
+    let dbApiExists = stdout.match("db-api");
+
+    if (!dbApiExists) await kubectl.applyManifest(files.path(DB_API_FILE));
+    if (!crds.stdout.match("k6")) await kubectl.deployK6Operator();
+    if (!stdout.match("psql")) await this.applyPgManifests();
+    if (!stdout.match("grafana")) await this.applyGrafanaManifests();
+    if (!dbApiExists) await dbApi.logUrl();
   },
 
   async phaseOutK6() {
