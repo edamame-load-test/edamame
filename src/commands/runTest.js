@@ -4,6 +4,7 @@ import cluster from "../utilities/cluster.js";
 import kubectl from "../utilities/kubectl.js";
 import manifest from "../utilities/manifest.js";
 import dbApi from "../utilities/dbApi.js";
+import files from "../utilities/files.js";
 
 const runTest = async (options) => {
   const spinner = new Spinner("Initializing load test...");
@@ -26,7 +27,14 @@ const runTest = async (options) => {
         `Either test name already exists, consists of only whitespaces, or is over 80 characters long.`
       );
     }
+    
+    if (files.exists(files.path("testIsRunning.txt"))) {
+      throw new Error(
+        `A load test is already in progress. You may only execute one test at a time.`
+      );
+    }
 
+    files.write("testIsRunning.txt", "");
     const testId = await dbApi.newTestId(testPath, name);
     spinner.succeed("Successfully initialized load test.");
 
@@ -53,6 +61,7 @@ const runTest = async (options) => {
     spinner.start();
     await cluster.phaseOutK6();
     spinner.succeed("Successfully removed load test resources from cluster.");
+    files.delete("testIsRunning.txt");
   } catch (err) {
     spinner.fail(`Error running test: ${err}`);
   }
