@@ -9,6 +9,7 @@ const destroyEKSCluster = async () => {
     spinner.succeed("Deleted Edamame Cluster");
   } catch (err) {
     spinner.fail(`Error deleting cluster: ${err}`);
+    if (err["stdout"]) console.log(err["stdout"]);
   }
 };
 

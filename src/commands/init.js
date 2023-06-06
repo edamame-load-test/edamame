@@ -28,7 +28,7 @@ const init = async () => {
     spinner.succeed("Cluster configured. Welcome to Edamame!");
   } catch (err) {
     spinner.fail(`Error creating cluster: ${err}`);
-    return;
+    if (err["stdout"]) console.log(err["stdout"]);
   }
 };
 

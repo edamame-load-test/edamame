@@ -14,6 +14,7 @@ const deleteTest = async (name) => {
     }
   } catch (err) {
     spinner.fail(`Error deleting test: ${err}`);
+    if (err["stdout"]) console.log(err["stdout"]);
   }
 };
 

@@ -19,6 +19,7 @@ const getTests = async () => {
     }
   } catch (err) {
     spinner.fail(`Error retrieving historical test information: ${err}`);
+    if (err["stdout"]) console.log(err["stdout"]);
   }
 };
 

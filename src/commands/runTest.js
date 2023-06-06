@@ -64,6 +64,7 @@ const runTest = async (options) => {
     files.delete("testIsRunning.txt");
   } catch (err) {
     spinner.fail(`Error running test: ${err}`);
+    if (err["stdout"]) console.log(err["stdout"]);
   }
 };
 

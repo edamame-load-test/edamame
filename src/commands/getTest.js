@@ -19,6 +19,7 @@ const getTest = async (name) => {
     }
   } catch (err) {
     spinner.fail(`Error retrieving test details: ${err}`);
+    if (err["stdout"]) console.log(err["stdout"]);
   }
 };
 
