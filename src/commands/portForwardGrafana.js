@@ -21,8 +21,8 @@ const portForwardGrafana = async () => {
     spinner.fail(
       `Error port forwardng to Grafana: ${err.message}`
     );
+    if (err["stdout"]) console.log(err["stdout"]);
   }
-
 };
 
 const stopGrafana = async () => {

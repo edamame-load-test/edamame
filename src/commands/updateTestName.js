@@ -27,6 +27,7 @@ const updateTestName = async (options) => {
     }
   } catch (err) {
     spinner.fail(`Error updating the test name: ${err}`);
+    if (err["stdout"]) console.log(err["stdout"]);
   }
 };
 
