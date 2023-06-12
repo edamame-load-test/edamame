@@ -71,37 +71,8 @@ const eksctl = {
     );
   },
 
-  async createIamLBCPolicy(existingPol) {
-    if (existingPol) {
-      await this.deleteOldIamLBCPolicy(existingPol);
-    }
-
-    return this.newIamLBCPolicy();
-  },
-
   localIp() {
     return exec(`curl ipinfo.io/ip`);
-  },
-
-  async newIamLBCPolicy() {
-    let oldPolicy = iam.deleteAWSLbcPolArn();
-    await this.deleteOldIamLBCPolicy(oldPolicy);
-
-    const { stdout } = await exec(
-      `cd ${files.path("")} && aws iam create-policy ` +
-      `--policy-name ${AWS_LBC_IAM_POLNAME} ` +
-      "--policy-document file://iam_policy.json"
-    );
-    const policyArn = iam.lbcPolicyArn(stdout);
-    await eksctl.createIamRoleLBCPol(policyArn);
-  },
-
-  deleteOldIamLBCPolicy(policy) {
-    if (policy) {
-      return exec(
-        `aws iam delete-policy --policy-arn ${policy}`
-      );
-    }
   },
 
   createIamRoleLBCPol(policyArn) {
@@ -114,18 +85,6 @@ const eksctl = {
         `--override-existing-serviceaccounts ` +
         "--approve"
     );
-  },
-
-  fetchOIDCs() {
-    const OIDC =
-      `aws eks describe-cluster ` +
-      `--name ${CLUSTER_NAME} ` +
-      '--query "cluster.identity.oidc.issuer" ' +
-      "--output text | cut -d '/' -f 5";
-
-    const listOIDCs = "aws iam list-open-id-connect-providers";
-
-    return exec(`${OIDC} && ${listOIDCs}`);
   },
 
   addCsiDriver(roleArn) {
@@ -159,21 +118,6 @@ const eksctl = {
     const { stdout } = await exec(`eksctl get cluster --verbose 0`);
     const line = stdout.split("\n").find((line) => line.includes("edamame"));
     return line.split("\t")[1];
-  },
-
-  async deleteEBSVolumes() {
-    let volumesCommand = `aws ec2 describe-volumes --filter ` +
-      `"Name=tag:kubernetes.io/created-for/pvc/name,Values=data-psql-0,grafana-pvc"` +
-      ` --query 'Volumes[].VolumeId' --output json`;
-
-    let volumes = await exec(`${volumesCommand}`);
-    volumes = JSON.parse(volumes.stdout);
-
-    return Promise.allSettled(
-      volumes.map((volume) => {
-        exec(`aws ec2 delete-volume --volume-id ${volume}`);
-      })
-    );
   }
 };
 
