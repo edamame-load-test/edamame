@@ -1,3 +1,4 @@
+import aws from "./aws.js";
 import iam from "./iam.js";
 import dbApi from "./dbApi.js";
 import helm from "./helm.js";
@@ -64,6 +65,8 @@ const cluster = {
   async create() {
     const { stdout } = await eksctl.clusterDesc();
     if (!stdout.match(CLUSTER_NAME)) {
+      // delete old edamame stacks if there was an AWS failure that didn't cleanly delete all old stacks
+      await aws.deleteOldStacks();
       await eksctl.createCluster();
     }
 
@@ -72,7 +75,7 @@ const cluster = {
   },
 
   async configureEBSCreds() {
-    const { stdout } = await eksctl.fetchOIDCs();
+    const { stdout } = await aws.fetchOIDCs();
     if (!iam.OIDCexists(stdout)) {
       await eksctl.createOIDC();
     }
@@ -86,7 +89,7 @@ const cluster = {
   },
 
   async setupAWSLoadBalancerController() {
-    await eksctl.newIamLBCPolicy();
+    await aws.newIamLBCPolicy();
     await helm.addEKSRepo();
     await kubectl.applyAwsLbcCrd();
     await helm.installAWSLBC();
@@ -177,8 +180,8 @@ const cluster = {
   async destroy() {
     await eksctl.destroyCluster();
     files.delete(NODE_GROUPS_FILE);
-    await eksctl.deleteOldIamLBCPolicy(iam.deleteAWSLbcPolArn());
-    return eksctl.deleteEBSVolumes();
+    await aws.deleteOldIamLBCPolicy(iam.deleteAWSLbcPolArn());
+    return aws.deleteEBSVolumes();
   }
 };
 
