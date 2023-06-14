@@ -25,6 +25,7 @@ const NODE_GROUPS_TEMPLATE = "nodegroups_template.yaml";
 const NODE_GROUPS_FILE = "load_test_crds/nodegroups.yaml";
 const STATSITE_CM = "statsite-config";
 const STATSITE_CM_FOLDER = "statsite-config";
+const MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES = 3;
 const DISPLAY_TEST_TITLE_SPACES = 30;
 const DISPLAY_TESTS_NUM_DASHES = 83;
 const DB_API_FILE = "db_api_deployment.yaml";
@@ -82,5 +83,6 @@ export {
   AWS_LBC_POLICY_REGEX,
   AWS_LBC_IAM_POLNAME,
   AWS_LBC_CHART_VERSION,
+  MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES,
   DASHBOARD_PORT,
 };

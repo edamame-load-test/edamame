@@ -62,14 +62,14 @@ const cluster = {
     }
   },
 
-  async create() {
+  async create(zones) {
     const { stdout } = await eksctl.clusterDesc();
     if (!stdout.match(CLUSTER_NAME)) {
       // delete old edamame stacks if there was an AWS failure that didn't cleanly delete all old stacks
       await aws.deleteOldStacks();
-      await eksctl.createCluster();
+      await eksctl.createCluster(zones);
     }
-
+    
     await eksctl.createNodeGroups();
     await this.applyStatsiteManifests();
   },

@@ -19,12 +19,11 @@ const program = new Command();
 
 program
   .command("init")
+  .option("-z, --zones <zones>", "List of one or more desired cluster availability zones specific to a user's preferred aws region")
   .description(
     "Create an EKS cluster and deploy Grafana, Postgres, & K6 Operator"
   )
-  .action(() => {
-    init();
-  });
+  .action(init);
 
 program
   .command("run")

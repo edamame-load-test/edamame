@@ -1,5 +1,5 @@
+import aws from "./aws.js";
 import files from "./files.js";
-import iam from "./iam.js";
 import { promisify } from "util";
 import child_process from "child_process";
 import {
@@ -7,8 +7,7 @@ import {
   LOAD_GEN_NODE_GRP,
   STATSITE_NODE_GRP,
   NODE_GROUPS_TEMPLATE,
-  NODE_GROUPS_FILE,
-  AWS_LBC_IAM_POLNAME,
+  NODE_GROUPS_FILE
 } from "../constants/constants.js";
 const exec = promisify(child_process.exec);
 
@@ -24,8 +23,15 @@ const eksctl = {
     }
   },
 
-  createCluster() {
-    return exec(`eksctl create cluster --name ${CLUSTER_NAME} --version=1.25`);
+  async createCluster(zones) {
+    let command = `eksctl create cluster --name ${CLUSTER_NAME} --version=1.25`;
+    if (!zones) {
+      return exec(command);
+    }
+
+    await aws.throwErrorIfInvalidZone(zones);
+    command += ` --zones ${zones}`;
+    return exec(command);
   },
 
   clusterDesc() {
