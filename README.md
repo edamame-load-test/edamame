@@ -21,7 +21,8 @@ In order to execute a load test with the `edamame` command line interface or gra
 
 ### edamame init
 
-Usage: `edamame init`
+Usage: `edamame init --zones <comma_separated_list_of_desired_availability_zones_in_your_preferred_aws_region>`
+Example: `edamame init --zones us-west-2a,us-west-2b,us-west-2d`
 Outputs:
 
 ```
@@ -45,6 +46,7 @@ Outputs:
 **Notes**:
 
 - It can take as long as _20 minutes_ to create the cluster and apply the necessary permissions.
+- The --zones flag is optional and exists to provide greater configuration flexibility. You can create a cluster with the default availability zones in your preferred aws region by simply executing `edamame init`.
 - To access the Grafana dashboards, use the provided link. For now, the default Grafana username and password are used (`admin` and `admin`). In Grafana, navigate to the Dashboards. From within the default HTTP & WebSockets dashboard, select the `test name` for the data you wish to view. If no tests have been run, you may see an error until there are test names in the database to display.
 
 ### edamame run

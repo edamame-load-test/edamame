@@ -1,6 +1,7 @@
 import { 
   AWS_LBC_IAM_POLNAME,
-  CLUSTER_NAME
+  CLUSTER_NAME,
+  MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES
 } from "../constants/constants.js";
 import { promisify } from "util";
 import iam from "./iam.js";
@@ -18,6 +19,49 @@ const aws = {
         await exec(`aws cloudformation delete-stack --stack-name ${stackName}`);
       }
     });
+  },
+
+  async throwErrorIfInvalidZone(zones) {
+    this.checkForInvalidZoneList(zones);
+    let userZones = zones.split(",");
+    let possibleZones = await this.usersPossibleZones();
+    let invalid = false;
+    let invalidZone;
+
+    for (let i = 0; i < userZones.length; i++) {
+      let zone = userZones[i];
+      if (!possibleZones[zone]) {
+        invalid = true;
+        invalidZone = zone;
+        break;
+      }
+    }
+
+    if (invalid) {
+      throw Error (`One of your specified zones, ${invalidZone}, isn't in the list of aws availability zones for your region`);
+    }
+  },
+
+  checkForInvalidZoneList(zones) {
+    let numDashes = zones.split("").filter(char => char === "-").length;
+    if (!zones.match(",") && numDashes >= MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES) {
+      throw Error (
+        `When specifying >1 availability zones, please specify the desired zones as a comma separated list like so: "us-east-1a,us-east-1b"`
+      );
+    }
+  },
+
+  async usersPossibleZones() {
+    let zones = await exec(`aws ec2 describe-availability-zones --all-availability-zones`);
+    zones = zones.stdout.split("\n").filter(line => line.match(`"ZoneName"`));
+    let zonesLookup = {};
+
+    zones.forEach(zoneDesc => {
+      let zoneKey = zoneDesc.split(`"ZoneName": `).filter(info => info !== "")[1].replace(",", "").replaceAll(`"`, "");
+      zonesLookup[zoneKey] = zoneDesc;
+    });
+
+    return zonesLookup;
   },
 
   async newIamLBCPolicy() {

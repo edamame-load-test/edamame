@@ -2,14 +2,15 @@ import cluster from "../utilities/cluster.js";
 import Spinner from "../utilities/spinner.js";
 import password from "../utilities/password.js";
 
-const init = async () => {
+const init = async (options) => {
+  const zones = options.zones;
   const spinner = new Spinner(
     "Creating Edamame cluster... (this may take up to 20 minutes)"
   );
 
   try {
     await cluster.checkForAllInstallations();
-    await cluster.create();
+    await cluster.create(zones);
     spinner.succeed("Successfully created Edamame cluster.");
 
     spinner.info("Configuring EBS credentials...");
