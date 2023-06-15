@@ -3,6 +3,7 @@ import cluster from "../utilities/cluster.js";
 import manifest from "../utilities/manifest.js";
 import dbApi from "../utilities/dbApi.js";
 import { KubeConfig, CustomObjectsApi } from "@kubernetes/client-node";
+import files from "../utilities/files.js";
 
 const stopTest = async () => {
   const kc = new KubeConfig();
@@ -19,6 +20,7 @@ const stopTest = async () => {
     await cluster.phaseOutK6();
     dbApi.updateTestStatus(testId, "completed");
     spinner.succeed(`Stopped current test.`);
+    files.delete("testIsRunning.txt");
   } else {
     spinner.succeed(`No tests currently running.`);
   }
