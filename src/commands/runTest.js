@@ -1,10 +1,9 @@
-import loadGenerators from "../utilities/loadGenerators.js";
+import files from "../utilities/files.js";
+import dbApi from "../utilities/dbApi.js";
 import Spinner from "../utilities/spinner.js";
 import cluster from "../utilities/cluster.js";
-import kubectl from "../utilities/kubectl.js";
 import manifest from "../utilities/manifest.js";
-import dbApi from "../utilities/dbApi.js";
-import files from "../utilities/files.js";
+import loadGenerators from "../utilities/loadGenerators.js";
 
 const runTest = async (options) => {
   const spinner = new Spinner("Initializing load test...");
@@ -65,6 +64,13 @@ const runTest = async (options) => {
   } catch (err) {
     spinner.fail(`Error running test: ${err}`);
     if (err["stdout"]) console.log(err["stdout"]);
+    if (!err.message.match(`load test is already in progress.`)) {
+      files.delete("testIsRunning.txt");
+    }
+    
+    if (err.message.match("getaddrinfo ENOTFOUND k8s-default-ingressd")) {
+      console.log("The DNS is still being configured for the DB API. Please try re-executing a load test in a couple minutes");
+    }
   }
 };
 
