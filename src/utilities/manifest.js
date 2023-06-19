@@ -5,9 +5,11 @@ import {
   GRAF_JSON_DBS,
   DB_API_INGRESS,
   DB_API_ING_TEMPLATE,
+  LOAD_GEN_NODE_GRP
 } from "../constants/constants.js";
 import files from "./files.js";
 import kubectl from "./kubectl.js";
+import eksctl from "./eksctl.js";
 
 const manifest = {
   createDbApiIngress(userIp) {
@@ -37,6 +39,29 @@ const manifest = {
     }
 
     files.writeYAML(K6_CR_FILE, k6CrData);
+  },
+
+  async createNodeGroupCr(type, finalFile, template, useBackUpNodeType = false) {
+    const nodeGroupData = files.readYAML(template);
+    nodeGroupData.metadata.region = await eksctl.getRegion();
+
+    if (useBackUpNodeType) {
+      if (type === LOAD_GEN_NODE_GRP) {
+        nodeGroupData.nodeGroups[0].instanceType = BACKUP_NODE_TYPE;
+      } else {
+        nodeGroupData.managedNodeGroups[0].instanceType = BACKUP_NODE_TYPE;
+      }
+    }
+
+    if (!files.exists(files.path("/load_test_crds"))) {
+      files.makeDir("/load_test_crds");
+    }
+    files.writeYAML(finalFile, nodeGroupData);
+  },
+
+  desiredNumLoadGenNodes() {
+    const k6CrData = files.readYAML(K6_CR_FILE);
+    return k6CrData.spec.parallelism;
   },
 
   numVus(path) {

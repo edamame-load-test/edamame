@@ -1,9 +1,10 @@
-import kubectl from "./kubectl.js";
 import {
   K6_TEST_POD_REGEX,
-  POLL_FREQUENCY
+  POLL_FREQUENCY,
+  LOAD_GEN_NODE_GRP,
+  SPECIALIZED_NODES_UNAVAILABLE_TIMEOUT
 } from "../constants/constants.js";
-import manifest from "./manifest.js";
+import kubectl from "./kubectl.js";
 
 const loadGenerators = {
   numTestsCompleted(stdout) {
@@ -45,24 +46,33 @@ const loadGenerators = {
     });
   },
 
-  pollUntilGenNodesReady(numNodes) {
-    return new Promise(resolve => {
+  pollUntilLoadNodesReady(numNodes, nodeType, nodeGroup, nodeDesc) {
+    return new Promise((resolve, reject) => {
+      const timeOut = setTimeout(async () => {
+        clearInterval(interval);
+        let warning = `WARNING: The ${nodeType} ${nodeDesc} lack`+
+          `${nodeDesc.match("nodes") ? "" : "s"} availability in your AWS region.` +
+          " Edamame will proceed to stop the execution of your load test.";
+        reject(new Error(warning));
+      }, SPECIALIZED_NODES_UNAVAILABLE_TIMEOUT);
+  
       const interval = setInterval(async () => {
-        const readyNodes = await kubectl.getGeneratorNodesReadyCount();
+        const readyNodes = await kubectl.getLoadNodesReadyCount(nodeGroup);
         if (readyNodes !== numNodes) return;
 
         clearInterval(interval);
+        clearTimeout(timeOut);
         resolve();
       }, POLL_FREQUENCY);
     });
   },
 
-  pollUntilGenNodesScaledToZero() {
+  pollUntilGenNodesScaleDown() {
     return new Promise(resolve => {
       const interval = setInterval(async () => {
-        const nodes = await kubectl.getGeneratorNodesCount();
+        const nodes = await kubectl.getLoadNodesCount(LOAD_GEN_NODE_GRP);
         if (nodes !== 0) return;
-
+      
         clearInterval(interval);
         resolve();
       }, POLL_FREQUENCY);

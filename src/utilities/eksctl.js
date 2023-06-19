@@ -1,13 +1,15 @@
 import aws from "./aws.js";
 import files from "./files.js";
+import manifest from "./manifest.js";
 import { promisify } from "util";
 import child_process from "child_process";
 import {
   CLUSTER_NAME,
+  GEN_NODE_GROUP_FILE,
+  GEN_NODE_GROUP_TEMPLATE,
+  AGG_NODE_GROUP_TEMPLATE,
   LOAD_GEN_NODE_GRP,
-  STATSITE_NODE_GRP,
-  NODE_GROUPS_TEMPLATE,
-  NODE_GROUPS_FILE
+  STATSITE_NODE_GRP
 } from "../constants/constants.js";
 const exec = promisify(child_process.exec);
 
@@ -38,19 +40,34 @@ const eksctl = {
     return exec(`eksctl get cluster`);
   },
 
-  async createNodeGroups() {
-    const nodeGroupsData = files.readYAML(NODE_GROUPS_TEMPLATE);
-    nodeGroupsData.metadata.region = await this.getRegion();
+  async createNodeGroup(finalFile, useBackUpNodeType = false) {
+    let type;
+    let template;
 
-    if (!files.exists(files.path("/load_test_crds"))) {
-      files.makeDir("/load_test_crds");
+    if (finalFile === GEN_NODE_GROUP_FILE) {
+      type = LOAD_GEN_NODE_GRP;
+      template = GEN_NODE_GROUP_TEMPLATE;
+    } else {
+      type = STATSITE_NODE_GRP;
+      template = AGG_NODE_GROUP_TEMPLATE;
+    } 
+    await manifest.createNodeGroupCr(type, finalFile, template, useBackUpNodeType);
+    return exec(`eksctl create nodegroup --config-file ${files.path(finalFile)}`);
+  },
+
+  async deleteNodeGroup(type) {
+    const nodeGroupData = files.readYAML(GEN_NODE_GROUP_FILE);
+    const region = nodeGroupData.metadata.region;
+
+    let deleteCommand = `eksctl delete nodegroup ` +
+      ` --cluster ${CLUSTER_NAME} ` +
+      `--region ${region} --name `;
+   
+    if (type === LOAD_GEN_NODE_GRP) {
+      await exec(deleteCommand + LOAD_GEN_NODE_GRP);
+    } else {
+      await exec(deleteCommand + STATSITE_NODE_GRP);
     }
-
-    files.writeYAML(NODE_GROUPS_FILE, nodeGroupsData);
-
-    return exec(
-      `eksctl create nodegroup --config-file ${files.path(NODE_GROUPS_FILE)}`
-    );
   },
 
   fetchIamRoles() {
@@ -102,17 +119,10 @@ const eksctl = {
     );
   },
 
-  scaleLoadGenNodes(numNodes) {
+  scaleNodes(numNodes, nodeGroupName) {
     return exec(
       `eksctl scale nodegroup --cluster=${CLUSTER_NAME} ` +
-        `--nodes=${numNodes} ${LOAD_GEN_NODE_GRP}`
-    );
-  },
-
-  scaleStatsiteNodes(numNodes) {
-    return exec(
-      `eksctl scale nodegroup --cluster=${CLUSTER_NAME} ` +
-        `--nodes=${numNodes} ${STATSITE_NODE_GRP}`
+        `--nodes=${numNodes} ${nodeGroupName}`
     );
   },
 

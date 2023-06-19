@@ -4,6 +4,8 @@ const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
 const DASHBOARD_PORT = 3001;
 const PORT_FORWARD_DELAY = 3500;
+const LOAD_GEN_NODE_TYPE = "m5.24xlarge";
+const LOAD_AGG_NODE_TYPE = "m5zn.xlarge";
 const DB_API_SERVICE = "db-api-service";
 const DB_API_INGRESS_NAME = "ingress-db-api";
 const EXTERNAL_IP_REGEX = "amazonaws.com";
@@ -21,8 +23,11 @@ const PG_CM_FILE = "postgres_configmap.yaml";
 const PG_SS_FILE = "postgres_statefulset.yaml";
 const STATSITE_FILE = "statsite_deployment.yaml";
 const STATSITE_NODE_GRP = "ng-agg";
-const NODE_GROUPS_TEMPLATE = "nodegroups_template.yaml";
-const NODE_GROUPS_FILE = "load_test_crds/nodegroups.yaml";
+const GEN_NODE_GROUP_TEMPLATE = "load_gen_nodegroup_temp.yaml";
+const AGG_NODE_GROUP_TEMPLATE = "load_agg_nodegroup_temp.yaml";
+const GEN_NODE_GROUP_FILE = "load_test_crds/load_gen_nodegroup.yaml";
+const AGG_NODE_GROUP_FILE = "load_test_crds/load_agg_nodegroup.yaml";
+const SPECIALIZED_NODES_UNAVAILABLE_TIMEOUT = 480000;
 const STATSITE_CM = "statsite-config";
 const STATSITE_CM_FOLDER = "statsite-config";
 const MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES = 3;
@@ -66,13 +71,15 @@ export {
   PG_CM_FILE,
   PG_SS_FILE,
   STATSITE_FILE,
-  NODE_GROUPS_TEMPLATE,
+  GEN_NODE_GROUP_TEMPLATE,
+  AGG_NODE_GROUP_TEMPLATE,
   STATSITE_NODE_GRP,
   STATSITE_CM,
   STATSITE_CM_FOLDER,
   DISPLAY_TEST_TITLE_SPACES,
   DISPLAY_TESTS_NUM_DASHES,
-  NODE_GROUPS_FILE,
+  GEN_NODE_GROUP_FILE,
+  AGG_NODE_GROUP_FILE,
   DB_API_FILE,
   CLUSTER_NAME,
   LOAD_GEN_NODE_GRP,
@@ -84,5 +91,8 @@ export {
   AWS_LBC_IAM_POLNAME,
   AWS_LBC_CHART_VERSION,
   MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES,
+  SPECIALIZED_NODES_UNAVAILABLE_TIMEOUT,
   DASHBOARD_PORT,
+  LOAD_GEN_NODE_TYPE,
+  LOAD_AGG_NODE_TYPE
 };

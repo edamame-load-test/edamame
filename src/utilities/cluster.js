@@ -23,7 +23,12 @@ import {
   GRAF_DS_FILE,
   GRAF_DB_FILE,
   DB_API_INGRESS,
-  NODE_GROUPS_FILE
+  GEN_NODE_GROUP_FILE,
+  AGG_NODE_GROUP_FILE,
+  STATSITE_NODE_GRP,
+  LOAD_AGG_NODE_TYPE,
+  LOAD_GEN_NODE_GRP,
+  LOAD_GEN_NODE_TYPE
 } from "../constants/constants.js";
 import { promisify } from "util";
 import child_process from "child_process";
@@ -70,7 +75,8 @@ const cluster = {
       await eksctl.createCluster(zones);
     }
     
-    await eksctl.createNodeGroups();
+    await eksctl.createNodeGroup(GEN_NODE_GROUP_FILE, false);
+    await eksctl.createNodeGroup(AGG_NODE_GROUP_FILE, false);
     await this.applyStatsiteManifests();
   },
 
@@ -154,24 +160,33 @@ const cluster = {
     await kubectl.deleteManifest(files.path(K6_CR_FILE));
     await kubectl.deleteManifest(files.path(STATSITE_FILE));
     await kubectl.deleteConfigMap(testId);
-    await eksctl.scaleStatsiteNodes(0);
-    await eksctl.scaleLoadGenNodes(0);
-    await loadGenerators.pollUntilGenNodesScaledToZero();
+    await eksctl.scaleNodes(0, STATSITE_NODE_GRP);
+    await eksctl.scaleNodes(0, LOAD_GEN_NODE_GRP);
+    await loadGenerators.pollUntilGenNodesScaleDown();
     files.delete(K6_CR_FILE);
   },
 
   async provisionStatsiteNode() {
-    await eksctl.scaleStatsiteNodes(1);
+    await eksctl.scaleNodes(1, STATSITE_NODE_GRP);
+    await loadGenerators.pollUntilLoadNodesReady(
+      1, 
+      LOAD_AGG_NODE_TYPE,
+      STATSITE_NODE_GRP,
+      "load aggregator node"
+    );
   },
 
   async provisionGenNodes(numNodes) {
-    await eksctl.scaleLoadGenNodes(numNodes);
-    await loadGenerators.pollUntilGenNodesReady(numNodes);
+    await eksctl.scaleNodes(numNodes, LOAD_GEN_NODE_GRP);
+    await loadGenerators.pollUntilLoadNodesReady(
+      numNodes, 
+      LOAD_GEN_NODE_TYPE,
+      LOAD_GEN_NODE_GRP,
+      "load generator nodes"
+    );
   },
 
-  async launchK6Test(testPath, testId, numNodes) {
-    manifest.createK6Cr(testPath, testId, numNodes);
-
+  async launchK6Test(testPath, testId) {
     await kubectl.applyManifest(files.path(STATSITE_FILE));
     await kubectl.createConfigMapWithName(testId, testPath);
     await kubectl.applyManifest(files.path(K6_CR_FILE));
@@ -179,7 +194,8 @@ const cluster = {
 
   async destroy() {
     await eksctl.destroyCluster();
-    files.delete(NODE_GROUPS_FILE);
+    files.delete(GEN_NODE_GROUP_FILE);
+    files.delete(AGG_NODE_GROUP_FILE);
     await aws.deleteOldIamLBCPolicy(iam.deleteAWSLbcPolArn());
     return aws.deleteEBSVolumes();
   }
