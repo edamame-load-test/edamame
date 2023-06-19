@@ -1,9 +1,14 @@
 import files from "../utilities/files.js";
 import dbApi from "../utilities/dbApi.js";
+import aws from "../utilities/aws.js";
 import Spinner from "../utilities/spinner.js";
 import cluster from "../utilities/cluster.js";
 import manifest from "../utilities/manifest.js";
 import loadGenerators from "../utilities/loadGenerators.js";
+import { 
+  LOAD_GEN_NODE_TYPE,
+  LOAD_AGG_NODE_TYPE 
+} from "../constants/constants.js";
 
 const runTest = async (options) => {
   const spinner = new Spinner("Initializing load test...");
@@ -38,6 +43,7 @@ const runTest = async (options) => {
     spinner.succeed("Successfully initialized load test.");
 
     const numNodes = manifest.parallelism(numVus, vusPerPod);
+    manifest.createK6Cr(testPath, testId, numNodes);
     spinner.info(
       `Provisioning load test resources (${numNodes} generator${
         numNodes === 1 ? "" : "s"
@@ -50,7 +56,7 @@ const runTest = async (options) => {
 
     spinner.info("Running load test...");
     spinner.start();
-    await cluster.launchK6Test(testPath, testId, numNodes);
+    await cluster.launchK6Test(testPath, testId);
     await dbApi.updateTestStatus(testId, "running");
     await loadGenerators.pollUntilAllComplete(numNodes);
     await dbApi.updateTestStatus(testId, "completed");
@@ -69,7 +75,20 @@ const runTest = async (options) => {
     }
     
     if (err.message.match("getaddrinfo ENOTFOUND k8s-default-ingressd")) {
-      console.log("The DNS is still being configured for the DB API. Please try re-executing a load test in a couple minutes");
+      let msg = "The DNS is still being configured for the DB API." +
+        " Please try re-executing your load test in a couple minutes.";
+      console.log(msg);
+    }
+
+    if (err.message.match("availability in your AWS region")) {
+      if (err.message.match(LOAD_GEN_NODE_TYPE)) {
+        await aws.checkOfferedInstanceTypes(LOAD_GEN_NODE_TYPE);
+      } else {
+        await aws.checkOfferedInstanceTypes(LOAD_AGG_NODE_TYPE);
+      }
+      
+      const id = manifest.latestK6TestId();
+      await dbApi.deleteTest(id);
     }
   }
 };

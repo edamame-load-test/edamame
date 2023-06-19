@@ -157,9 +157,9 @@ const kubectl = {
     return exec(`kubectl get pods`);
   },
 
-  async getGeneratorNodes() {
+  async getLoadNodes(nodeGroup) {
     const { stdout } = await exec(
-      `kubectl get nodes --selector alpha.eksctl.io/nodegroup-name=ng-gen`
+      `kubectl get nodes --selector alpha.eksctl.io/nodegroup-name=${nodeGroup}`
     );
     const nodes = stdout
       .split("\n")
@@ -168,16 +168,17 @@ const kubectl = {
     return nodes;
   },
 
-  async getGeneratorNodesCount() {
-    const nodes = await this.getGeneratorNodes();
+  async getLoadNodesCount(nodeGroup) {
+    const nodes = await this.getLoadNodes(nodeGroup);
     return nodes.length;
   },
 
-  async getGeneratorNodesReadyCount() {
-    const nodes = await this.getGeneratorNodes();
+  async getLoadNodesReadyCount(nodeGroup) {
+    const nodes = await this.getLoadNodes(nodeGroup);
     const readyNodes = nodes.filter((node) => node.match(/\sReady\s/));
     return readyNodes.length;
   },
+
   // If there's a process on a port, it kills it, otherwise it throws an error
   async stopProcessOnPort(port) {
     try {

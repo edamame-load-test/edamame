@@ -1,0 +1,20 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: edamame
+  region: us-east-1 # default value
+
+managedNodeGroups:
+  - name: ng-agg
+    instanceType: m5zn.xlarge # Testing: m5.large; Production: m5zn.xlarge
+    desiredCapacity: 0
+    minSize: 0
+    maxSize: 1
+    preBootstrapCommands:
+      - sysctl -w net.core.rmem_default=536870912 # Set to 512M
+      - sysctl -w net.core.rmem_max=536870912 # Set to 512M
+    taints:
+      - key: "special"
+        value: "sysctl-udp-buffer"
+        effect: NoSchedule
