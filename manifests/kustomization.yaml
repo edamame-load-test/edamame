@@ -4,9 +4,9 @@ generatorOptions:
   labels:
     app: edamame
 secretGenerator:
-- name: psql-secret
-  envs:
-  - psql.env
-  type: Opaque
-  options:
-    disableNameSuffixHash: true
+  - name: postgres-secret
+    envs:
+      - postgres.env
+    type: Opaque
+    options:
+      disableNameSuffixHash: true

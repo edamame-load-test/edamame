@@ -129,7 +129,7 @@ const aws = {
 
   async deleteEBSVolumes() {
     let volumesCommand = `aws ec2 describe-volumes --filter ` +
-      `"Name=tag:kubernetes.io/created-for/pvc/name,Values=data-psql-0,grafana-pvc"` +
+      `"Name=tag:kubernetes.io/created-for/pvc/name,Values=data-postgres-0,grafana-pvc"` +
       ` --query 'Volumes[].VolumeId' --output json`;
 
     let volumes = await exec(`${volumesCommand}`);
