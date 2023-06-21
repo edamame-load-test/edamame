@@ -149,7 +149,7 @@ const cluster = {
 
     if (!dbApiExists) await kubectl.applyManifest(files.path(DB_API_FILE));
     if (!crds.stdout.match("k6")) await kubectl.deployK6Operator();
-    if (!stdout.match("psql")) await this.applyPgManifests();
+    if (!stdout.match("postgres")) await this.applyPgManifests();
     if (!stdout.match("grafana")) await this.applyGrafanaManifests();
     if (!dbApiExists) await dbApi.logUrl();
   },

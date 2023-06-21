@@ -1,34 +1,34 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: psql
+  name: postgres
   labels:
-    app: psql
+    app: postgres
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: psql
-  serviceName: psql
+      app: postgres
+  serviceName: postgres
   template:
     metadata:
       labels:
-        app: psql
+        app: postgres
     spec:
       containers:
-        - name: psql
+        - name: postgres
           image: "postgres:latest"
           env:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: psql-secret
-                  key: psql-username
+                  name: postgres-secret
+                  key: postgres-username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: psql-secret
-                  key: psql-password
+                  name: postgres-secret
+                  key: postgres-password
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           ports:
@@ -84,10 +84,10 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: psql-service
+  name: postgres-service
 spec:
   selector:
-    app: psql
+    app: postgres
   ports:
     - protocol: TCP
       port: 5432

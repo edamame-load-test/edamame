@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: psql-configmap
+  name: postgres-configmap
 data:
-  psql-host: psql-service
-  psql-port: "5432"
-  psql-db: edamame
+  postgres-host: postgres-service
+  postgres-port: "5432"
+  postgres-db: edamame

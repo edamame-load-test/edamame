@@ -35,31 +35,31 @@ spec:
             - name: PGHOST
               valueFrom:
                 configMapKeyRef:
-                  name: psql-configmap
-                  key: psql-host
+                  name: postgres-configmap
+                  key: postgres-host
             - name: PGPORT
               valueFrom:
                 configMapKeyRef:
-                  name: psql-configmap
-                  key: psql-port
+                  name: postgres-configmap
+                  key: postgres-port
             - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  name: psql-secret
-                  key: psql-username
+                  name: postgres-secret
+                  key: postgres-username
             - name: PGDATABASE
               valueFrom:
                 configMapKeyRef:
-                  name: psql-configmap
-                  key: psql-db
+                  name: postgres-configmap
+                  key: postgres-db
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: psql-secret
-                  key: psql-password
+                  name: postgres-secret
+                  key: postgres-password
           volumeMounts:
-          - name: config
-            mountPath: /etc/statsite
+            - name: config
+              mountPath: /etc/statsite
       volumes:
         - name: config
           configMap:
