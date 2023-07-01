@@ -1364,22 +1364,22 @@
     "list": [
       {
         "current": {
-          "selected": true,
-          "text": "50kVUs",
-          "value": "50kVUs"
+          "selected": false,
+          "text": "test2",
+          "value": "test2"
         },
         "datasource": {
           "type": "postgres",
           "uid": "P44368ADAD746BC27"
         },
-        "definition": "SELECT DISTINCT name from tests;",
+        "definition": "SELECT name FROM tests ORDER BY id DESC;",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "testName",
         "options": [],
-        "query": "SELECT DISTINCT name from tests;",
-        "refresh": 1,
+        "query": "SELECT name FROM tests ORDER BY id DESC;",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1388,7 +1388,7 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
