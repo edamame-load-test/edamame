@@ -11,11 +11,11 @@ function TopBar() {
   useEffect(() => {
     async function fetchClusterUrl() {
       try {
-        console.log("fetching");
         const url = await clusterService.getClusterUrl();
         setClusterUrl(url);
       } catch (error) {
-        console.log("Unable to resolve the cluster URL");
+        console.log(`Couldn't resolve cluster URL: ${error.message}`);
+        setClusterUrl("Currently unable to resolve the cluster URL");
       }
     }
     fetchClusterUrl();

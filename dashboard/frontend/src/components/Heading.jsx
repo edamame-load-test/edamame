@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { FiExternalLink } from "react-icons/fi";
 import logo from "../assets/logo.svg";
 import testService from "../services/testService";
+import timeElapsed from "../utilities/timeElapsed";
 import generateGrafanaUrl from "../utilities/generateGrafanaUrl";
-
-// Check if I'm getting infinite loops in my useEffect. I might be making a mistake here
-// Figure out why my heading is switching to something to not running right away.
 
 function Heading({ currTest, setCurrTest }) {
   const [elapsedTime, setElapsedTime] = useState("");
@@ -13,38 +11,26 @@ function Heading({ currTest, setCurrTest }) {
 
   useEffect(() => {
     async function checkRunningTest() {
-      const tests = await testService.getTests(); // Query the DB to get an updated list of tests
-      const activeTests = tests.filter((test) => test.status !== "completed"); // Check if any tests are active
+      const tests = await testService.getTests(); 
+      const activeTests = tests.filter((test) => test.status !== "completed");
       if (activeTests.length === 0) {
         setCurrTest({});
-        setIsStopping(false); // If there are no tests, there should be no tests stopping either
+        setIsStopping(false);
       } else {
         setCurrTest(activeTests[0]);
       }
     }
     const intervalId = setInterval(checkRunningTest, 3000);
-    return () => clearInterval(intervalId); // Cleanup function
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
-    function formatElapsedTime(seconds) {
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = seconds % 60;
-      return `${minutes}min${
-        remainingSeconds < 10 ? "0" : ""
-      }${remainingSeconds}s`;
-    }
-
     if (Object.keys(currTest).length !== 0) {
       const startTime = new Date(currTest.start_time);
-      const now = new Date();
-      const elapsedSeconds = Math.floor((now - startTime) / 1000);
-      setElapsedTime(formatElapsedTime(elapsedSeconds));
+      setElapsedTime(timeElapsed.display(startTime));
 
       const intervalId = setInterval(() => {
-        const now = new Date();
-        const elapsedSeconds = Math.floor((now - startTime) / 1000);
-        setElapsedTime(formatElapsedTime(elapsedSeconds));
+        setElapsedTime(timeElapsed.display(startTime));
       }, 1000);
 
       return () => clearInterval(intervalId);

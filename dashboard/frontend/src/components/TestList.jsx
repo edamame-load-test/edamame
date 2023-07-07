@@ -1,15 +1,10 @@
-// TODO
-// · If the test has not been completed write "in progress"
-// · Translate the time into a proper format
-// · Add links to the buttons
-
 import { FiExternalLink, FiMoreVertical } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import testService from "../services/testService";
 import ScriptModal from "./ScriptModal";
 import LaunchTestModal from "./LaunchTestModal";
 import generateGrafanaUrl from "../utilities/generateGrafanaUrl";
-import formatDate from "../utilities/formatDate";
+import format from "../utilities/formatter";
 import Menu from "./Menu";
 import timeDifferenceFormatted from "../utilities/timeDifferenceFormatted";
 
@@ -28,7 +23,6 @@ function TestList({ currTest, setCurrTest }) {
     getAllTests();
   }, [currTest]);
 
-  // Empty State (If there aren't any tests yet)
   if (tests.length === 0) {
     return (
       <>
@@ -101,7 +95,7 @@ function TestList({ currTest, setCurrTest }) {
                 .map((test) => (
                   <tr key={test.id} className="border-b">
                     <td className="px-6 py-5">{test.name}</td>
-                    <td>{formatDate(new Date(test.start_time))}</td>
+                    <td>{format.date(test.start_time)}</td>
                     <td>
                       {test.status === "completed" ? (
                         timeDifferenceFormatted(test.end_time, test.start_time)
