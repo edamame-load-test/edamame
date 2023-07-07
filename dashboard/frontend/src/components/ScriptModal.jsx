@@ -1,11 +1,5 @@
 import React from "react";
-import formatDate from "../utilities/formatDate";
-
-// Escape certain special HTML characters
-
-function formatScript(script) {
-  return script.replace(/\\"/g, '"').replace(/\\n/g, "\n");
-}
+import format from "../utilities/formatter";
 
 function ScriptModal({ currScript, setIsScriptModal }) {
   return (
@@ -21,12 +15,12 @@ w-[70%] flex flex-col"
         <div className="flex flex-row items-baseline justify-between">
           <h2 className="text-lg font-bold">{currScript.name}</h2>
           <p className="text-slate-600">
-            {currScript.script && formatDate(new Date(currScript.start_time))}
+            {currScript.script && format.date(currScript.start_time)}
           </p>
         </div>
         {currScript.script && (
           <pre className="bg-slate-100 rounded p-4 mt-6 overflow-x-scroll">
-            {formatScript(currScript.script)}
+            {format.script(currScript.script)}
           </pre>
         )}
         <button

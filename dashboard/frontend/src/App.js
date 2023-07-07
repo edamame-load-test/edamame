@@ -4,7 +4,7 @@ import TopBar from "./components/TopBar";
 import { useState } from "react";
 
 function App() {
-  const [currTest, setCurrTest] = useState({}); // Global state stores the current running test
+  const [currTest, setCurrTest] = useState({});
   return (
     <div className="App text-slate-900">
       <TopBar />
