@@ -15,6 +15,27 @@ const format = {
 
   script(script) {
     return script.replace(/\\"/g, '"').replace(/\\n/g, "\n");
+  },
+
+  timeDifference(endTime, startTime) {
+    let seconds = Math.floor((new Date(endTime) - new Date(startTime)) / 1000);
+    let hours = Math.floor(seconds / 3600);
+    let minutes = Math.floor((seconds - hours * 3600) / 60);
+
+    let hrsFormatted = hours > 0 ? 
+      `${hours} hr${hours === 1 ? "" : "s"}` : 
+      "";
+    let minsFormatted = minutes > 0 ? 
+      `${minutes} min${minutes === 1 ? "" : "s"}` 
+      : ""; 
+  
+    if (hours > 0) {
+      return `${hrsFormatted} ${minsFormatted}`;
+    } else if (minutes > 0) {
+      return minsFormatted; 
+    } else {
+      return "0 mins";
+    }
   }
 };
 
