@@ -6,7 +6,6 @@ import LaunchTestModal from "./LaunchTestModal";
 import generateGrafanaUrl from "../utilities/generateGrafanaUrl";
 import format from "../utilities/formatter";
 import Menu from "./Menu";
-import timeDifferenceFormatted from "../utilities/timeDifferenceFormatted";
 
 function TestList({ currTest, setCurrTest }) {
   const [tests, setTests] = useState([]);
@@ -80,7 +79,7 @@ function TestList({ currTest, setCurrTest }) {
               Launch a test
             </button>
           </div>
-          <table class="table-fixed text-slate-800 w-full mt-6">
+          <table className="table-fixed text-slate-800 w-full mt-6">
             <thead className="text-sm bg-slate-200 text-left">
               <tr className="border-b border-slate-300">
                 <th className="py-3 px-6 rounded-tl">Name</th>
@@ -98,7 +97,7 @@ function TestList({ currTest, setCurrTest }) {
                     <td>{format.date(test.start_time)}</td>
                     <td>
                       {test.status === "completed" ? (
-                        timeDifferenceFormatted(test.end_time, test.start_time)
+                        format.timeDifference(test.end_time, test.start_time)
                       ) : (
                         <div className="flex align-middle gap-1">
                           <p className=" py-1 ">In Progress </p>

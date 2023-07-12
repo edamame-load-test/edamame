@@ -28,14 +28,11 @@ const grafana = {
     });
   },
 
-  async detailedUrl(testId) {
-    let podName = await kubectl.exactPodName("grafana");
-    await kubectl.tempPortForward(podName, GRAF_PORT, GRAF_PORT);
-
+  async detailedUrl() {
     return (
-      `http://localhost:${GRAF_PORT}/d/IWSghv-4k/` +
-      `http-ws-data?orgId=1&var-testid=${testId}` +
-      `&refresh=5s&from=now-15m&to=now`
+      `http://localhost:${GRAF_PORT}/d/IWSghv-5k/`+
+      `http-ws-data?orgId=1&refresh=5s&var-testname`+
+      `=yourSpecificTestName`
     );
   },
 };

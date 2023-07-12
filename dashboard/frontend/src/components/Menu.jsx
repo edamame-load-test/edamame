@@ -1,9 +1,5 @@
 import testService from "../services/testService";
 
-// This script stuff is a modal. So it should be rendered from a higher level.
-// It should probably be rendered from the tests page
-// When a user selects it from the tests it will be rendered
-
 function Menu({ name, setMenu, setIsScriptModal, setCurrScript }) {
   async function handleScript() {
     setIsScriptModal(true);

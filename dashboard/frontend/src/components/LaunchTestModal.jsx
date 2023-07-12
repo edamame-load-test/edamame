@@ -13,7 +13,8 @@ function LaunchTestModal({ setIsModal, setTests, setCurrTest, currTest }) {
   function handleSubmit(e) {
     e.preventDefault();
     const newID = uuidv4();
-    testService.startTest(title, file); // Starts the test
+    testService.startTest(title, file);
+
     const newTest = {
       id: newID,
       name: title,
@@ -21,10 +22,7 @@ function LaunchTestModal({ setIsModal, setTests, setCurrTest, currTest }) {
       start_time: Date.now(),
       script: JSON.stringify(file),
     };
-    // setCurrTest(newTest); // Pushes the newTest onto the currTest instantly.
     setLoading(true);
-    // setTests((prevTests) => [...prevTests, newTest]); // Updates the list of tests instantly
-    // setIsModal(false);
   }
 
   useEffect(() => {
@@ -48,6 +46,7 @@ function LaunchTestModal({ setIsModal, setTests, setCurrTest, currTest }) {
     };
     setIsFileSelected(true);
   };
+  
   return (
     <div className="inset-0 ">
       <div
