@@ -68,7 +68,8 @@ data:
         start_time timestamp NOT NULL DEFAULT now(),
         end_time timestamp,
         status varchar(10) NOT NULL DEFAULT 'starting',
-        script text
+        script text,
+        archive_id varchar(255) DEFAULT ''
       );
       CREATE TABLE samples (
         id SERIAL PRIMARY KEY,
