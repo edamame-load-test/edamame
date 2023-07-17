@@ -16,7 +16,7 @@ const portForwardGrafana = async () => {
       spinner.succeed(
         `You can access grafana at http://localhost:${GRAF_PORT}. ` +
         `If you want to navigate directly to Edamame's WebSocket and ` +
-        `HTTP metrics dashboard, that's available at ${grafana.detailedUrl()}.` +
+        `HTTP metrics dashboard, that's available at ${grafana.detailedUrl()}. ` +
         `Simply replace the "yourSpecificTestName" query parameter ` +
         `with an existing historical test name.`
       );

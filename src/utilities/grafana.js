@@ -28,7 +28,7 @@ const grafana = {
     });
   },
 
-  async detailedUrl() {
+  detailedUrl() {
     return (
       `http://localhost:${GRAF_PORT}/d/IWSghv-5k/`+
       `http-ws-data?orgId=1&refresh=5s&var-testname`+

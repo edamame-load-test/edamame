@@ -20,7 +20,7 @@ const updateTestName = async (options) => {
 
     let test = await dbApi.getTest(currName);
     if (test) {
-      test = await dbApi.putRequest(test.id, { "name": newName });
+      test = await dbApi.patchRequest(test.id, { "name": newName });
       spinner.succeed(`Successfully updated test's name to: '${test.name}'`);
     } else {
       spinner.fail(`Couldn't update name, because couldn't find a test named: ${currName}`);

@@ -136,22 +136,22 @@ const dbApi = {
 
   async updateTestStatus(id, status) {
     try {
-      return this.putRequest(id, { status });
+      return this.patchRequest(id, { status });
     } catch {
       await this.restoreIp();
-      return this.putRequest(id, { status });
+      return this.patchRequest(id, { status });
     }
   },
 
-  async putRequest(id, data) {
+  async patchRequest(id, data) {
     const url = this.url();
 
     try {
-      let response = await axios.put(`${url}/${id}`, data);
+      let response = await axios.patch(`${url}/${id}`, data);
       return response.data;
     } catch {
       await this.restoreIp();
-      let res = await axios.put(`${this.url()}/${id}`, data);
+      let res = await axios.patch(`${this.url()}/${id}`, data);
       return res.data;
     }
   },
@@ -192,6 +192,19 @@ const dbApi = {
       return this.parseTestData(tests, "status");
     }
   },
+
+  async setUpArchive(testName) {
+    const url = `${this.url()}/pg_dump/${testName}`;
+
+    try {
+      await axios.post(`${url}`, {});
+    } catch {
+      await this.restoreIp();
+      const newUrl = `${this.url()}/pg_dump/${testName}`;
+      let res = await axios.post(`${newUrl}`, {});
+      return res.data;
+    }
+  }
 
 };
 
