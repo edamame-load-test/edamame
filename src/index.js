@@ -14,6 +14,9 @@ import { stopTest } from "./commands/stopTest.js";
 import { NUM_VUS_PER_POD } from "./constants/constants.js";
 import { Command } from "commander";
 import { startGui, stopGui } from "./commands/gui.js";
+import { archive } from "./commands/archive.js";
+import { deleteFromArchive } from "./commands/deleteFromArchive.js";
+import { ARCHIVE } from "./constants/constants.js";
 
 const program = new Command();
 
@@ -85,7 +88,7 @@ program
   .description("Spin up grafana, and the express app serving react")
   .action(async (options) => {
     if (options.start) {
-      await portForwardGrafana(); // Spin up grafana
+      await portForwardGrafana();
       startGui();
     } else if (options.stop) {
       stopGui();
@@ -98,5 +101,22 @@ program
   .action(() => {
     destroyEKSCluster();
   });
+
+program
+  .command("archive")
+  .option("--all", `Upload all load tests as S3 Objects to the ${ARCHIVE} AWS S3 Bucket`)
+  .option("-n, --name <name>", "Name of specific test to archive")
+  .description(
+    `Move load test data from EBS volume to AWS S3 Glacier to allow for persistent test ` +
+    ` data storage beyond the life of the Edamame EKS cluster. If test name flag isn't ` +
+    ` provided, then all existing test data will be archived. `
+  ).action(archive);
+
+program
+  .command("delete-from-archive")
+  .option("--all", `Delete entire ${ARCHIVE} AWS S3 Bucket`)
+  .option("-n, --name <name>", "Name of specific test to remove from the AWS S3 Bucket")
+  .description(`Delete specific load test from the ${ARCHIVE} AWS S3 Bucket or delete the entire bucket`)
+  .action(deleteFromArchive);
 
 program.parse(process.argv);

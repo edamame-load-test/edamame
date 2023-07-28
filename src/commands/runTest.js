@@ -61,7 +61,7 @@ const runTest = async (options) => {
     await loadGenerators.pollUntilAllComplete(numNodes);
     await dbApi.updateTestStatus(testId, "completed");
     spinner.succeed("Load test completed.");
-
+    
     spinner.info("Tearing down load test resources.");
     spinner.start();
     await cluster.phaseOutK6();

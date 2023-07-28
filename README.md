@@ -253,6 +253,39 @@ Outputs:
 - Ends local access to the graphical user interface (GUI) and the Grafana dashboard.
 - This frees up ports 3000 and 3001 for other processes.
 
+### edamame archive
+
+Usage: `edamame archive --all`
+Alternative Usage: `edamame archive --name "100K VUs"`
+Outputs:
+
+```
+[04:08:56:294] ℹ Starting archive process...
+[04:08:56:544] ℹ Creating edamame-load-tests AWS S3 Bucketlocated at: aws-region=us-west-2
+ if it doesn't exist yet...
+[04:09:01:715] ℹ AWS S3 Bucket is ready for uploads.
+[04:09:03:366] ℹ Successfully archived 100K VUs.
+[04:09:03:366] ✔ Archival process complete. Uploaded 1 load test objects to the AWS S3 Bucket: edamame-load-tests
+```
+
+- Uploads 1 load test or all load tests to an AWS S3 Bucket as S3 objects with the standard infrequent access storage class.
+- Purpose: allow user to back up their load test data to AWS S3 in case they need to teardown their Edamame EKS cluster for a period of time. A user should execute this command prior to executing `edamame teardown`.
+- There isn't support yet for changing the S3 object's storage class to another class via the Edamame CLI. If a user wants to change the storage class to a Glacier category for even cheaper storage they can do so, but will currently need to use the AWS CLI.
+
+### edamame delete-from-archive
+
+Usage: `edamame delete-from-archive --all`
+Alternative Usage: `edamame delete-from-archive --name "100K VUs"`
+Outputs:
+
+```
+[04:17:18:812] ℹ Starting archival deletion process...
+[04:17:21:787] ✔ Successfully deleted 100K VUs from the AWS S3 Bucket: edamame-load-tests
+```
+
+- Deletes 1 load test S3 object from the AWS S3 Bucket in case the user no longer wants to store that test's data.
+- If the --all flag is provided then all S3 objects and the user's load test AWS S3 Bucket will be deleted.
+
 ### edamame teardown
 
 Usage: `edamame teardown`

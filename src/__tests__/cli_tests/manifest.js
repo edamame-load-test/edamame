@@ -1,7 +1,5 @@
-import manifest from "../utilities/manifest.js";
+import manifest from "../../utilities/manifest.js";
 import mock from "mock-fs";
-import yaml from "js-yaml";
-
 
 beforeAll(() => { 
   mock({

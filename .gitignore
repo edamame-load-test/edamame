@@ -4,4 +4,5 @@ node_modules
 manifests/load_test_crds/*
 manifests/db_api_ingress.yaml
 build
-testIsRunning.txt
+manifests/testIsRunning.txt
+

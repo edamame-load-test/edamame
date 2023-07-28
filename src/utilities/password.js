@@ -1,4 +1,3 @@
-import readlineSync from "readline-sync";
 import manifest from "./manifest.js";
 import crypto from 'crypto';
 
@@ -12,9 +11,9 @@ const password = {
     return result;
   },
 
-  assign() {
+  async assign() {
     const password = crypto.randomUUID();
-    return manifest.setPgGrafCredentials(password);
+    await manifest.setPgDbApiGrafCredentials(password);
   }
 };
 

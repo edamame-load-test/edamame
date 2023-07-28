@@ -7,6 +7,7 @@ import {
   DB_API_ING_TEMPLATE,
   LOAD_GEN_NODE_GRP
 } from "../constants/constants.js";
+import aws from "./aws.js";
 import files from "./files.js";
 import kubectl from "./kubectl.js";
 import eksctl from "./eksctl.js";
@@ -102,10 +103,13 @@ const manifest = {
     return data.spec.script.configMap.name;
   },
 
-  setPgGrafCredentials(pw) {
-    const secretData = `postgres-username=${CLUSTER_NAME}\npostgres-password=${pw}`;
+  async setPgDbApiGrafCredentials(pw) {
+    let secretData = `postgres-username=${CLUSTER_NAME}\npostgres-password=${pw}\n`;
+    let awsData = await aws.currentCLICredentials();
+    secretData += `aws-region=${awsData.region}\naws-account-id=${awsData.accountId}\n`;
+    secretData += `aws-access-key-id=${awsData.accessKey}\naws-secret-access-key=${awsData.secretKey}\n`;
     files.write("postgres.env", secretData);
-    return kubectl.createSecret();
+    await kubectl.createSecret();
   },
 
   forEachGrafJsonDB(callback) {
