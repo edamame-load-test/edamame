@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: db-api
-          image: rachwest/edamame-db-api:latest
+          image: rachwest/edamame:latest
           ports:
             - containerPort: 4444
           env:
@@ -47,6 +47,33 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: postgres-password
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: aws-region
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: aws-secret-access-key
+            - name: AWS_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: aws-account-id
+          volumeMounts:
+            - name: pg-dump
+              mountPath: /var/pg_dump
+      volumes:
+        - name: pg-dump
+          emptyDir:
+            sizeLimit: 500Mi
 ---
 apiVersion: v1
 kind: Service

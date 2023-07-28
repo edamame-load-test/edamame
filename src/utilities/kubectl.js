@@ -5,7 +5,8 @@ import { spawn } from "child_process";
 const exec = promisify(child_process.exec);
 import { 
   AWS_LBC_CRD, 
-  LOAD_GEN_NODE_GRP } 
+  CLUSTER_NAME
+} 
 from "../constants/constants.js";
 
 const kubectl = {
@@ -192,7 +193,7 @@ const kubectl = {
     } catch (err) {
       console.log(`Error stopping process on port ${port}: ${err.message}`);
     }
-  },
+  }
 };
 
 export default kubectl;

@@ -2,6 +2,9 @@ import path from "path";
 import fs from "fs";
 import yaml from "js-yaml";
 import { fileURLToPath } from 'url';
+import { promisify } from "util";
+import child_process from "child_process";
+const exec = promisify(child_process.exec);
 
 const files = {
   exists(path) {
@@ -50,6 +53,15 @@ const files = {
 
   delete(fileName) {
     return fs.rm(this.path(fileName), (err) => err)
+  },
+
+  async filesInDir(directoryPath) {
+    if (!this.exists(directoryPath)) {
+      return 0;
+    }
+
+    const { stdout } = await exec(`cd ${directoryPath} && echo *`);
+    return stdout.replaceAll("\n", "").split(" ");
   }
 };
 

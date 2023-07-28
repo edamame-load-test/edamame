@@ -193,14 +193,15 @@ const dbApi = {
     }
   },
 
-  async setUpArchive(testName) {
-    const url = `${this.url()}/pg_dump/${testName}`;
+  async archiveTest(testName) {
+    const url = `${this.url()}/archive/${testName}`;
 
     try {
-      await axios.post(`${url}`, {});
+      let response = await axios.post(`${url}`, {});
+      return response.data;
     } catch {
       await this.restoreIp();
-      const newUrl = `${this.url()}/pg_dump/${testName}`;
+      const newUrl = `${this.url()}/archive/${testName}`;
       let res = await axios.post(`${newUrl}`, {});
       return res.data;
     }

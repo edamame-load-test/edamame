@@ -4,6 +4,7 @@ const DB_API_PORT = 4444;
 const GRAF_PORT = 3000;
 const DASHBOARD_PORT = 3001;
 const PORT_FORWARD_DELAY = 3500;
+const ARCHIVE = "edamame-load-tests";
 const LOAD_GEN_NODE_TYPE = "m5.24xlarge";
 const LOAD_AGG_NODE_TYPE = "m5zn.xlarge";
 const DB_API_SERVICE = "db-api-service";
@@ -56,6 +57,7 @@ export {
   DB_API_INGRESS,
   DB_API_ING_TEMPLATE,
   DB_API_INGRESS_NAME,
+  ARCHIVE,
   PG_CM,
   GRAF,
   GRAF_DS,
