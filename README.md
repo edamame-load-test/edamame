@@ -275,7 +275,7 @@ Outputs:
 ### edamame delete-from-archive
 
 Usage: `edamame delete-from-archive --all`
-Alternative Usage: `edamame delte-from-archive --name "100K VUs"`
+Alternative Usage: `edamame delete-from-archive --name "100K VUs"`
 Outputs:
 
 ```

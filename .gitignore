@@ -5,4 +5,4 @@ manifests/load_test_crds/*
 manifests/db_api_ingress.yaml
 build
 manifests/testIsRunning.txt
-manifests/pg_dump/*
+
