@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: db-api
-          image: rachwest/edamame:latest
+          image: rachwest/edamame-db-api:latest
           ports:
             - containerPort: 4444
           env:
