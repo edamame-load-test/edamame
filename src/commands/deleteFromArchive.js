@@ -1,33 +1,36 @@
 import aws from "../utilities/aws.js";
-import dbApi from "../utilities/dbApi.js";
 import Spinner from "../utilities/spinner.js";
-import { 
-  ARCHIVE
-} from "../constants/constants.js";
+import archiveMessage from "../utilities/archiveMessage.js";
 
 const deleteFromArchive = async (options) => {
-  const spinner = new Spinner("Starting archival deletion process...");
+  const spinner = new Spinner(archiveMessage.startDeletion);
   const testName = options.name;
 
   try {
     if (testName) {
-      const test = await dbApi.getTest(testName);
-      if (!test) {
-        throw new Error(`Nonexistent test to unarchive: ${testName}.`);
-      }
-      await aws.deleteObjectFromS3Bucket(`${testName}.tar.gz`);
-      spinner.succeed(
-        `Successfully deleted ${testName} from the AWS S3 Bucket: ${ARCHIVE}`);
+      const s3Object = aws.s3ObjectNameForTest(testName);
+
+      const exists = await aws.s3ObjectExists(s3Object);
+      if (!exists) throw Error(archiveMessage.noObject(testName));
+
+      await aws.deleteObjectFromS3Bucket(s3Object);
+      spinner.succeed(archiveMessage.singleDeletionSuccess(testName));
     } else {
       await aws.deleteS3Bucket();
-      spinner.succeed(`Deleted AWS S3 bucket: ${ARCHIVE}`);
+      spinner.succeed(archiveMessage.deletedBucket);
     }
   } catch (err) {
-    if (err.stderr.match("NoSuchBucket")) {
-      spinner.fail(`There's no AWS S3 ${ARCHIVE} bucket to delete.`);
-    } else {
-      spinner.fail(`Error deleting load test data from AWS S3 storage: ${err}`);
-    }
+    processDeleteError(err, spinner);
+  }
+};
+
+const processDeleteError = (error, spinner) => {
+  if (error.message.match("No s3 object")) {
+    spinner.fail(error.message);
+  } else if (error.stderr && error.stderr.match("NoSuchBucket")) {
+    spinner.fail(archiveMessage.noBucket);
+  } else {
+    spinner.fail(archiveMessage.error(error, "delete"));
   }
 };
 

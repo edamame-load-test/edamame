@@ -3,13 +3,14 @@ import {
   EXTERNAL_IP_REGEX,
   DB_API_INGRESS_NAME,
   DISPLAY_TESTS_NUM_DASHES,
-  DISPLAY_TEST_TITLE_SPACES
+  DISPLAY_TEST_TITLE_SPACES,
 } from "../constants/constants.js";
 import manifest from "./manifest.js";
 import kubectl from "./kubectl.js";
 import eksctl from "./eksctl.js";
 import files from "./files.js";
 import axios from "axios";
+import aws from "./aws.js";
 
 const dbApi = {
   async nameExists(name) {
@@ -32,7 +33,10 @@ const dbApi = {
       const test = testData[i];
       if (attribute === "testName" && test.name === comparisonValue) {
         return true;
-      } else if (attribute === "status" && test.status.match(/(running|status)/)) {
+      } else if (
+        attribute === "status" &&
+        test.status.match(/(running|status)/)
+      ) {
         return true;
       }
     }
@@ -106,9 +110,9 @@ const dbApi = {
     console.log(`${spaces} Test script content: ${spaces}`);
     console.log(`${"-".repeat(DISPLAY_TESTS_NUM_DASHES)}`);
 
-    test.script.split("\\n").forEach(line => {
+    test.script.split("\\n").forEach((line) => {
       console.log(line);
-    });  
+    });
   },
 
   printTestDataTable(tests) {
@@ -193,20 +197,19 @@ const dbApi = {
     }
   },
 
-  async archiveTest(testName) {
-    const url = `${this.url()}/archive/${testName}`;
+  async archive(archivePath, testName) {
+    const url = `${this.url()}/${archivePath}/${testName}`;
 
     try {
-      let response = await axios.post(`${url}`, {});
+      let response = await axios.post(url, {});
       return response.data;
     } catch {
       await this.restoreIp();
-      const newUrl = `${this.url()}/archive/${testName}`;
-      let res = await axios.post(`${newUrl}`, {});
+      const newUrl = `${this.url()}/${archivePath}/${testName}`;
+      let res = await axios.post(newUrl, {});
       return res.data;
     }
-  }
-
+  },
 };
 
 export default dbApi;

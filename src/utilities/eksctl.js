@@ -9,7 +9,7 @@ import {
   GEN_NODE_GROUP_TEMPLATE,
   AGG_NODE_GROUP_TEMPLATE,
   LOAD_GEN_NODE_GRP,
-  STATSITE_NODE_GRP
+  STATSITE_NODE_GRP,
 } from "../constants/constants.js";
 const exec = promisify(child_process.exec);
 
@@ -18,9 +18,10 @@ const eksctl = {
     try {
       await exec(`eksctl version`);
     } catch {
-      const msg = `Eksctl isn't installed. Please install eksctl; ` +
-      `instructions can be found at: ` +
-      `https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html`;
+      const msg =
+        `Eksctl isn't installed. Please install eksctl; ` +
+        `instructions can be found at: ` +
+        `https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html`;
       throw new Error(msg);
     }
   },
@@ -50,24 +51,16 @@ const eksctl = {
     } else {
       type = STATSITE_NODE_GRP;
       template = AGG_NODE_GROUP_TEMPLATE;
-    } 
-    await manifest.createNodeGroupCr(type, finalFile, template, useBackUpNodeType);
-    return exec(`eksctl create nodegroup --config-file ${files.path(finalFile)}`);
-  },
-
-  async deleteNodeGroup(type) {
-    const nodeGroupData = files.readYAML(GEN_NODE_GROUP_FILE);
-    const region = nodeGroupData.metadata.region;
-
-    let deleteCommand = `eksctl delete nodegroup ` +
-      ` --cluster ${CLUSTER_NAME} ` +
-      `--region ${region} --name `;
-   
-    if (type === LOAD_GEN_NODE_GRP) {
-      await exec(deleteCommand + LOAD_GEN_NODE_GRP);
-    } else {
-      await exec(deleteCommand + STATSITE_NODE_GRP);
     }
+    await manifest.createNodeGroupCr(
+      type,
+      finalFile,
+      template,
+      useBackUpNodeType
+    );
+    return exec(
+      `eksctl create nodegroup --config-file ${files.path(finalFile)}`
+    );
   },
 
   fetchIamRoles() {
@@ -134,7 +127,7 @@ const eksctl = {
     const { stdout } = await exec(`eksctl get cluster --verbose 0`);
     const line = stdout.split("\n").find((line) => line.includes("edamame"));
     return line.split("\t")[1];
-  }
+  },
 };
 
 export default eksctl;
