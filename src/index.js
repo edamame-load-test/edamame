@@ -16,13 +16,18 @@ import { Command } from "commander";
 import { startGui, stopGui } from "./commands/gui.js";
 import { archive } from "./commands/archive.js";
 import { deleteFromArchive } from "./commands/deleteFromArchive.js";
+import { importFromArchive } from "./commands/importFromArchive.js";
+import { showArchiveContents } from "./commands/archiveContents.js";
 import { ARCHIVE } from "./constants/constants.js";
 
 const program = new Command();
 
 program
   .command("init")
-  .option("-z, --zones <zones>", "List of one or more desired cluster availability zones specific to a user's preferred aws region")
+  .option(
+    "-z, --zones <zones>",
+    "List of one or more desired cluster availability zones specific to a user's preferred aws region"
+  )
   .description(
     "Create an EKS cluster and deploy Grafana, Postgres, & K6 Operator"
   )
@@ -104,19 +109,47 @@ program
 
 program
   .command("archive")
-  .option("--all", `Upload all load tests as S3 Objects to the ${ARCHIVE} AWS S3 Bucket`)
+  .option(
+    "--all",
+    `Upload all load tests as S3 Objects to the ${ARCHIVE} AWS S3 Bucket`
+  )
   .option("-n, --name <name>", "Name of specific test to archive")
   .description(
     `Move load test data from EBS volume to AWS S3 Glacier to allow for persistent test ` +
-    ` data storage beyond the life of the Edamame EKS cluster. If test name flag isn't ` +
-    ` provided, then all existing test data will be archived. `
-  ).action(archive);
+      ` data storage beyond the life of the Edamame EKS cluster. If test name flag isn't ` +
+      ` provided, then all existing test data will be archived. `
+  )
+  .action(archive);
 
 program
   .command("delete-from-archive")
   .option("--all", `Delete entire ${ARCHIVE} AWS S3 Bucket`)
-  .option("-n, --name <name>", "Name of specific test to remove from the AWS S3 Bucket")
-  .description(`Delete specific load test from the ${ARCHIVE} AWS S3 Bucket or delete the entire bucket`)
+  .option(
+    "-n, --name <name>",
+    "Name of specific test to remove from the AWS S3 Bucket"
+  )
+  .description(
+    `Delete specific load test from the ${ARCHIVE} AWS S3 Bucket or delete the entire bucket`
+  )
   .action(deleteFromArchive);
+
+program
+  .command("import-from-archive")
+  .option("--all", `Import all data stored in the ${ARCHIVE} AWS S3 Bucket`)
+  .option(
+    "-n, --name <name>",
+    "Name of specific test to import from the AWS S3 Bucket"
+  )
+  .description(
+    `Imports historical load test data stored in ${ARCHIVE} AWS S3 Bucket to the Postgres database`
+  )
+  .action(importFromArchive);
+
+program
+  .command("archive-contents")
+  .description(
+    `List the names of the historical load tests that exist in the AWS S3 Bucket`
+  )
+  .action(showArchiveContents);
 
 program.parse(process.argv);

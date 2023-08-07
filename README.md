@@ -256,21 +256,35 @@ Outputs:
 ### edamame archive
 
 Usage: `edamame archive --all`
-Alternative Usage: `edamame archive --name "100K VUs"`
+Alternative Usage: `edamame archive --name testName`
 Outputs:
+
+`$ edamame archive --name "100K VUs"`
 
 ```
 [04:08:56:294] ℹ Starting archive process...
-[04:08:56:544] ℹ Creating edamame-load-tests AWS S3 Bucketlocated at: aws-region=us-west-2
+[04:08:56:544] ℹ Creating load test AWS S3 Bucket located in: aws-region=us-west-2
  if it doesn't exist yet...
 [04:09:01:715] ℹ AWS S3 Bucket is ready for uploads.
 [04:09:03:366] ℹ Successfully archived 100K VUs.
-[04:09:03:366] ✔ Archival process complete. Uploaded 1 load test objects to the AWS S3 Bucket: edamame-load-tests
+[04:09:03:366] ✔ Archive process complete.
 ```
 
-- Uploads 1 load test or all load tests to an AWS S3 Bucket as S3 objects with the standard infrequent access storage class.
-- Purpose: allow user to back up their load test data to AWS S3 in case they need to teardown their Edamame EKS cluster for a period of time. A user should execute this command prior to executing `edamame teardown`.
-- There isn't support yet for changing the S3 object's storage class to another class via the Edamame CLI. If a user wants to change the storage class to a Glacier category for even cheaper storage they can do so, but will currently need to use the AWS CLI.
+`$ edamame archive --all`
+
+```
+[01:57:28:276] ℹ Starting archive process...
+[01:57:28:538] ℹ Creating load test AWS S3 Bucket located in: aws-region=us-west-2
+ if it doesn't exist yet...
+[01:57:30:170] ℹ AWS S3 Bucket is ready for uploads.
+[01:57:33:187] ℹ Successfully archived 45f4d3e5-5c52-4f3e-88e2-17a085b1c80f.
+[01:57:34:728] ℹ Archive for 100k VUs already exists. Skipping to next step.
+[01:57:34:728] ✔ Archive process complete.
+```
+
+- Uploads 1 or more load tests to an AWS S3 Bucket as S3 objects with the standard infrequent access storage class.
+- Purpose: allow user to back up their load test data to AWS S3 in case they need or want to teardown their Edamame EKS cluster, but want to persist their load test data. A user should execute this command prior to executing `edamame teardown`.
+- There isn't currently support for changing the S3 object's storage class to another class via the Edamame CLI. If a user wants to change the storage class to a Glacier category for even cheaper cold storage they can do so, but will need to use the AWS CLI or management console.
 
 ### edamame delete-from-archive
 
@@ -280,11 +294,45 @@ Outputs:
 
 ```
 [04:17:18:812] ℹ Starting archival deletion process...
-[04:17:21:787] ✔ Successfully deleted 100K VUs from the AWS S3 Bucket: edamame-load-tests
+[04:17:21:787] ✔ Successfully deleted 100K VUs from your Edamame load test AWS S3 Bucket.
 ```
 
-- Deletes 1 load test S3 object from the AWS S3 Bucket in case the user no longer wants to store that test's data.
-- If the --all flag is provided then all S3 objects and the user's load test AWS S3 Bucket will be deleted.
+- Permanently deletes 1 load test S3 object from the AWS S3 Bucket in case the user no longer wants to store that test's data.
+- If the --all flag is provided then all S3 objects and the user's entire load test AWS S3 Bucket will be permanently deleted.
+
+### edamame archive-contents
+
+Usage: `edamame archive-contents`
+
+Outputs:
+
+```
+[11:59:14:955] ℹ Loading AWS S3 Bucket archive details...
+[11:59:17:351] ✔ Your Edamame load test AWS S3 Bucket contains the following load test S3 objects:
+ > 100kVUs.tar.gz
+ > 120kVUs.tar.gz
+```
+
+- Shows the load tests that have been uploaded to AWS S3.
+- Each S3 object contains the data associated with one historical test.
+
+### edamame import-from-archive
+
+Usage: `edamame import-from-archive --all`
+Alternative Usage: `edamame import-from-archive --name testName`
+Outputs:
+
+`$ edamame import-from-archive --name "100K VUs"`
+
+```
+[02:29:28:602] ℹ Starting process to import AWS S3 archived data into Postgres database...
+[02:29:31:507] ℹ Successfully imported the test 100kVUs from your AWS S3 Bucket.
+[02:29:31:554] ✔ Completed importing data from AWS S3.
+```
+
+- Imports 1 or more load test S3 objects from the AWS S3 Bucket into the current AWS EKS cluster.
+- If the --all flag is provided then all load test AWS S3 objects will be imported.
+- If the import command is executed after a user executes load tests in their current cluster and there is an overlap in the import data and the data in the Postgres database in the cluster, then the import process will be aborted. There currently isn't support for importing data with a test that has the same name as a test that already exists in the Postgres database. As a result, it's recommended that a user executes `edamame import-from-archive` immediately after `edamame init` to avoid name collisions.
 
 ### edamame teardown
 

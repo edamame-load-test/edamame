@@ -87,4 +87,4 @@ spec:
     - protocol: TCP
       port: 4444
       targetPort: 4444
-      nodePort: 30001
+      nodePort: 30002

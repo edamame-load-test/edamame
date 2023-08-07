@@ -1,8 +1,8 @@
-import { 
+import {
   EBS_CSI_DRIVER_REGEX,
-  AWS_LBC_POLICY_REGEX
- } from "../constants/constants.js";
- import files from "./files.js";
+  AWS_LBC_POLICY_REGEX,
+} from "../constants/constants.js";
+import files from "./files.js";
 
 const iam = {
   deleteAWSLbcPolArn() {
@@ -44,8 +44,7 @@ const iam = {
   logAWSLbcPolArn(policy) {
     const data = `alb_pol_arn=${policy}\n`;
     files.write(".env", data);
-  }
+  },
 };
 
 export default iam;
-

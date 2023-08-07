@@ -1,64 +1,58 @@
 import aws from "../utilities/aws.js";
 import dbApi from "../utilities/dbApi.js";
-import files from "../utilities/files.js";
+import archiveMessage from "../utilities/archiveMessage.js";
 import Spinner from "../utilities/spinner.js";
-import { ARCHIVE } from "../constants/constants.js";
+
+const uploadToAWS = async (testName, spinner) => {
+  try {
+    const s3Name = aws.s3ObjectNameForTest(testName);
+    const exists = await aws.s3ObjectExists(s3Name);
+
+    if (exists) {
+      spinner.info(archiveMessage.alreadyExists(testName));
+    } else {
+      await dbApi.archive("archive", testName);
+      spinner.info(archiveMessage.uploadSuccess(testName));
+    }
+  } catch (error) {
+    spinner.info(archiveMessage.sizeIssue(testName));
+  }
+};
+
+const allTestsToArchive = async (testName) => {
+  let testsToArchive;
+  if (testName) {
+    const test = await dbApi.getTest(testName);
+    if (!test) {
+      throw new Error(archiveMessage.nonexistentTest(testName));
+    }
+    testsToArchive = [test];
+  } else {
+    testsToArchive = await dbApi.getAllTests();
+    if (testsToArchive.length === 0) {
+      throw new Error(archiveMessage.noTests);
+    }
+  }
+  return testsToArchive;
+};
 
 const archive = async (options) => {
-  const spinner = new Spinner("Starting archive process...");
+  const spinner = new Spinner(archiveMessage.start);
   const testName = options.name;
-  let testsToArchive;
-  
+
   try {
-    if (testName) {
-      const test = await dbApi.getTest(testName);
-      if (!test) {
-        throw new Error(`Nonexistent test to archive: ${testName}.`);
-      }
-      testsToArchive = [test];
-    } else {
-      testsToArchive = await dbApi.getAllTests();
-      if (testsToArchive.length === 0) {
-        throw new Error(`There are no tests to archive.`);
-      }
-    }
-    let region = files.read(files.path("postgres.env")).match("aws-region=.{1,}\n")[0];
-    spinner.info(
-      `Creating ${ARCHIVE} AWS S3 Bucket` +
-      `located at: ${region} if it doesn't exist yet...`
-    );
+    const testsToArchive = await allTestsToArchive(testName);
+    spinner.info(archiveMessage.createBucketInRegion());
     await aws.setUpArchiveBucket();
-    spinner.info("AWS S3 Bucket is ready for uploads.");
-    let numArchived = 0;
-    
+    spinner.info(archiveMessage.bucketReady);
+
     for (let i = 0; i < testsToArchive.length; i++) {
-      let name = testsToArchive[i].name;
-      try {
-        const exists = aws.s3ObjectExists(aws.s3ObjectNameForTest(name));
-        if (!exists) {
-          spinner.info(`Archive for ${name} already exists. Skipping to next archive step.`);
-        } else {
-          await dbApi.archiveTest(name);
-          spinner.info(`Successfully archived ${name}.`);
-          numArchived += 1;
-        }
-      } catch (error) {
-        console.log(error);
-        spinner.info(
-          `There was an issue archiving your load test: ${name}.` +
-          ` It seems your load test had enough data to exceed the` +
-          ` upload size limit. Please reach out to an edamame` +
-          ` developer for a custom archive solution for this test.`
-        );
-      }
+      await uploadToAWS(testsToArchive[i].name, spinner);
     }
 
-    spinner.succeed(
-      `Archival process complete. Uploaded ${numArchived} load ` +
-      `test objects to the AWS S3 Bucket: ${ARCHIVE}`
-    );
+    spinner.succeed(archiveMessage.exportComplete);
   } catch (err) {
-    spinner.fail(`Error archiving load test data: ${err}`);
+    spinner.fail(archiveMessage.error(err, "upload"));
   }
 };
 

@@ -8,7 +8,8 @@
     "edamame": "src/index.js"
   },
   "scripts": {
-    "test:cli": "jest --testPathPattern=src/__tests__/cli_tests/"
+    "test:cli": "jest --testPathPattern=src/__tests__/cli/utilities",
+    "test:manifest": "jest --testPathPattern=src/__tests__/cli/manifests"
   },
   "keywords": [],
   "license": "ISC",
