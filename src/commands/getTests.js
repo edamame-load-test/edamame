@@ -10,8 +10,8 @@ const getTests = async () => {
     let tests = await dbApi.getAllTests();
     if (tests.length > 0) {
       spinner.succeed(
-        `Successfully retrieved historical test data.` +
-        `Test names are listed under (index).`
+        `Successfully retrieved historical test data. ` +
+          `Test names are listed under (index).`
       );
       dbApi.printTestDataTable(tests);
     } else {

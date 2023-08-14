@@ -21,8 +21,8 @@ In order to execute a load test with the `edamame` command line interface or gra
 
 ### edamame init
 
-Usage: `edamame init --zones <comma_separated_list_of_desired_availability_zones_in_your_preferred_aws_region>`
-Example: `edamame init --zones us-west-2a,us-west-2b,us-west-2d`
+Usage: `edamame init --zones <comma_separated_list_of_desired_availability_zones_in_your_preferred_aws_region>` <br />
+Example: `edamame init --zones us-west-2a,us-west-2b,us-west-2d` <br />
 Outputs:
 
 ```
@@ -51,8 +51,8 @@ Outputs:
 
 ### edamame run
 
-Usage: `edamame run --file {/path/to/test.js} --name "<desired name>" --vus-per-pod <num_vus>`
-Alternative usage:`edamame run -f {/path/to/test.js} -n "<desired name>" -v <num_vus>`
+Usage: `edamame run --file {/path/to/test.js} --name "<desired name>" --vus-per-pod <num_vus>` <br />
+Alternative usage:`edamame run -f {/path/to/test.js} -n "<desired name>" -v <num_vus>` <br />
 Outputs:
 
 ```
@@ -81,7 +81,7 @@ Outputs:
 
 ### edamame stop
 
-Usage: `edamame stop`
+Usage: `edamame stop` <br />
 Outputs:
 
 ```
@@ -94,7 +94,7 @@ Outputs:
 
 ### edamame get --all
 
-Usage: `edamame get --all`
+Usage: `edamame get --all` <br />
 Outputs:
 
 ```
@@ -114,8 +114,8 @@ Outputs:
 
 ### edamame get --name
 
-Usage: `edamame get --name "<test name>"`
-Alternative Usage: `edamame get -n "<test name>"`
+Usage: `edamame get --name "<test name>"` <br />
+Alternative Usage: `edamame get -n "<test name>"` <br />
 Outputs:
 
 ```
@@ -164,7 +164,7 @@ export default function () {
 
 ### edamame delete
 
-Usage: `edamame delete "<test name>"`
+Usage: `edamame delete "<test name>"` <br />
 Outputs:
 
 ```
@@ -178,8 +178,8 @@ Outputs:
 
 ### edamame update
 
-Usage: `edamame update --current "<current test name>" --new "<new proposed name>"`
-Alternative usage: `edamame update -c "<current test name>" -n "<new proposed name>"`
+Usage: `edamame update --current "<current test name>" --new "<new proposed name>"` <br />
+Alternative usage: `edamame update -c "<current test name>" -n "<new proposed name>"` <br />
 Outputs:
 
 ```
@@ -193,7 +193,7 @@ Outputs:
 
 ### edamame grafana --start
 
-Usage: `edamame grafana --start`
+Usage: `edamame grafana --start` <br />
 Outputs:
 
 ```
@@ -206,7 +206,7 @@ Outputs:
 
 ### edamame grafana --stop
 
-Usage: `edamame grafana --stop`
+Usage: `edamame grafana --stop` <br />
 Outputs:
 
 ```
@@ -218,7 +218,7 @@ Outputs:
 
 ### edamame dashboard --start
 
-Usage: `edamame dashboard --start`
+Usage: `edamame dashboard --start` <br />
 Outputs:
 
 ```
@@ -242,7 +242,7 @@ Outputs:
 
 ### edamame dashboard --stop
 
-Usage: `edamame dashboard --stop`
+Usage: `edamame dashboard --stop` <br />
 Outputs:
 
 ```
@@ -255,14 +255,15 @@ Outputs:
 
 ### edamame archive
 
-Usage: `edamame archive --all`
-Alternative Usage: `edamame archive --name testName`
+Usage: `edamame archive --all` <br />
+Alternative Usage: `edamame archive --name testName --storage desiredStorageClass` <br />
 Outputs:
 
 `$ edamame archive --name "100K VUs"`
 
 ```
 [04:08:56:294] ℹ Starting archive process...
+[04:08:56:297] ℹ No S3 storage class has been specified, so the default STANDARD S3 storage class will be used.
 [04:08:56:544] ℹ Creating load test AWS S3 Bucket located in: aws-region=us-west-2
  if it doesn't exist yet...
 [04:09:01:715] ℹ AWS S3 Bucket is ready for uploads.
@@ -270,7 +271,7 @@ Outputs:
 [04:09:03:366] ✔ Archive process complete.
 ```
 
-`$ edamame archive --all`
+`$ edamame archive --all --storage INTELLIGENT_TIERING`
 
 ```
 [01:57:28:276] ℹ Starting archive process...
@@ -282,14 +283,30 @@ Outputs:
 [01:57:34:728] ✔ Archive process complete.
 ```
 
-- Uploads 1 or more load tests to an AWS S3 Bucket as S3 objects with the standard infrequent access storage class.
-- Purpose: allow user to back up their load test data to AWS S3 in case they need or want to teardown their Edamame EKS cluster, but want to persist their load test data. A user should execute this command prior to executing `edamame teardown`.
-- There isn't currently support for changing the S3 object's storage class to another class via the Edamame CLI. If a user wants to change the storage class to a Glacier category for even cheaper cold storage they can do so, but will need to use the AWS CLI or management console.
+- Uploads 1 or more load tests to an AWS S3 Bucket as S3 objects with either the default STANDARD S3 storage class or the user's specified storage class. The bucket will be created in the same region that the user's AWS CLI is configured with.
+- Purpose: allow user to back up their load test data to AWS S3 in case they need or want to teardown their Edamame EKS cluster, but want to persist their load test data beyond the life of the cluster. A user should execute this command prior to executing `edamame teardown`.
+- A user can select any of the following valid storage class options:
+
+  - STANDARD (Standard)
+  - REDUCED_REDUNDANCY (Reduced Redundancy)
+  - STANDARD_IA (Standard Infrequent Access)
+  - ONEZONE_IA (One Zone Infrequent Access)
+  - INTELLIGENT_TIERING (Standard Intelligent-Tiering)
+  - GLACIER (Glacier Flexible Retrieval)
+  - DEEP_ARCHIVE (Glacier Deep Archive)
+  - GLACIER_IR (Glacier Instant Retrieval)
+
+- The available storage options have different associated fees & availability SLAs. Some of the classes also have retrieval charges and minimum storage duration charges. Be sure to read more about the options at the following links to make sure you specify the right class for your storage needs.
+
+  - https://aws.amazon.com/s3/storage-classes/
+  - https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html
+
+- There isn't currently support for changing the S3 object's storage class to another class via the Edamame CLI outside of restoring the object (see `edamame restore` for more details). If a user wants to change the storage class they can do so, but will need to use the AWS CLI or management console.
 
 ### edamame delete-from-archive
 
-Usage: `edamame delete-from-archive --all`
-Alternative Usage: `edamame delete-from-archive --name "100K VUs"`
+Usage: `edamame delete-from-archive --all` <br />
+Alternative Usage: `edamame delete-from-archive --name "100K VUs"` <br />
 Outputs:
 
 ```
@@ -302,8 +319,7 @@ Outputs:
 
 ### edamame archive-contents
 
-Usage: `edamame archive-contents`
-
+Usage: `edamame archive-contents` <br />
 Outputs:
 
 ```
@@ -318,8 +334,8 @@ Outputs:
 
 ### edamame import-from-archive
 
-Usage: `edamame import-from-archive --all`
-Alternative Usage: `edamame import-from-archive --name testName`
+Usage: `edamame import-from-archive --all` <br />
+Alternative Usage: `edamame import-from-archive --name testName` <br />
 Outputs:
 
 `$ edamame import-from-archive --name "100K VUs"`
@@ -334,9 +350,24 @@ Outputs:
 - If the --all flag is provided then all load test AWS S3 objects will be imported.
 - If the import command is executed after a user executes load tests in their current cluster and there is an overlap in the import data and the data in the Postgres database in the cluster, then the import process will be aborted. There currently isn't support for importing data with a test that has the same name as a test that already exists in the Postgres database. As a result, it's recommended that a user executes `edamame import-from-archive` immediately after `edamame init` to avoid name collisions.
 
+### edamame restore
+
+Usage: `edamame restore --name testName --days 10` <br />
+Outputs:
+
+```
+[02:25:18:043] ℹ Starting restoration of AWS S3 object...
+[02:25:19:060] ✔ AWS S3 restoration process is in progress. Once it's complete you can import data associated with testName into your current Edamame EKS cluster or move the S3 object elsewhere.
+```
+
+- Restores an S3 object with the storage class GLACIER, DEEP_ARCHIVE, DEEP_ARCHIVE_ACCESS INTELLIGENT_TIERING, or ARCHIVE_ACCESS INTELLIGENT_TIERING to allow for importing the data associated with the specified load test that's stored in the S3 Object into the current Edamame EKS cluster or moving it to an alternative location.
+- The number of days flag is required if the S3 object has the GLACIER or DEEP_ARCHIVE storage class. The argument passed to the number of days flag should be a number between 1 and 30 days.
+- If the S3 object has the class GLACIER or DEEP_ARCHIVE then the object will be temporarily restored to the STANDARD class for the specified number of days. If the S3 object has the INTELLIGENT_TIERING class with an archive status of either DEEP_ARCHIVE_ACCESS or ARCHIVE_ACCESS, the object will be restored to the Frequent Access tier.
+- Please note that restoration is not immediate and how long it takes is dependent on AWS. As a result, one cannot execute `edamame import-from-archive` immediately after executing `edamame restore`.
+
 ### edamame teardown
 
-Usage: `edamame teardown`
+Usage: `edamame teardown` <br />
 Outputs:
 
 ```

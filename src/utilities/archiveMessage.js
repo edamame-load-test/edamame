@@ -16,6 +16,8 @@ const archiveMessage = {
 
   emptyBucket: "Your AWS S3 Edamame load test bucket is empty.",
 
+  startRestore: "Starting restoration of AWS S3 object...",
+
   deletedBucket: "Deleted Edamame load test AWS S3 bucket",
 
   startDeletion: "Starting archival deletion process...",
@@ -23,6 +25,39 @@ const archiveMessage = {
   importComplete: "Completed importing data from AWS S3.",
 
   exportComplete: "Archive process complete.",
+
+  defaultStorageClass:
+    "No S3 storage class has been specified, so the default STANDARD S3 storage class will be used.",
+
+  restoreInProgress:
+    "S3 Object is in the process of being restored and can't be imported yet.",
+
+  restorationInProgress(name) {
+    return (
+      `AWS S3 restoration process is in progress. Once its complete you ` +
+      ` can import data associated with ${name} into your current Edamame ` +
+      ` EKS cluster or move the S3 object elsewhere.`
+    );
+  },
+
+  restoreBeforeImport(testName) {
+    return (
+      `Can't import ${testName}; Its S3 storage class requires it` +
+      ` to be restored before imported.\n See the edamame restore` +
+      ` command in the docs for more details.`
+    );
+  },
+
+  noRestorationNeeded(testName) {
+    return (
+      `AWS S3 Object associated with the test ${testName} ` +
+      `doesn't have a storage class that requires restoration.`
+    );
+  },
+
+  invalidRestoreDays(days) {
+    return `Invalid days flag argument: ${days}. Number of days should be 1-30.`;
+  },
 
   nonexistentTest(testName) {
     return `Nonexistent test to archive: ${testName}.`;
@@ -74,7 +109,7 @@ const archiveMessage = {
   },
 
   noObject(testName) {
-    return `No s3 object associated with the test named ${testName}.`;
+    return `There's no AWS S3 object associated with the test named ${testName}.`;
   },
 
   singleDeletionSuccess(name) {
