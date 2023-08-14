@@ -10,7 +10,6 @@ import kubectl from "./kubectl.js";
 import eksctl from "./eksctl.js";
 import files from "./files.js";
 import axios from "axios";
-import aws from "./aws.js";
 
 const dbApi = {
   async nameExists(name) {
@@ -197,8 +196,9 @@ const dbApi = {
     }
   },
 
-  async archive(archivePath, testName) {
-    const url = `${this.url()}/${archivePath}/${testName}`;
+  async archive(archivePath, testName, storageClass) {
+    let url = `${this.url()}/${archivePath}/${testName}`;
+    if (archivePath === "archive") url += `?storage=${storageClass}`;
 
     try {
       let response = await axios.post(url, {});
@@ -206,6 +206,7 @@ const dbApi = {
     } catch {
       await this.restoreIp();
       const newUrl = `${this.url()}/${archivePath}/${testName}`;
+      if (archivePath === "archive") url += `?storage=${storageClass}`;
       let res = await axios.post(newUrl, {});
       return res.data;
     }

@@ -52,8 +52,9 @@ const aws = {
   checkForInvalidZoneList(zones) {
     let numDashes = zones.split("").filter((char) => char === "-").length;
     if (
-      !zones.match(",") &&
-      numDashes >= MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES
+      (!zones.match(",") &&
+        numDashes >= MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES) ||
+      !zones.match("-")
     ) {
       let msg =
         `When specifying >1 availability zones, please ` +
@@ -196,7 +197,7 @@ const aws = {
     };
   },
 
-  archiveBucketExists: async () => {
+  async archiveBucketExists() {
     try {
       await exec(`aws s3 ls s3://${ARCHIVE}`);
       return true;
@@ -214,10 +215,12 @@ const aws = {
     return `${testName.replaceAll(" ", "")}.tar.gz`;
   },
 
-  async s3ObjectExists(file) {
+  async s3ObjectExists(testName) {
     try {
-      await exec(`aws s3api head-object --bucket ${ARCHIVE} --key ${file}`);
-      return true;
+      const key = this.s3ObjectNameForTest(testName);
+      const command = `aws s3api head-object --bucket ${ARCHIVE} --key ${key}`;
+      const { stdout } = await exec(command);
+      return stdout;
     } catch (error) {
       if (error.stderr.match("Not Found")) {
         // file doesn't exist yet
@@ -227,6 +230,19 @@ const aws = {
         throw Error(error);
       }
     }
+  },
+
+  async restoreS3Object(testName, days, type) {
+    const key = this.s3ObjectNameForTest(testName);
+    let command =
+      `aws s3api restore-object --bucket ${ARCHIVE} ` +
+      `--key ${key} --restore-request `;
+    if (type === "glacier") {
+      command += `'{"Days":${days},"GlacierJobParameters":{"Tier":"Standard"}}'`;
+    } else {
+      command += `'{}'`;
+    }
+    return exec(command);
   },
 
   async listObjectsInS3Bucket() {
@@ -252,7 +268,8 @@ const aws = {
     await exec(`aws s3 rb s3://${ARCHIVE} --force`);
   },
 
-  async deleteObjectFromS3Bucket(key) {
+  async deleteObjectFromS3Bucket(testName) {
+    const key = this.s3ObjectNameForTest(testName);
     await exec(`aws s3api delete-object --bucket ${ARCHIVE} --key ${key}`);
   },
 };

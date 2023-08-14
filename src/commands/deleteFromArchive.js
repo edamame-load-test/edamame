@@ -8,12 +8,10 @@ const deleteFromArchive = async (options) => {
 
   try {
     if (testName) {
-      const s3Object = aws.s3ObjectNameForTest(testName);
-
-      const exists = await aws.s3ObjectExists(s3Object);
+      const exists = await aws.s3ObjectExists(testName);
       if (!exists) throw Error(archiveMessage.noObject(testName));
 
-      await aws.deleteObjectFromS3Bucket(s3Object);
+      await aws.deleteObjectFromS3Bucket(testName);
       spinner.succeed(archiveMessage.singleDeletionSuccess(testName));
     } else {
       await aws.deleteS3Bucket();

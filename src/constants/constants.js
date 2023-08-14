@@ -47,6 +47,18 @@ const EBS_CSI_DRIVER_REGEX =
   "ebs-csi-controller-sa.*AmazonEKS_EBS_CSI_DriverRole";
 const AWS_LBC_CRD = `"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"`;
 const AWS_LBC_POLICY_REGEX = `arn:aws:iam::.*EdamameAWSLoadBalancerControllerIAMPolicy`;
+const DEFAULT_AWS_S3_STORAGE_CLASS = "STANDARD";
+const VALID_STORAGE_CLASSES = {
+  STANDARD: "Standard",
+  REDUCED_REDUNDANCY: "Reduced Redundancy",
+  STANDARD_IA: "Standard Infrequent Access",
+  ONEZONE_IA: "One Zone Infrequent Access",
+  INTELLIGENT_TIERING: "Standard Intelligent-Tiering",
+  GLACIER: "Glacier Flexible Retrieval",
+  DEEP_ARCHIVE: "Glacier Deep Archive",
+  GLACIER_IR: "Glacier Instant Retrieval",
+};
+const RESTORE_BEFORE_IMPORT_S3_REGEX = `("ArchiveStatus": "(DEEP_ARCHIVE_ACCESS|ARCHIVE_ACCESS)"|"StorageClass": "(GLACIER|DEEP_ARCHIVE)")`;
 
 export {
   NUM_VUS_PER_POD,
@@ -94,7 +106,10 @@ export {
   AWS_LBC_CHART_VERSION,
   MIN_NUM_DASHES_FOR_GTEQ_2_AWS_AVZONES,
   SPECIALIZED_NODES_UNAVAILABLE_TIMEOUT,
+  RESTORE_BEFORE_IMPORT_S3_REGEX,
+  DEFAULT_AWS_S3_STORAGE_CLASS,
   DASHBOARD_PORT,
   LOAD_GEN_NODE_TYPE,
-  LOAD_AGG_NODE_TYPE
+  LOAD_AGG_NODE_TYPE,
+  VALID_STORAGE_CLASSES,
 };

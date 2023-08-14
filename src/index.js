@@ -18,6 +18,7 @@ import { archive } from "./commands/archive.js";
 import { deleteFromArchive } from "./commands/deleteFromArchive.js";
 import { importFromArchive } from "./commands/importFromArchive.js";
 import { showArchiveContents } from "./commands/archiveContents.js";
+import { restore } from "./commands/restore.js";
 import { ARCHIVE } from "./constants/constants.js";
 
 const program = new Command();
@@ -114,10 +115,15 @@ program
     `Upload all load tests as S3 Objects to the ${ARCHIVE} AWS S3 Bucket`
   )
   .option("-n, --name <name>", "Name of specific test to archive")
+  .option(
+    "-s, --storage <storage>",
+    "Desired storage class for the AWS S3 Object"
+  )
   .description(
-    `Move load test data from EBS volume to AWS S3 Glacier to allow for persistent test ` +
+    `Move load test data from EBS volume to AWS S3 Bucket to allow for persistent test ` +
       ` data storage beyond the life of the Edamame EKS cluster. If test name flag isn't ` +
-      ` provided, then all existing test data will be archived. `
+      ` provided, then all existing test data will be archived. If the storage flag isn't ` +
+      ` provided, then the default STANDARD storage class will be used.`
   )
   .action(archive);
 
@@ -144,6 +150,15 @@ program
     `Imports historical load test data stored in ${ARCHIVE} AWS S3 Bucket to the Postgres database`
   )
   .action(importFromArchive);
+
+program
+  .command("restore")
+  .requiredOption("-n, --name <name>", "Name of specific test to restore")
+  .option("-d, --days <days>", "Number of days to restore the AWS S3 Object")
+  .description(
+    `Restores AWS S3 object associated with a given load test to the STANDARD storage class for the specified # of days`
+  )
+  .action(restore);
 
 program
   .command("archive-contents")

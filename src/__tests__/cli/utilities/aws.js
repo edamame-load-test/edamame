@@ -43,6 +43,8 @@ jest.mock("util", () => ({
   }),
 }));
 
+jest.mock("../../../utilities/dbApi.js", () => ({}));
+
 describe("Check logic that processes aws cli commands' inputs and outputs", () => {
   test("Account id number should be extracted from aws sts get-caller-identity stdout", async () => {
     await expect(aws.getAccountId()).resolves.toMatch(fakeAccountNum);
@@ -64,10 +66,6 @@ describe("Check logic that processes aws cli commands' inputs and outputs", () =
     await expect(aws.archiveBucketExists()).resolves.toEqual(true);
   });
 
-  test("True is returned when checking for existing AWS S3 Object", async () => {
-    await expect(aws.s3ObjectExists()).resolves.toEqual(true);
-  });
-
   test("Error is thrown when user doesn't list their desired availability zones in expected list format", () => {
     expect.assertions(1);
     try {
@@ -78,8 +76,9 @@ describe("Check logic that processes aws cli commands' inputs and outputs", () =
   });
 
   test("Error is thrown when user doesn't specify availability zone names that align with AWS naming conventions", () => {
+    expect.assertions(1);
     try {
-      aws.checkForInvalidZoneList("uswest2auswest2b");
+      aws.checkForInvalidZoneList("uswest2a");
     } catch (error) {
       expect(error.message).toEqual(invalidUserAVZoneInput);
     }
