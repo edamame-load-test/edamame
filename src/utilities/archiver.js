@@ -56,10 +56,16 @@ const archiver = {
     const stdout = await aws.s3ObjectExists(testName);
     if (!stdout) {
       spinner.info(archiveMessage.noObject(testName));
-    } else if (stdout.match("ongoing-request")) {
-      spinner.info(archiveMessage.restoreInProgress);
     } else if (stdout.match(RESTORE_BEFORE_IMPORT_S3_REGEX)) {
-      spinner.info(archiveMessage.restoreBeforeImport(testName));
+      try {
+        if (!this.restoreComplete(stdout)) {
+          spinner.info(archiveMessage.restoreInProgress);
+        } else {
+          list.push(testName);
+        }
+      } catch {
+        spinner.info(archiveMessage.restoreBeforeImport(testName));
+      }
     } else {
       list.push(testName);
     }
@@ -87,7 +93,10 @@ const archiver = {
       }
     } catch (err) {
       const duplicate =
-        err.response && err.response.data && err.response.data.error;
+        err.response &&
+        err.response.data &&
+        err.response.data.error &&
+        err.response.data.error.match("duplicate");
 
       const message = duplicate
         ? archiveMessage.duplicateImport(testName)
@@ -102,6 +111,17 @@ const archiver = {
       spinner.fail(error.message);
     } else {
       spinner.fail(archiveMessage.error(error, "import"));
+    }
+  },
+
+  restoreComplete(stdout) {
+    const restore = stdout
+      .split("\n")
+      .filter((line) => line.match("Restore"))[0];
+    if (restore.match("expiry-date")) {
+      return true;
+    } else {
+      return false;
     }
   },
 };

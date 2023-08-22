@@ -7,8 +7,6 @@ import { render, screen } from "@testing-library/react";
 import ScriptModal from "../components/ScriptModal";
 jest.mock("axios");
 
-// <ScriptModal setIsScriptModal={setIsScriptModal} currScript={currScript}/>
-
 beforeEach(() => {
   const setStateMock = jest.fn();
   const currScript = "import http from ''k6/http'';\n" +

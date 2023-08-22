@@ -2,6 +2,7 @@ import { FiExternalLink, FiMoreVertical } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import testService from "../services/testService";
 import ScriptModal from "./ScriptModal";
+import ArchiveModal from "./ArchiveModal";
 import LaunchTestModal from "./LaunchTestModal";
 import generateGrafanaUrl from "../utilities/generateGrafanaUrl";
 import format from "../utilities/formatter";
@@ -10,6 +11,8 @@ import Menu from "./Menu";
 function TestList({ currTest, setCurrTest }) {
   const [tests, setTests] = useState([]);
   const [isScriptModal, setIsScriptModal] = useState(false);
+  const [archiveTestName, setArchiveTestName] = useState("");
+  const [isArchiveModal, setIsArchiveModal] = useState(false);
   const [currScript, setCurrScript] = useState({});
   const [isModal, setIsModal] = useState(false);
   const [menu, setMenu] = useState(null);
@@ -55,15 +58,19 @@ function TestList({ currTest, setCurrTest }) {
         {isModal && (
           <LaunchTestModal
             setIsModal={setIsModal}
-            setTests={setTests}
             currTest={currTest}
-            setCurrTest={setCurrTest}
           />
         )}
         {isScriptModal && (
           <ScriptModal
             setIsScriptModal={setIsScriptModal}
             currScript={currScript}
+          />
+        )}
+        {isArchiveModal && (
+          <ArchiveModal
+            setIsArchiveModal={setIsArchiveModal}
+            archiveTestName={archiveTestName}
           />
         )}
         <div className="mt-10 max-w-4xl mx-auto">
@@ -136,10 +143,14 @@ function TestList({ currTest, setCurrTest }) {
                           </div>
                           {test.id === menu ? (
                             <Menu
-                              name={test.name}
+                              test={test}
                               setMenu={setMenu}
+                              tests={tests}
+                              setTests={setTests}
                               setCurrScript={setCurrScript}
                               setIsScriptModal={setIsScriptModal}
+                              setIsArchiveModal={setIsArchiveModal}
+                              setArchiveTestName={setArchiveTestName}
                             />
                           ) : null}
                         </div>
