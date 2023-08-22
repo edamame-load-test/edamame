@@ -9,8 +9,7 @@
   },
   "scripts": {
     "test:utilities": "jest --testPathPattern=src/__tests__/cli/utilities",
-    "test:manifest": "jest --testPathPattern=src/__tests__/cli/manifests",
-    "test:commands": "jest --testPathPattern=src/__tests__/cli/commands"
+    "test:manifest": "jest --testPathPattern=src/__tests__/cli/manifests"
   },
   "keywords": [],
   "license": "ISC",

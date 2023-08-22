@@ -1,12 +1,25 @@
 import testService from "../services/testService";
 
-function Menu({ name, setMenu, setIsScriptModal, setCurrScript }) {
+function Menu({ test, setMenu, tests, setTests, setIsScriptModal, setCurrScript, setIsArchiveModal, setArchiveTestName }) {
   async function handleScript() {
     setIsScriptModal(true);
     setMenu(false);
-    const data = await testService.getTest(name);
-    await setCurrScript(data);
+    setCurrScript(test);
   }
+
+  async function handleArchive() {
+    setIsArchiveModal(true);
+    setMenu(false);
+    setArchiveTestName(test.name);
+  }
+
+  async function handleDelete() {
+    await testService.deleteTest(test.name);
+    const newTestList = tests.filter(aTest => aTest.name !== test.name);
+    setTests(newTestList);
+    setMenu(false);
+  }
+
   return (
     <>
       <div
@@ -24,11 +37,14 @@ function Menu({ name, setMenu, setIsScriptModal, setCurrScript }) {
           See script
         </p>
         <p
+          onClick={handleArchive}
+          className="hover:cursor-pointer hover:bg-slate-100 pl-4 py-2 pr-16"
+        >
+          Archive
+        </p> 
+        <p
           className="text-pink hover:cursor-pointer pl-4 pr-16 hover:bg-pink/10 py-2"
-          onClick={() => {
-            testService.deleteTest(name);
-            setMenu(false);
-          }}
+          onClick={handleDelete}
         >
           Delete
         </p>

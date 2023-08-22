@@ -97,6 +97,7 @@ program
       await portForwardGrafana();
       startGui();
     } else if (options.stop) {
+      await stopGrafana();
       stopGui();
     }
   });

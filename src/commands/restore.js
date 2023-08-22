@@ -20,7 +20,7 @@ const restore = async (options) => {
         ? "intelligent_tiering"
         : "glacier";
       if (type === "glacier") {
-        if (isNaN(numDays) || numDays < 0 || numDays > 30 || days.match(".")) {
+        if (isNaN(numDays) || numDays < 0 || numDays > 30 || days.match(/\./)) {
           throw Error(archiveMessage.invalidRestoreDays(days));
         }
       }

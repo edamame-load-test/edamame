@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { FiUploadCloud } from "react-icons/fi";
-import { v4 as uuidv4 } from "uuid";
 import testService from "../services/testService";
 
-function LaunchTestModal({ setIsModal, setTests, setCurrTest, currTest }) {
+function LaunchTestModal({ setIsModal, currTest }) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(null);
@@ -12,16 +11,7 @@ function LaunchTestModal({ setIsModal, setTests, setCurrTest, currTest }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    const newID = uuidv4();
     testService.startTest(title, file);
-
-    const newTest = {
-      id: newID,
-      name: title,
-      status: "Pending",
-      start_time: Date.now(),
-      script: JSON.stringify(file),
-    };
     setLoading(true);
   }
 
@@ -108,7 +98,7 @@ w-[70%]"
               <button
                 disabled
                 type="button"
-                class="text-white bg-blue  rounded px-3 py-2"
+                class="text-white bg-blue rounded px-3 py-2"
               >
                 <svg
                   aria-hidden="true"

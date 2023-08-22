@@ -34,8 +34,8 @@ const archiveMessage = {
 
   restorationInProgress(name) {
     return (
-      `AWS S3 restoration process is in progress. Once its complete you ` +
-      ` can import data associated with ${name} into your current Edamame ` +
+      `AWS S3 restoration process is in progress. Once its complete you` +
+      ` can import data associated with ${name} into your current Edamame` +
       ` EKS cluster or move the S3 object elsewhere.`
     );
   },
@@ -116,7 +116,7 @@ const archiveMessage = {
     return `Successfully deleted ${name} from your Edamame load test AWS S3 Bucket.`;
   },
 
-  singleImportFail(name) {
+  singleImportFail(testName) {
     return `Issue importing ${testName}. Please try again later.`;
   },
 
